@@ -188,7 +188,7 @@ async function buildTarget(name, data) {
   fs.writeFileSync(path.join(out, 'data.json'), JSON.stringify(data));
   fs.mkdirSync(path.join(out, 'icons'));
   // Toolbar sizes get a margin like other toolbar icons; the glyph alone at full size looks oversized.
-  for (const s of [16, 32, 48, 128]) fs.writeFileSync(path.join(out, `icons/${s}.png`), png(s, { scale: s <= 32 ? 0.5625 : 1 }));
+  for (const s of [16, 32, 48, 128]) fs.writeFileSync(path.join(out, `icons/${s}.png`), png(s, { scale: s <= 32 ? 0.5625 : 0.75 }));
 
   const manifest = t.manifest({ ...readJson('extension/manifest.base.json'), version: pkg.version });
   fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2));
