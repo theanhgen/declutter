@@ -10,4 +10,21 @@ export const declutterSnippets = {
     c.rejectAllCookies();
     return true;
   },
+  // Mafra's wall "Souhlasím" is href="javascript:Didomi.setUserAgreeToAll();" (CSP-blocked from an extension).
+  // On the consent page (/nastaveni-souhlasu?url=…) the page does not always forward afterwards; go back
+  // to ?url= ourselves, but only if it is on the same site.
+  DECLUTTER_DIDOMI_AGREE: () => {
+    if (!window.Didomi?.setUserAgreeToAll) return false;
+    window.Didomi.setUserAgreeToAll();
+    if (location.pathname.includes('nastaveni-souhlasu')) {
+      setTimeout(() => {
+        if (!location.pathname.includes('nastaveni-souhlasu')) return;
+        const site = location.hostname.split('.').slice(-2).join('.');
+        let to;
+        try { to = new URL(new URLSearchParams(location.search).get('url') || '/', location.origin); } catch { to = null; }
+        location.href = to && (to.hostname === site || to.hostname.endsWith('.' + site)) ? to.href : '/';
+      }, 1500);
+    }
+    return true;
+  },
 };

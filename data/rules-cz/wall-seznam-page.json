@@ -1,0 +1,31 @@
+{
+  "name": "cz-wall-seznam-page",
+  "_comment": "Seznam's consent page: Souhlasím or Předplatit. The dialog is a closed shadow root (open-shadow.js opens it).",
+  "runContext": {
+    "urlPattern": "^https://cmp\\.seznam\\.cz/nastaveni-souhlasu"
+  },
+  "detectCmp": [
+    {
+      "exists": "div.szn-cmp-dialog-container"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": [
+        "div.szn-cmp-dialog-container",
+        "[data-testid=\"cw-button-agree-with-ads\"]"
+      ]
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": [
+        "div.szn-cmp-dialog-container",
+        "[data-testid=\"cw-button-agree-with-ads\"]"
+      ],
+      "retry": 3,
+      "retryInterval": 800
+    }
+  ],
+  "optOut": []
+}

@@ -17,7 +17,8 @@ export function badgeFor(state, now = Date.now()) {
   const stuck = state.consent === 'working' && now - (state.since ?? now) > STUCK_AFTER_MS;
   if (state.shortsLeak > 0) return { text: '!', color: '#d93025', title: `Declutter: ${state.shortsLeak} Shorts link(s) got past the selectors` };
   if (state.consent === 'failed' || stuck) return { text: '!', color: '#d93025', title: `Declutter: cookie banner (${state.cmp}) not answered` };
-  if (state.consent === 'wall') return { text: '', color: '#777', title: 'Declutter: consent-or-pay wall, left to you' };
+  if (state.consent === 'wall') return { text: 'Kč', color: '#e37400', title: 'Declutter: consent-or-pay wall — agree or pay; accept from this menu' };
+  if (state.consent === 'accepted') return { text: '', color: '#777', title: `Declutter: accepted the pay wall (${state.cmp})` };
   if (state.consent === 'done') return { text: '', color: '#1e8e3e', title: `Declutter: refused ${state.cmp}` };
   return { text: '', color: '#777', title: 'Declutter' };
 }

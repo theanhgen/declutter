@@ -1,0 +1,26 @@
+{
+  "name": "cz-wall-mafra-teaser",
+  "_comment": "Mafra's bottom bar links to /nastaveni-souhlasu (cz-wall-mafra-page).",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(idnes|lidovky|expres)\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "a.cookie-info[href*=\"nastaveni-souhlasu\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "a.cookie-info[href*=\"nastaveni-souhlasu\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "a.cookie-info[href*=\"nastaveni-souhlasu\"]",
+      "retry": 3,
+      "retryInterval": 800
+    }
+  ],
+  "optOut": [],
+  "intermediate": true
+}

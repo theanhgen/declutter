@@ -36,7 +36,8 @@ Research behind every claim here: `research/` (three reports + the scripts and r
 | D2 | Desktop only: Chrome + Safari macOS; Firefox later | **decided** | chat |
 | D3 | Our own code, MIT. Do not fork any Shorts blocker | **decided** (licenses leave no choice) | `research/shorts.md` |
 | D4 | Consent engine = DuckDuckGo **autoconsent** (MPL-2.0, npm dep, unmodified). Consent-O-Matic's CZ coverage is taken over by our CZ rule pack (bauhaus written fresh from the live page; rozhlas is already covered by autoconsent); CoM's engine is not bundled | **decided** by user 2026-09-24 | `research/consent.md` |
-| D5 | Consent-or-pay walls (Seznam, Mafra, CPEx): **leave the wall to the user**. No auto-accept, no hiding. Implemented as: autoconsent is disabled for the whole tab on a wall domain (`data/consent.json` → `walls`), so nothing underneath is touched either | **decided** by user 2026-09-21 | chat |
+| D5 | Consent-or-pay walls (Seznam, Mafra, CPEx) are never refused or hidden (refusing is impossible — verified 2026-09-24, see *Walls*). On a wall domain only the `cz-wall-*` rules run, so nothing else on the page is touched | **decided** by user 2026-09-21, refined by D9 | chat |
+| D9 | Two wall modes (Settings): **Manual** (default) = detect the wall, show a **Kč** badge, accept only when the user presses "Accept this wall" in the popup; **Auto** = click "Souhlasím" on walls only. Loop guard: ≤2 automatic accepts per wall family per tab per minute, then fall back to manual | **decided** by user 2026-09-24 | chat |
 | D6 | Selectors and CZ rules live in data (JSON), fetched at runtime with a bundled fallback, so a fix is a data edit, not a Safari rebuild | **built**; needs a hosting URL (open question below) | chat, autoconsent 16.41.0 source |
 | D7 | Breakage detection = in-extension self-check + a daily canary on own hardware. **No auto-rewriting of selectors** | **built**; canary runs daily on Elaeis via launchd, Telegram not configured yet | chat |
 | D8 | Page-world code (snippets for rules, the open-shadow patch) lives in the extension, never in `data/`. Remote data can reference a named snippet but cannot add code | **decided** 2026-09-24 | this build |
@@ -63,6 +64,21 @@ that is what `initialize()` parses (`lib/web.ts:53-95`, `:619-627`; `lib/message
 filters by domain before sending (`filterCompactRules(storageGet('rules'), {url, mainFrame})`) and ships
 `rules.json`, `compact-rules.json` and a `rule-index.json` — mirror that shape so the remote payload stays small.
 
+## Walls (D5, D9)
+
+Tested 2026-09-24 in Chromium on Blesk: refusing everything keeps the wall (homepage, reload, articles);
+"Potvrdit moje volby" stays disabled until "Vyžadované účely pro vstup bez omezení" is accepted; accepting only
+that row records consent to all 11 IAB purposes and 58 of 74 vendors. So a wall is agree-or-pay, nothing between.
+
+| Family | Sites | What shows | Accept |
+|---|---|---|---|
+| CPEx | blesk, e15, reflex, zive, aktualne, lupa | modal on the page | `#cpexSubs_consentButton` |
+| Seznam | seznam, novinky, seznamzpravy, sreality, sport, super, firmy | bottom bar (`szn-cwl`, no buttons); articles redirect to `cmp.seznam.cz/nastaveni-souhlasu` | bar → consent page → `cw-button-agree-with-ads` (closed shadow root, opened by `open-shadow.js`) |
+| Mafra | idnes, lidovky, expres | bottom bar `a.cookie-info`; articles redirect to `/nastaveni-souhlasu` | bar → consent page → `DECLUTTER_DIDOMI_AGREE` (the link is a CSP-blocked `javascript:` URL), then back to `?url=` on the same site |
+
+In manual mode, "Accept" on a Seznam/Mafra bar sets a 30 s hand-off so the consent page it opens accepts too.
+Tests: `npm run test:walls` (both modes × 3 families, 12 checks).
+
 ## Architecture (as built)
 
 ```
@@ -76,12 +92,13 @@ declutter/
     shorts/dnr-rules.json    # static /shorts/<id> → /watch redirect for full page loads
     consent/content.js       # AutoConsent in every frame
     consent/snippets.js      # our named page-world snippets (DECLUTTER_*), D8
-    consent/open-shadow.js   # page world, mapy/kupi only: opens Seznam's closed shadow root
+    consent/open-shadow.js   # page world, mapy/kupi/cmp.seznam.cz only: opens Seznam's closed shadow root
+    options/                 # Settings page (Safari's "Settings" button): switches, wall mode, exceptions
     popup/                   # two toggles, this site's status, "leave banners alone on this site"
   data/                      # EVERYTHING that changes when a site changes (D6)
     shorts.json              # hide selectors + card containers for the self-check
     consent.json             # wall domains, disabled CMPs
-    rules-cz/*.json          # 15 autoconsent rules (13 site rules, Liferay generic, Seznam dialog)
+    rules-cz/*.json          # 15 refuse rules (13 sites, Liferay generic, Seznam dialog) + 5 cz-wall-* accept rules
   safari/project.yml         # xcodegen: container app + extension; run-script copies build/safari in
   scripts/safari.sh          # build + sign + install ~/Applications/Declutter.app
   scripts/canary-agent.sh    # install/remove the daily launchd job
@@ -192,7 +209,8 @@ reliably what the new element is, and a wrong guess hides the wrong content with
    opens `/watch?v=<id>`; click a Short somewhere → `/watch`.
 3. alza.cz, o2.cz, mapy.com: banner refused (toolbar popup says "Refused cookies"). o2 and mapy exercise the
    page-world parts (`world: MAIN` eval and the open-shadow script), the M2 Safari gate.
-4. blesk.cz: the wall stays; popup says "left to you".
+4. blesk.cz: the wall stays with a **Kč** badge; "Accept this wall" in the popup gets you in. Optionally switch
+   Settings → walls to Auto and open a novinky.cz article: it should open directly after one hop.
 5. **Quit Safari (⌘Q), reopen: Declutter is still enabled** — the M0 gate. Repeat after a reboot once.
 
 If step 5 fails, the fallback is Developer ID signing + notarization (needs the paid program's Developer ID
@@ -235,4 +253,7 @@ certificate; the team already has one for App Store work).
 - **Codesign fails on ~/Desktop** ("resource fork, Finder information, or similar detritus not allowed"): iCloud
   adds xattrs. `scripts/safari.sh` builds in `~/Library/Developer/Xcode/DerivedData/declutter` and the copy phase
   runs `xattr -cr`.
+- **Visibility traps:** KB and Seznam hide their banners with `visibility: hidden` and leave them in the page;
+  autoconsent's visible check ignores `visibility`. Match a class/inline style that only exists while shown,
+  or an auto-accept rule will loop (it did on Novinky before the fix and the loop guard).
 - `pensieve/project.yml` is the xcodegen reference (one app + extension targets, team 28DMV2MR8T).

@@ -1,0 +1,27 @@
+{
+  "name": "cz-wall-mafra-page",
+  "_comment": "Mafra's consent page: Souhlasím or Předplatit.",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(idnes|lidovky|expres)\\.cz/nastaveni-souhlasu"
+  },
+  "detectCmp": [
+    {
+      "exists": "a.contentwall_ok"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "a.contentwall_ok"
+    }
+  ],
+  "optIn": [
+    {
+      "waitFor": "a.contentwall_ok",
+      "timeout": 5000
+    },
+    {
+      "eval": "DECLUTTER_DIDOMI_AGREE"
+    }
+  ],
+  "optOut": []
+}

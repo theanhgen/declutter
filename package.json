@@ -7,7 +7,8 @@
     "test": "node build.mjs && node --test test/*.test.mjs",
     "test:e2e": "node test/e2e.mjs",
     "canary": "node canary/run.mjs",
-    "safari": "scripts/safari.sh"
+    "safari": "scripts/safari.sh",
+    "test:walls": "node test/walls.mjs"
   },
   "license": "MIT",
   "type": "module",

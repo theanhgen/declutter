@@ -30,7 +30,8 @@ test('badgeFor: problems are red, everything else is quiet', () => {
   assert.equal(badgeFor({ consent: 'working', since: 0 }, 20000).text, '!');
   assert.equal(badgeFor({ consent: 'working', since: 10000 }, 20000).text, '');
   assert.equal(badgeFor({ consent: 'done', cmp: 'x' }).text, '');
-  assert.equal(badgeFor({ consent: 'wall' }).text, '');
+  assert.equal(badgeFor({ consent: 'wall' }).text, 'Kč');
+  assert.equal(badgeFor({ consent: 'accepted', cmp: 'x' }).text, '');
 });
 
 test('validData rejects malformed remote payloads', () => {
@@ -48,14 +49,19 @@ test('build: data.json is valid and every CZ rule is well formed', () => {
   for (const r of data.consent.rules) {
     assert.ok(!names.has(r.name), `duplicate rule name ${r.name}`);
     names.add(r.name);
-    for (const k of ['detectCmp', 'detectPopup', 'optIn', 'optOut']) assert.ok(Array.isArray(r[k]) && r[k].length, `${r.name}.${k}`);
+    for (const k of ['detectCmp', 'detectPopup', 'optIn', 'optOut']) assert.ok(Array.isArray(r[k]), `${r.name}.${k}`);
+    for (const k of ['detectCmp', 'detectPopup', 'optIn']) assert.ok(r[k].length, `${r.name}.${k} empty`);
     if (r.runContext?.urlPattern) new RegExp(r.runContext.urlPattern); // throws if invalid
   }
 });
 
-test('build: wall list and CZ rules never overlap', () => {
+test('build: wall list and CZ rules never overlap (wall rules only accept)', () => {
   const data = JSON.parse(read('build/data.json'));
-  for (const r of data.consent.rules) {
+  for (const r of data.consent.rules.filter((x) => x.name.startsWith('cz-wall-'))) {
+    assert.deepEqual(r.optOut, [], `${r.name} must never refuse`);
+    assert.ok(r.optIn.length, `${r.name} needs optIn`);
+  }
+  for (const r of data.consent.rules.filter((x) => !x.name.startsWith('cz-wall-'))) {
     for (const w of data.consent.walls) {
       const re = r.runContext?.urlPattern && new RegExp(r.runContext.urlPattern);
       assert.ok(!re || !re.test(`https://www.${w}/`), `rule ${r.name} targets wall ${w}`);

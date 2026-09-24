@@ -33,7 +33,8 @@ check('remote Shorts selector applied (logo hidden)', !logoVisible);
 await page.goto('https://www.bazos.cz/', { waitUntil: 'domcontentloaded' });
 await page.waitForTimeout(8000);
 const s = await tabState(sw, page.url());
-check('remote wall list applied (bazos treated as a wall)', s?.consent === 'wall', JSON.stringify(s));
+// On a wall site only wall rules run, so bazos's TermsFeed banner is no longer refused.
+check('remote wall list applied (bazos banner left alone)', s && s.consent !== 'done', JSON.stringify(s));
 
 await close();
 server.close();

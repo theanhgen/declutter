@@ -11,6 +11,11 @@ async function render() {
     $(k).onchange = () => save({ [k]: $(k).checked });
   }
 
+  for (const r of document.querySelectorAll('input[name=walls]')) {
+    r.checked = r.value === (s.walls ?? 'manual');
+    r.onchange = () => save({ walls: r.value });
+  }
+
   $('exceptions').replaceChildren(...s.exceptions.map((host) => {
     const li = document.createElement('li');
     const b = Object.assign(document.createElement('button'), { textContent: 'Remove' });

@@ -61,7 +61,8 @@
       "matches": [
         "*://*.mapy.com/*",
         "*://*.mapy.cz/*",
-        "*://*.kupi.cz/*"
+        "*://*.kupi.cz/*",
+        "*://cmp.seznam.cz/*"
       ],
       "js": [
         "consent/open-shadow.js"
