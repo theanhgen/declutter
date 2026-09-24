@@ -6,8 +6,10 @@ cd "$(dirname "$0")/.."
 node build.mjs safari
 (cd safari && xcodegen generate -q)
 DD="$HOME/Library/Developer/Xcode/DerivedData/declutter"
+# Always clean: the copy phase changes files inside the appex, and an incremental build skips re-signing,
+# leaving "a sealed resource is missing or invalid".
 xcodebuild -project safari/Declutter.xcodeproj -scheme Declutter -configuration Debug \
-  -derivedDataPath "$DD" -allowProvisioningUpdates -quiet build
+  -derivedDataPath "$DD" -allowProvisioningUpdates -quiet clean build
 mkdir -p "$HOME/Applications"
 rm -rf "$HOME/Applications/Declutter.app"
 ditto "$DD/Build/Products/Debug/Declutter.app" "$HOME/Applications/Declutter.app"
