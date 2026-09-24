@@ -109,20 +109,23 @@ function inside(poly, x, y) {
 // background: opaque [r, g, b] behind the glyph (app icons); scale: share of the canvas the 16-unit glyph grid fills.
 function png(size, { background = null, scale = 1, ss = 8 } = {}) {
   const px = Buffer.alloc(size * (size * 4 + 1));
-  const counter = size === 16 ? COUNTER.small : COUNTER.large;
+  const counter = size === 16 && scale === 1 ? COUNTER.small : COUNTER.large;
   const unit = 16 / (size * scale), offset = size * (1 - scale) / 2;
   for (let y = 0; y < size; y++) {
     px[y * (size * 4 + 1)] = 0;
     for (let x = 0; x < size; x++) {
-      let covered = 0;
+      let covered = 0, stem = 0;
       for (let sy = 0; sy < ss; sy++) {
         for (let sx = 0; sx < ss; sx++) {
-          const gx = (x - offset + (sx + 0.5) / ss) * unit, gy = (y - offset + (sy + 0.5) / ss) * unit;
-          if (inside(GLYPH, gx, gy) && !inside(counter, gx, gy)) covered++;
+          const gx = (x - offset + (sx + 0.5) / ss) * unit - 0.25, gy = (y - offset + (sy + 0.5) / ss) * unit - 0.25;
+          if (inside(GLYPH, gx, gy) && !inside(counter, gx, gy)) { covered++; if (gx >= 10.1) stem++; }
         }
       }
       const i = y * (size * 4 + 1) + 1 + x * 4;
-      const a = covered / (ss * ss), rose = [201, 101, 117]; // #c96575
+      // Two shades on purpose: Safari renders a single-colour toolbar icon as a template (grey, blue when
+      // active). The stem is a darker rose so it keeps its colour.
+      const a = covered / (ss * ss), light = [201, 101, 117], dark = [168, 74, 92]; // #c96575, #a84a5c
+      const rose = covered ? light.map((v, k) => Math.round(v + (dark[k] - v) * stem / covered)) : light;
       if (background) {
         for (let k = 0; k < 3; k++) px[i + k] = Math.round(background[k] + (rose[k] - background[k]) * a);
         px[i + 3] = 255;
@@ -184,7 +187,8 @@ async function buildTarget(name, data) {
   fs.writeFileSync(path.join(out, 'shorts/shorts.css'), shortsCss(data.shorts.hide));
   fs.writeFileSync(path.join(out, 'data.json'), JSON.stringify(data));
   fs.mkdirSync(path.join(out, 'icons'));
-  for (const s of [16, 32, 48, 128]) fs.writeFileSync(path.join(out, `icons/${s}.png`), png(s));
+  // Toolbar sizes get a margin like other toolbar icons; the glyph alone at full size looks oversized.
+  for (const s of [16, 32, 48, 128]) fs.writeFileSync(path.join(out, `icons/${s}.png`), png(s, { scale: s <= 32 ? 0.75 : 1 }));
 
   const manifest = t.manifest({ ...readJson('extension/manifest.base.json'), version: pkg.version });
   fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2));
