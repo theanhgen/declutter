@@ -57,86 +57,72 @@ function shortsCss(selectors) {
     ' {\n  display: none !important;\n}\n';
 }
 
-// ---- icons: a clean teal frame with its overlay peeled away ----
+// ---- icons: a bold rose lowercase "d", drawn on a 16-unit grid without an image library ----
+// Flattens M/L/C commands into a polygon.
+function flatten(cmds) {
+  const pts = [];
+  let cur;
+  for (const [op, ...v] of cmds) {
+    if (op !== 'C') { cur = v; pts.push(v); continue; }
+    const [x0, y0] = cur;
+    for (let i = 1; i <= 48; i++) {
+      const t = i / 48, u = 1 - t;
+      pts.push([
+        u ** 3 * x0 + 3 * u ** 2 * t * v[0] + 3 * u * t ** 2 * v[2] + t ** 3 * v[4],
+        u ** 3 * y0 + 3 * u ** 2 * t * v[1] + 3 * u * t ** 2 * v[3] + t ** 3 * v[5],
+      ]);
+    }
+    cur = v.slice(4);
+  }
+  return pts;
+}
+
+const GLYPH = flatten([
+  ['M', 11.3, 1.5], ['L', 14, 1.5], ['L', 14, 14], ['L', 7.65, 14],
+  ['C', 3.7, 14, 1.5, 11.95, 1.5, 8.95],
+  ['C', 1.5, 5.95, 3.6, 4.0, 6.7, 4.0],
+  ['C', 8.1, 4.0, 9.25, 4.45, 10.1, 5.2],
+  ['L', 10.1, 2.7],
+  ['C', 10.1, 1.9, 10.5, 1.5, 11.3, 1.5],
+]);
+// The counter is pixel-fit at 16px so the bowl stays open in the toolbar.
+const COUNTER = {
+  small: flatten([
+    ['M', 7.5, 7], ['C', 9.1, 7, 10, 7.8, 10, 9], ['L', 10, 11], ['L', 7.5, 11],
+    ['C', 5.9, 11, 5, 10.2, 5, 9], ['C', 5, 7.8, 5.9, 7, 7.5, 7],
+  ]),
+  large: flatten([
+    ['M', 7.8, 7.0], ['C', 9.3, 7.0, 10.15, 7.8, 10.15, 9.1], ['L', 10.15, 11.05], ['L', 7.8, 11.05],
+    ['C', 6.2, 11.05, 5.4, 10.25, 5.4, 9.05], ['C', 5.4, 7.85, 6.25, 7.0, 7.8, 7.0],
+  ]),
+};
+
+function inside(poly, x, y) {
+  let hit = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > y) !== (yj > y) && x < xi + (y - yi) / (yj - yi) * (xj - xi)) hit = !hit;
+  }
+  return hit;
+}
+
 function png(size) {
   const px = Buffer.alloc(size * (size * 4 + 1));
-  // At 16px, keep the fold solid and at least two gap pixels clear; AA only outer corners.
-  const toolbarPixels = [
-    '................',
-    '..aTTT..FPPPPp..',
-    '.aTTTT...FPPPPP.',
-    '.TTSSSS...FPPPP.',
-    '.TTSSSSS...FPPP.',
-    '.TTSSSSSSS..FPP.',
-    '.TTSSSSSSSS..FP.',
-    '.TTSSSSSSSSS..F.',
-    '.TTSSSSSSSSSS...',
-    '.TTSSSSSSSSSSTT.',
-    '.TTSSSSSSSSSSTT.',
-    '.TTSSSSSSSSSSTT.',
-    '.TTTSSSSSSSSTTT.',
-    '.aTTTTTTTTTTTTa.',
-    '..aTTTTTTTTTTa..',
-    '................',
-  ];
-  const toolbarColors = {
-    T: [8, 136, 135, 255],
-    S: [238, 255, 249, 255],
-    P: [65, 215, 180, 255],
-    F: [5, 89, 88, 255],
-    a: [8, 136, 135, 128],
-    p: [65, 215, 180, 128],
-  };
-  const samples = 8;
-  const small = size <= 16;
-  const inset = small ? 3 : 3.25;
-  const roundedBox = (x, y, left, top, right, bottom, radius) => {
-    const dx = Math.max(left + radius - x, 0, x - right + radius);
-    const dy = Math.max(top + radius - y, 0, y - bottom + radius);
-    return dx * dx + dy * dy <= radius * radius;
-  };
-  const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
-  const colorAt = (x, y) => {
-    if (!roundedBox(x, y, 1, 1, 15, 15, small ? 3 : 3.5)) return null;
-    const diagonal = x - y;
-    const peelEdge = 6.5 + 0.32 * (y - 1) + 0.08 * (y - 1) ** 2;
-    if (x > peelEdge && diagonal < 8) return null;
-    if (diagonal >= 8) {
-      if (!small && diagonal < 8.7 + 0.09 * (y - 1) ** 2) return [9, 116, 110];
-      return mix([59, 211, 177], [21, 161, 150], y / 8);
-    }
-    if (roundedBox(x, y, inset, inset, 16 - inset, 16 - inset, small ? 1 : 1.5)) {
-      return [235, 255, 247];
-    }
-    return mix([14, 157, 145], [7, 125, 131], y / 16);
-  };
+  const counter = size === 16 ? COUNTER.small : COUNTER.large;
+  const ss = 8, unit = 16 / size;
   for (let y = 0; y < size; y++) {
     px[y * (size * 4 + 1)] = 0;
     for (let x = 0; x < size; x++) {
-      const i = y * (size * 4 + 1) + 1 + x * 4;
-      if (size === 16) {
-        const color = toolbarColors[toolbarPixels[y][x]];
-        if (color) px.set(color, i);
-        continue;
-      }
-      let red = 0, green = 0, blue = 0, covered = 0;
-      for (let sy = 0; sy < samples; sy++) {
-        for (let sx = 0; sx < samples; sx++) {
-          const color = colorAt(
-            (x + (sx + 0.5) / samples) * 16 / size,
-            (y + (sy + 0.5) / samples) * 16 / size,
-          );
-          if (!color) continue;
-          red += color[0]; green += color[1]; blue += color[2]; covered++;
+      let covered = 0;
+      for (let sy = 0; sy < ss; sy++) {
+        for (let sx = 0; sx < ss; sx++) {
+          const gx = (x + (sx + 0.5) / ss) * unit, gy = (y + (sy + 0.5) / ss) * unit;
+          if (inside(GLYPH, gx, gy) && !inside(counter, gx, gy)) covered++;
         }
       }
-      // Average covered samples only, so transparent edges have no dark fringe.
-      if (covered) {
-        px[i] = Math.round(red / covered);
-        px[i + 1] = Math.round(green / covered);
-        px[i + 2] = Math.round(blue / covered);
-        px[i + 3] = Math.round(255 * covered / (samples * samples));
-      }
+      const i = y * (size * 4 + 1) + 1 + x * 4;
+      px[i] = 201; px[i + 1] = 101; px[i + 2] = 117; // #c96575
+      px[i + 3] = Math.round(255 * covered / (ss * ss));
     }
   }
   const chunk = (type, data) => {
