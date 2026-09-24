@@ -1,0 +1,33 @@
+{
+  "name": "drupal-eu-cookie-compliance",
+  "_comment": "Drupal EU Cookie Compliance; autoconsent's generic rule fails here (Decline is a.button.secondary). (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(chrysal\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#sliding-popup a.button.secondary, #sliding-popup .decline-button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#sliding-popup"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#sliding-popup .agree-button, #sliding-popup a.button:not(.secondary)"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#sliding-popup a.button.secondary, #sliding-popup .decline-button",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "#sliding-popup",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

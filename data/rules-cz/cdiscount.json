@@ -1,0 +1,33 @@
+{
+  "name": "tagcommander-cdiscount",
+  "_comment": "TagCommander: Continuer sans accepter. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(cdiscount\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#footer_tc_privacy_button_3"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#footer_tc_privacy"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#footer_tc_privacy_button_2"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#footer_tc_privacy_button_3",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "#footer_tc_privacy",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

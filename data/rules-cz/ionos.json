@@ -1,0 +1,33 @@
+{
+  "name": "ionos",
+  "_comment": "Ablehnen = confirm-selection with nothing selected; autoconsent's ionos.de rule fails (disabled). (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(ionos\\.de|ionos\\.com|ionos\\.co\\.uk|ionos\\.fr|ionos\\.es|ionos\\.it|ionos\\.at)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-testid=\"confirm-selection\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[data-testid=\"confirm-selection\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-testid=\"confirm-all\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-testid=\"confirm-selection\"]",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "[data-testid=\"confirm-selection\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

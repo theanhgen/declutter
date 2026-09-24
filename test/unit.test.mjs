@@ -99,3 +99,11 @@ test('DNR redirect regex stays inside the Safari-safe subset', () => {
     assert.equal(r.action.redirect.regexSubstitution.replace('\\1', m[1]), `https://${host}/watch?v=abc_D-1`);
   }
 });
+
+test('BUILTIN_CMPS lists every code-based autoconsent rule (walls switch them all off)', () => {
+  const dir = path.join(root, 'node_modules/@duckduckgo/autoconsent/lib/cmps');
+  const names = fs.readdirSync(dir).flatMap((f) => [...fs.readFileSync(path.join(dir, f), 'utf8').matchAll(/^\s+name = '([^']+)';/gm)].map((m) => m[1]));
+  const src = read('extension/background.js');
+  const listed = JSON.parse(src.match(/BUILTIN_CMPS = (\[[^\]]+\])/)[1].replace(/'/g, '"'));
+  assert.deepEqual([...listed].sort(), [...names].sort());
+});

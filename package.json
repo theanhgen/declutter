@@ -10,7 +10,8 @@
     "safari": "scripts/safari.sh",
     "test:walls": "node test/walls.mjs",
     "ios": "scripts/ios.sh",
-    "test:mobile": "node test/mobile.mjs"
+    "test:mobile": "node test/mobile.mjs",
+    "test:features": "node test/features.mjs"
   },
   "license": "MIT",
   "type": "module",

@@ -1,0 +1,33 @@
+{
+  "name": "nationaltrust",
+  "_comment": "Reject additional cookies. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(nationaltrust\\.org\\.uk)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///div[@id='cookieOptions']//a[contains(., 'Reject additional')]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "xpath///div[@id='cookieOptions']//a[contains(., 'Reject additional')]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///div[@id='cookieOptions']//a[contains(., 'Accept additional')]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///div[@id='cookieOptions']//a[contains(., 'Reject additional')]",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "xpath///div[@id='cookieOptions']//a[contains(., 'Reject additional')]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

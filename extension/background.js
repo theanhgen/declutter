@@ -12,8 +12,9 @@ const DEFAULT_SETTINGS = {
   // Remote copy of build/data.json, baked in at build time (DECLUTTER_DATA_URL). Empty = bundled copy only.
   // eslint-disable-next-line no-undef
   dataUrl: __DATA_URL__,
-  // Hosts where the consent module stays out (user's own choice, on top of the walls).
+  // Per-site choices: banners left alone (exceptions) or accepted (acceptSites). Everywhere else: refused.
   exceptions: [],
+  acceptSites: [],
   // Consent-or-pay walls: 'manual' = detect and show a Kč badge, accept only when asked from the popup;
   // 'auto' = accept (Souhlasím) automatically. Walls are never refused or hidden either way.
   walls: 'manual',
@@ -22,6 +23,11 @@ const DEFAULT_SETTINGS = {
 };
 const DATA_REFRESH_MINUTES = 12 * 60;
 const isWallRule = (name) => /^(cz-)?wall-/.test(name);
+// autoconsent's code-based rules are compiled in and run whatever rules we pass. On a wall site they must be
+// off, or e.g. the generic Sourcepoint rule claims Spiegel's wall frame before the wall rule sees its buttons.
+// Names from node_modules/@duckduckgo/autoconsent/lib/cmps/*.ts (unit-tested against the installed version).
+export const BUILTIN_CMPS = ['TrustArc-top', 'Cybotcookiebot', 'Sourcepoint-frame', 'consentmanager.net', 'Evidon',
+  'Onetrust', 'Klaro', 'Uniconsent', 'Conversant', 'tiktok.com', 'Admiral'];
 // Loop guard: if a site keeps re-showing its wall after we accepted, stop auto-accepting in that tab.
 const WALL_AUTO_LIMIT = 2;
 const WALL_AUTO_WINDOW_MS = 60000;
@@ -99,6 +105,24 @@ async function paintBadge(tabId, state) {
   } catch { /* tab closed */ }
 }
 
+// ---- counters (Settings shows them); local only ----
+async function bump(patch) {
+  const { stats = {} } = await api.storage.local.get('stats');
+  for (const [k, v] of Object.entries(patch)) stats[k] = (stats[k] ?? 0) + v;
+  stats.since ??= Date.now();
+  await api.storage.local.set({ stats });
+}
+
+// "report this site" from the popup: kept locally so rules can be written for it later.
+async function report(tabId) {
+  const tab = await api.tabs.get(tabId);
+  const state = await getTab(tabId);
+  const { reports = [] } = await api.storage.local.get('reports');
+  const entry = { url: tab.url, host: new URL(tab.url).hostname, at: Date.now(), consent: state.consent ?? 'none', cmp: state.cmp ?? '' };
+  await api.storage.local.set({ reports: [entry, ...reports.filter((r) => r.host !== entry.host)].slice(0, 100) });
+  return true;
+}
+
 async function applyShortsRedirect() {
   const { shorts } = await getSettings();
   await api.declarativeNetRequest.updateEnabledRulesets(
@@ -121,6 +145,7 @@ async function onConsentMessage(msg, sender) {
       const [settings, data] = await Promise.all([getSettings(), getData()]);
       const wall = hostMatches(tabHost, data.consent.walls);
       const excepted = hostMatches(tabHost, settings.exceptions);
+      const accepting = hostMatches(tabHost, settings.acceptSites ?? []);
       const prev = await getTab(tabId);
       // "Accept" on Seznam's/Mafra's bottom bar navigates to their consent page; accept there too.
       const wallRules = data.consent.rules.filter((r) => isWallRule(r.name));
@@ -139,8 +164,10 @@ async function onConsentMessage(msg, sender) {
       // Manual mode detects the wall and waits for an optIn from the popup; auto mode accepts at once.
       const config = wall
         ? { enabled: settings.consent && !excepted, autoAction: (settings.walls === 'auto' && !looping) || acceptPending ? 'optIn' : null,
-          enablePrehide: false, enableCosmeticRules: false, enableGeneratedRules: false, logs }
-        : { enabled: settings.consent && !excepted, autoAction: 'optOut', disabledCmps: data.consent.disabledCmps,
+          enablePrehide: false, enableCosmeticRules: false, enableGeneratedRules: false, disabledCmps: BUILTIN_CMPS,
+          // Sourcepoint wall frames (Spiegel) sometimes render late; look for longer than the default 20 tries.
+          detectRetries: 60, logs }
+        : { enabled: settings.consent && !excepted, autoAction: accepting ? 'optIn' : 'optOut', disabledCmps: data.consent.disabledCmps,
           enablePrehide: true, enableCosmeticRules: true, logs };
       const rules = wall
         ? { autoconsent: wallRules }
@@ -185,11 +212,16 @@ async function onConsentMessage(msg, sender) {
     case 'optInResult':
       if (!msg.result) await setTab(tabId, { consent: 'failed', cmp: msg.cmp });
       break;
-    case 'autoconsentDone':
+    case 'autoconsentDone': {
+      const siteAccepted = hostMatches(tabHost, (await getSettings()).acceptSites ?? []);
       await setTab(tabId, isWallRule(msg.cmp)
         ? { consent: 'accepted', cmp: msg.cmp, acceptUntil: 0 }
-        : { consent: 'done', cmp: msg.cmp, doneAt: Date.now() });
+        : siteAccepted
+          ? { consent: 'acceptedSite', cmp: msg.cmp }
+          : { consent: 'done', cmp: msg.cmp, doneAt: Date.now() });
+      await bump({ clicks: msg.totalClicks ?? 0, ...(isWallRule(msg.cmp) ? { walls: 1 } : siteAccepted ? { accepted: 1 } : { refused: 1 }) });
       break;
+    }
     case 'autoconsentError':
       console.warn('declutter: autoconsent error', msg.details);
       break;
@@ -211,9 +243,19 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     acceptWall(msg.tabId).then(sendResponse, () => sendResponse(false));
     return true;
   }
+  if (msg.type === 'report') {
+    report(msg.tabId).then(sendResponse, () => sendResponse(false));
+    return true;
+  }
+  if (msg.type === 'updateData') {
+    refreshRemoteData().then(() => sendResponse(true));
+    return true;
+  }
   if (!sender.tab) return;
   if (msg.type === 'shortsLeak') {
     setTab(sender.tab.id, { shortsLeak: msg.count, leakPath: msg.path });
+  } else if (msg.type === 'shortsRedirect') {
+    bump({ shorts: 1 });
   } else if (msg.type === 'shortsNav') {
     setTab(sender.tab.id, { shortsLeak: 0 });
   } else {

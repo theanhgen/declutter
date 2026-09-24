@@ -1,0 +1,33 @@
+{
+  "name": "transavia",
+  "_comment": "Continue without accepting. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(transavia\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-testid=\"button-accept-no-cookies\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[data-testid=\"button-accept-no-cookies\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-testid=\"button-accept-all-cookies\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-testid=\"button-accept-no-cookies\"]",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "[data-testid=\"button-accept-no-cookies\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

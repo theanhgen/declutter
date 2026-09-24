@@ -11,10 +11,12 @@ const html = document.documentElement;
 let enabled = true;
 let cards = bundled.cards;
 
+const countRedirect = () => api.runtime.sendMessage({ type: 'shortsRedirect' }).catch(() => {});
+
 function redirectIfShort() {
   if (!enabled) return false;
   const to = redirectTarget(location.href);
-  if (to) location.replace(to);
+  if (to) { countRedirect(); location.replace(to); }
   return !!to;
 }
 
@@ -27,6 +29,7 @@ function onClick(e) {
   if (!to) return;
   e.preventDefault();
   e.stopImmediatePropagation();
+  countRedirect();
   location.assign(to);
 }
 

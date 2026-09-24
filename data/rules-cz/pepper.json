@@ -1,0 +1,33 @@
+{
+  "name": "pepper",
+  "_comment": "Pepper network: continue without accepting. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(pepper\\.com|mydealz\\.de|hotukdeals\\.com|dealabs\\.com|chollometro\\.com|pepper\\.pl|preisjaeger\\.at|pelando\\.com\\.br)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///section[contains(@class,'popover--visible')]//button[contains(., 'zonder te accepteren') or contains(., 'ohne zu akzeptieren') or contains(., 'without accepting') or contains(., 'sans accepter')]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "xpath///section[contains(@class,'popover--visible')]//button[contains(., 'zonder te accepteren') or contains(., 'ohne zu akzeptieren') or contains(., 'without accepting') or contains(., 'sans accepter')]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///section[contains(@class,'popover--visible')]//button[contains(@class,'button--type-primary')]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///section[contains(@class,'popover--visible')]//button[contains(., 'zonder te accepteren') or contains(., 'ohne zu akzeptieren') or contains(., 'without accepting') or contains(., 'sans accepter')]",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "xpath///section[contains(@class,'popover--visible')]//button[contains(., 'zonder te accepteren') or contains(., 'ohne zu akzeptieren') or contains(., 'without accepting') or contains(., 'sans accepter')]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

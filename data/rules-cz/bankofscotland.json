@@ -1,0 +1,33 @@
+{
+  "name": "lbg-cookies",
+  "_comment": "Lloyds Banking Group banner. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(bankofscotland\\.co\\.uk|lloydsbank\\.com|halifax\\.co\\.uk|mbna\\.co\\.uk)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#lbganalyticsCookies #decline"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#lbganalyticsCookies"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#lbganalyticsCookies #accept"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#lbganalyticsCookies #decline",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "#lbganalyticsCookies",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

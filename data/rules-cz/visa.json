@@ -1,0 +1,33 @@
+{
+  "name": "visa-cookiereports",
+  "_comment": "CookieReports banner: Odmítnout vše. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(visa\\.com|visa\\.cz|visa\\.co\\.uk|visa\\.de|visa\\.fr)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#CookieReportsBanner a.wscrOk2"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#CookieReportsBanner"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#CookieReportsBanner a.wscrOk"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#CookieReportsBanner a.wscrOk2",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "#CookieReportsBanner",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

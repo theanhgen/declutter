@@ -1,0 +1,33 @@
+{
+  "name": "orejime",
+  "_comment": "Orejime (open-source CMP). (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(ameli\\.fr)/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".orejime-Notice .orejime-Button--decline"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".orejime-Notice"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".orejime-Notice .orejime-Button--save"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".orejime-Notice .orejime-Button--decline",
+      "retry": 2
+    },
+    {
+      "waitForVisible": ".orejime-Notice",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

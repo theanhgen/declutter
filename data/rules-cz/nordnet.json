@@ -1,0 +1,33 @@
+{
+  "name": "nordnet",
+  "_comment": "Afvis (reject), next to the accept button. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(nordnet\\.dk|nordnet\\.se|nordnet\\.no|nordnet\\.fi)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookie-accept-all-secondary"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "xpath///button[@id='cookie-accept-all-secondary']/..//button[normalize-space()='Afvis' or normalize-space()='Avvisa' or normalize-space()='Avvis' or normalize-space()='Hylkää' or normalize-space()='Reject']"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookie-accept-all-secondary"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///button[@id='cookie-accept-all-secondary']/..//button[normalize-space()='Afvis' or normalize-space()='Avvisa' or normalize-space()='Avvis' or normalize-space()='Hylkää' or normalize-space()='Reject']",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "xpath///button[@id='cookie-accept-all-secondary']/..//button[normalize-space()='Afvis' or normalize-space()='Avvisa' or normalize-space()='Avvis' or normalize-space()='Hylkää' or normalize-space()='Reject']",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

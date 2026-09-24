@@ -1,0 +1,33 @@
+{
+  "name": "waitrose",
+  "_comment": "Reject all. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(waitrose\\.com|johnlewis\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-testid=\"reject-all\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[data-testid=\"reject-all\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-testid=\"accept-all\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-testid=\"reject-all\"]",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "[data-testid=\"reject-all\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

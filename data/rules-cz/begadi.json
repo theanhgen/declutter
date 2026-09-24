@@ -1,0 +1,35 @@
+{
+  "name": "begadi-amasty",
+  "_comment": "Magento Amasty cookie panel; SPEICHERN with only 'Erforderlich' on stores amcookie_allowed=0 (verified). Kept site-specific: elsewhere the same button can mean allow-all. (Consent-O-Matic had a rule.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(begadi\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-amcookie-js=\"field\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#btn-cookie-allow"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#switch-box-1"
+    },
+    {
+      "waitForThenClick": "#btn-cookie-allow"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#btn-cookie-allow"
+    },
+    {
+      "waitForVisible": "#btn-cookie-allow",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "benq",
+  "_comment": "Only required cookies. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(benq\\.eu|benq\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookie-bar-eu button[aria-label=\"Accept only required cookies\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookie-bar-eu button[aria-label=\"Accept only required cookies\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookie-bar-eu button[aria-label=\"Accept all cookies\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookie-bar-eu button[aria-label=\"Accept only required cookies\"]",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "#cookie-bar-eu button[aria-label=\"Accept only required cookies\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

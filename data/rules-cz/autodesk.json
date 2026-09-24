@@ -1,0 +1,33 @@
+{
+  "name": "autodesk",
+  "_comment": "MUI with hashed classes; matched by text next to the 'cookie preferences' link. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(autodesk\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///button[normalize-space()='Decline'][ancestor::*[.//a[contains(., 'cookie preferences')]]]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "xpath///button[normalize-space()='Decline'][ancestor::*[.//a[contains(., 'cookie preferences')]]]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///button[normalize-space()='Accept'][ancestor::*[.//a[contains(., 'cookie preferences')]]]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///button[normalize-space()='Decline'][ancestor::*[.//a[contains(., 'cookie preferences')]]]",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "xpath///button[normalize-space()='Decline'][ancestor::*[.//a[contains(., 'cookie preferences')]]]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

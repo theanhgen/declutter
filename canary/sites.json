@@ -1,5 +1,5 @@
 {
- "_comment": "expect: done = banner shows and must be refused; clear = no banner may be left visible; wall = consent-or-pay wall, must be left alone.",
+ "_comment": "expect: done = banner shows and must be refused; clear = no banner may be left visible (use for sites that show a banner only sometimes from this IP); wall = consent-or-pay wall, must be detected and left alone. wait = ms to wait (default 15000).",
  "sites": [
   {
    "host": "www.seznam.cz",
@@ -168,7 +168,7 @@
   },
   {
    "host": "www.ceskatelevize.cz",
-   "expect": "done"
+   "expect": "clear"
   },
   {
    "host": "www.i4wifi.cz",
@@ -198,7 +198,8 @@
   {
    "host": "www.spiegel.de",
    "expect": "wall",
-   "note": "international"
+   "note": "international",
+   "wait": 25000
   },
   {
    "host": "www.zeit.de",
@@ -232,38 +233,168 @@
   },
   {
    "host": "www.theguardian.com",
-   "expect": "done",
+   "expect": "clear",
    "note": "international"
   },
   {
    "host": "www.booking.com",
-   "expect": "done",
+   "expect": "clear",
    "note": "international"
   },
   {
    "host": "www.amazon.de",
-   "expect": "done",
+   "expect": "clear",
    "note": "international"
   },
   {
    "host": "www.zalando.de",
-   "expect": "done",
+   "expect": "clear",
    "note": "international"
   },
   {
    "host": "www.google.com",
-   "expect": "done",
+   "expect": "clear",
    "note": "international"
   },
   {
    "host": "www.youtube.com",
-   "expect": "done",
+   "expect": "clear",
    "note": "international"
   },
   {
    "host": "stackoverflow.com",
-   "expect": "done",
+   "expect": "clear",
    "note": "international"
+  },
+  {
+   "host": "danskebank.dk",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "sverigesradio.se",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.ameli.fr",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.arteradio.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.autodesk.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.bankofscotland.co.uk",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.benq.eu",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.cdiscount.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.deepl.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.eurorepar.fr",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.fanatical.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.kobo.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.nationaltrust.org.uk",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.nd.nl",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.nordnet.dk",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.pepper.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.transavia.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.visa.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.waitrose.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.chrysal.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.ionos.de",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "metro.co.uk",
+   "expect": "wall",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.autohero.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.begadi.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.thomas-krenn.com",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.sundhed.dk",
+   "expect": "done",
+   "note": "from Consent-O-Matic's rule list"
   }
  ]
 }

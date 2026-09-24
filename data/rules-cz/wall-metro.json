@@ -1,0 +1,26 @@
+{
+  "name": "wall-metro",
+  "_comment": "metro.co.uk: ACCEPT, or REJECT AND PURCHASE METRO ESSENTIAL. Button text is uppercase only via CSS, so match case-insensitively.",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(metro\\.co\\.uk)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///button[contains(translate(normalize-space(.), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'PURCHASE METRO ESSENTIAL')]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "xpath///button[translate(normalize-space(.), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='ACCEPT']",
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///button[translate(normalize-space(.), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='ACCEPT']",
+      "retry": 3,
+      "retryInterval": 800
+    }
+  ],
+  "optOut": []
+}

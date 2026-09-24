@@ -23,9 +23,11 @@
     "spiegel.de",
     "zeit.de",
     "bild.de",
-    "heise.de"
+    "heise.de",
+    "metro.co.uk"
   ],
   "disabledCmps": [
-    "bbc.com"
+    "bbc.com",
+    "ionos.de"
   ]
 }

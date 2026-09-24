@@ -1,0 +1,33 @@
+{
+  "name": "sverigesradio",
+  "_comment": "Godkänn endast nödvändiga. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(sverigesradio\\.se)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///button[contains(., 'endast nödvändiga')]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "xpath///button[contains(., 'endast nödvändiga')]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///button[normalize-space()='Godkänn alla']"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///button[contains(., 'endast nödvändiga')]",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "xpath///button[contains(., 'endast nödvändiga')]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

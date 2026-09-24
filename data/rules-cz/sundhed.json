@@ -1,0 +1,32 @@
+{
+  "name": "sundhed-dk",
+  "_comment": "Nej tak = strictly necessary only. (Consent-O-Matic had a rule.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(sundhed\\.dk)/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".cookie-box button[ng-click=\"vm.rejectCookie()\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".cookie-box button[ng-click=\"vm.rejectCookie()\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".cookie-box button[ng-click=\"vm.acceptCookie()\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".cookie-box button[ng-click=\"vm.rejectCookie()\"]"
+    },
+    {
+      "waitForVisible": ".cookie-box",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

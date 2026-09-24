@@ -1,0 +1,33 @@
+{
+  "name": "arteradio",
+  "_comment": "Radix dialog, ids are generated; matched by text. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(arteradio\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///div[@role='dialog' or starts-with(@id,'radix')]//button[normalize-space()='Tout refuser']"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "xpath///div[@role='dialog' or starts-with(@id,'radix')]//button[normalize-space()='Tout refuser']"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///div[@role='dialog' or starts-with(@id,'radix')]//button[normalize-space()='Tout accepter']"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///div[@role='dialog' or starts-with(@id,'radix')]//button[normalize-space()='Tout refuser']",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "xpath///div[@role='dialog' or starts-with(@id,'radix')]//button[normalize-space()='Tout refuser']",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

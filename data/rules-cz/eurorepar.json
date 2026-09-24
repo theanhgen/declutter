@@ -1,0 +1,33 @@
+{
+  "name": "psa-eurorepar",
+  "_comment": "Stellantis banner: Continuer sans accepter. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(eurorepar\\.fr)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#_psaihm_continue_without_accepting"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#_psaihm_main_div"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#_psaihm_id_accept_all_btn"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#_psaihm_continue_without_accepting",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "#_psaihm_main_div",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

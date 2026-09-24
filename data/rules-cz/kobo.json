@@ -1,0 +1,47 @@
+{
+  "name": "kobo",
+  "_comment": "Desktop and phone copies of the buttons (one always hidden). Odmítnout. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(kobo\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-testid^=\"privacy-banner-decline-all-btn\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[data-testid^=\"privacy-banner-decline-all-btn\"]",
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-testid^=\"privacy-banner-accept-all-btn\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "if": {
+        "visible": "[data-testid=\"privacy-banner-decline-all-btn-desktop\"]"
+      },
+      "then": [
+        {
+          "waitForThenClick": "[data-testid=\"privacy-banner-decline-all-btn-desktop\"]",
+          "retry": 2
+        }
+      ],
+      "else": [
+        {
+          "waitForThenClick": "[data-testid=\"privacy-banner-decline-all-btn-mobile\"]",
+          "retry": 2
+        }
+      ]
+    },
+    {
+      "waitForVisible": "[data-testid^=\"privacy-banner-decline-all-btn\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

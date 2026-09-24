@@ -2,29 +2,98 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  :root { color-scheme: light dark; --muted: #6b6b6b; --bad: #d93025; --ok: #1e8e3e; }
-  body { font: 13px/1.4 -apple-system, system-ui, sans-serif; margin: 0; padding: 12px 14px; width: 260px; }
-  h1 { font-size: 14px; margin: 0 0 10px; }
-  label { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
-  .status { margin: 10px 0 0; padding-top: 8px; border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent); }
-  .status p { margin: 4px 0; }
-  .bad { color: var(--bad); } .ok { color: var(--ok); } .muted { color: var(--muted); }
-  button { margin-top: 8px; font: inherit; }
+  /* Same type as the settings page (monospace, lowercase), laid out like an iOS grouped list. */
+  :root {
+    color-scheme: light dark;
+    --bg: #f2f2f7; --card: #fff; --fg: hsl(0, 0%, 10%); --muted: #8a8a8e; --sep: rgba(60, 60, 67, .18);
+    --green: #34c759; --orange: #ff9500; --red: #ff3b30; --blue: #007aff; --grey: #aeaeb2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #000; --card: #1c1c1e; --fg: hsl(0, 0%, 92%); --muted: #8d8d93; --sep: rgba(84, 84, 88, .6); --blue: #0a84ff; }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  .gap { height: 16px; }
+  body {
+    margin: 0; padding: 14px 14px 16px; width: 300px;
+    background: var(--bg); color: var(--fg);
+    font: 13px/1.4 ui-monospace, "SF Mono", Menlo, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+  html.ios body { width: auto; padding: 16px 16px 24px; font-size: 15px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 4px 12px; }
+  h1 { margin: 0; font-size: 1.35em; font-weight: normal; }
+  #host { color: var(--muted); font-size: .85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .caption { margin: 16px 12px 6px; color: var(--muted); font-size: .8em; text-transform: lowercase; }
+  .group { background: var(--card); border-radius: 12px; overflow: hidden; }
+  .row {
+    display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px;
+    width: 100%; border: 0; background: none; color: inherit; font: inherit; text-align: left;
+  }
+  /* separator above every visible row except the first visible one */
+  .row:not([hidden]) ~ .row:not([hidden]) { box-shadow: inset 0 1px 0 var(--sep); }
+  .row .label { flex: 1; }
+  button.row { cursor: pointer; }
+  button.row:active { background: var(--sep); }
+  .action { color: var(--blue); }
+  .action.wall { color: var(--orange); }
+  .chevron { color: var(--grey); }
+  .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--grey); }
+  .dot.ok { background: var(--green); } .dot.wall { background: var(--orange); } .dot.bad { background: var(--red); }
+  .sub { display: block; color: var(--muted); font-size: .85em; }
+  /* iOS switch */
+  input.switch {
+    appearance: none; -webkit-appearance: none; flex: none; margin: 0; cursor: pointer;
+    width: 42px; height: 26px; border-radius: 13px; background: var(--sep); position: relative; transition: background .2s;
+  }
+  html.ios input.switch { width: 51px; height: 31px; border-radius: 16px; }
+  input.switch::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, .2); transition: transform .2s;
+  }
+  html.ios input.switch::after { width: 27px; height: 27px; }
+  input.switch:checked { background: var(--green); }
+  /* iOS segmented control */
+  .segmented { display: flex; flex: 1; padding: 2px; border-radius: 9px; background: var(--sep); }
+  .segmented button {
+    flex: 1; border: 0; border-radius: 7px; padding: 6px 4px; background: none; color: inherit; font: inherit; font-size: .9em; cursor: pointer;
+  }
+  .segmented button[aria-pressed="true"] { background: var(--card); box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
+  .note { margin: 6px 12px 0; color: var(--muted); font-size: .8em; }
+  input.switch:checked::after { transform: translateX(16px); }
+  html.ios input.switch:checked::after { transform: translateX(20px); }
 </style>
 </head>
 <body>
-  <h1>Declutter</h1>
-  <label><input type="checkbox" id="shorts"> Hide YouTube Shorts</label>
-  <label><input type="checkbox" id="consent"> Refuse cookie banners</label>
-  <div class="status">
-    <p id="host" class="muted"></p>
-    <p id="consentStatus"></p>
-    <p id="shortsStatus"></p>
-    <button id="acceptWall" hidden>Accept this wall (Souhlasím)</button>
-    <button id="pause" hidden></button>
-    <p><a href="#" id="settings">Settings…</a></p>
+  <header><h1>declutter</h1><span id="host"></span></header>
+
+  <div class="group">
+    <label class="row"><span class="label">hide shorts</span><input type="checkbox" class="switch" id="shorts"></label>
+    <label class="row"><span class="label">refuse cookie banners</span><input type="checkbox" class="switch" id="consent"></label>
   </div>
+
+  <div id="pageSection" hidden>
+    <p class="caption">this page</p>
+    <div class="group" id="status"></div>
+  </div>
+
+  <div id="siteSection" hidden>
+    <p class="caption">cookie banners on this site</p>
+    <div class="group"><div class="row"><div class="segmented" id="siteMode">
+      <button data-mode="refuse">refuse</button><button data-mode="accept">accept</button><button data-mode="ignore">leave</button>
+    </div></div></div>
+  </div>
+
+  <div class="gap"></div>
+  <div class="group" id="actions">
+    <button class="row action wall" id="acceptWall" hidden><span class="label">accept this wall (souhlasím)</span></button>
+    <button class="row action" id="report" hidden><span class="label">report: not handled right</span></button>
+    <button class="row" id="settings"><span class="label">settings</span><span class="chevron">›</span></button>
+  </div>
+
+  <p class="note" id="reported" hidden>saved to settings → reported sites</p>
   <script src="popup.js"></script>
 </body>
 </html>

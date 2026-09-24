@@ -1,0 +1,33 @@
+{
+  "name": "nd-nl",
+  "_comment": "Alleen functionele cookies accepteren = necessary only. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(nd\\.nl)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookieconsent .cookie-banner__inner__content__toolbar__settings"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookieconsent"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookieconsent .cookie-banner__inner__content__toolbar button:not(.cookie-banner__inner__content__toolbar__settings)"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookieconsent .cookie-banner__inner__content__toolbar__settings",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "#cookieconsent",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

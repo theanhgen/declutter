@@ -1,0 +1,39 @@
+{
+  "name": "autohero",
+  "_comment": "Konfigurieren opens the settings (only ESSENTIAL ticked); the same button then reads 'Auswahl speichern'. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(autohero\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-qa-selector=\"cookie-consent-accept-all\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[data-qa-selector=\"cookie-consent-accept-all\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-qa-selector=\"cookie-consent-accept-all\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-qa-selector=\"cookie-consent-configure\"]"
+    },
+    {
+      "waitForVisible": "input[name=\"ANALYTICAL\"]",
+      "timeout": 3000
+    },
+    {
+      "waitForThenClick": "[data-qa-selector=\"cookie-consent-configure\"]"
+    },
+    {
+      "waitForVisible": "[data-qa-selector=\"cookie-consent-accept-all\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

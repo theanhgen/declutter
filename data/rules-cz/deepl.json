@@ -1,0 +1,33 @@
+{
+  "name": "deepl",
+  "_comment": "Strict banner: 'accept selected' with nothing selected = refuse. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(deepl\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-testid=\"cookie-banner-strict-accept-selected\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[data-testid=\"cookie-banner-strict-accept-selected\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-testid=\"cookie-banner-strict-accept-all\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-testid=\"cookie-banner-strict-accept-selected\"]",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "[data-testid=\"cookie-banner-strict-accept-selected\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

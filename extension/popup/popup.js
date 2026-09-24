@@ -1,55 +1,85 @@
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 
-async function main() {
-  $('settings').onclick = (e) => { e.preventDefault(); api.runtime.openOptionsPage(); window.close(); };
-  const { settings = {} } = await api.storage.local.get('settings');
-  const s = { shorts: true, consent: true, exceptions: [], ...settings };
-  const save = (patch) => api.storage.local.set({ settings: { ...s, ...patch } }).then(() => Object.assign(s, patch));
+// iPhone/iPad: full-width sheet with larger touch targets.
+if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent) && matchMedia('(pointer: coarse)').matches)) {
+  document.documentElement.classList.add('ios');
+}
 
+function statusRow(kind, text, sub) {
+  const row = document.createElement('div');
+  row.className = 'row';
+  const dot = Object.assign(document.createElement('span'), { className: `dot ${kind}` });
+  const label = Object.assign(document.createElement('span'), { className: 'label', textContent: text });
+  if (sub) label.append(Object.assign(document.createElement('span'), { className: 'sub', textContent: sub }));
+  row.append(dot, label);
+  return row;
+}
+
+async function main() {
+  $('settings').onclick = () => { api.runtime.openOptionsPage(); window.close(); };
+
+  const { settings = {} } = await api.storage.local.get('settings');
+  const s = { shorts: true, consent: true, exceptions: [], acceptSites: [], ...settings };
+  const save = (patch) => api.storage.local.set({ settings: { ...s, ...patch } }).then(() => Object.assign(s, patch));
   for (const k of ['shorts', 'consent']) {
     $(k).checked = s[k];
     $(k).onchange = () => save({ [k]: $(k).checked });
   }
 
-  const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  // ?tab=<id> renders the popup for a given tab (tests open it as a page).
+  const forced = Number(new URLSearchParams(location.search).get('tab'));
+  const [tab] = forced ? [await api.tabs.get(forced)] : await api.tabs.query({ active: true, currentWindow: true });
   if (!tab?.url?.startsWith('http')) return;
   const host = new URL(tab.url).hostname;
-  $('host').textContent = host;
+  $('host').textContent = host.replace(/^www\./, '');
   const state = (await api.storage.session.get(`tab-${tab.id}`))[`tab-${tab.id}`] ?? {};
 
-  const c = $('consentStatus');
+  const rows = [];
   const stuck = state.consent === 'working' && Date.now() - state.since > 15000;
-  if (state.consent === 'done') { c.textContent = `Refused cookies (${state.cmp})`; c.className = 'ok'; }
-  else if (state.consent === 'failed' || stuck) { c.textContent = `Banner not answered (${state.cmp})`; c.className = 'bad'; }
+  if (state.consent === 'done') rows.push(statusRow('ok', 'cookies refused', state.cmp));
+  else if (state.consent === 'failed' || stuck) rows.push(statusRow('bad', 'banner not answered', state.cmp));
   else if (state.consent === 'wall') {
-    c.textContent = state.looping
-      ? 'This wall came back right after being accepted, so auto-accept paused here. Accept manually, or reload later.'
-      : 'Consent-or-pay wall: agree to tracking or pay. There is no free refuse.';
+    rows.push(statusRow('wall', 'pay wall: agree or pay', state.looping
+      ? 'it came back right after accepting, so auto-accept paused here'
+      : 'there is no free refuse on this site'));
     $('acceptWall').hidden = false;
     $('acceptWall').onclick = async () => {
       await api.runtime.sendMessage({ type: 'acceptWall', tabId: tab.id });
       window.close();
     };
-  }
-  else if (state.consent === 'accepting') { c.textContent = `Accepting the wall (${state.cmp})…`; }
-  else if (state.consent === 'accepted') { c.textContent = `Accepted the pay wall (${state.cmp})`; c.className = 'muted'; }
-  else if (state.consent === 'paused') { c.textContent = 'Paused on this site'; c.className = 'muted'; }
-  else if (state.consent === 'working') { c.textContent = `Answering ${state.cmp}…`; }
-  else { c.textContent = 'No cookie banner recognised'; c.className = 'muted'; }
+  } else if (state.consent === 'accepting') rows.push(statusRow('wall', 'accepting the wall…', state.cmp));
+  else if (state.consent === 'accepted') rows.push(statusRow('wall', 'pay wall accepted', state.cmp));
+  else if (state.consent === 'paused') rows.push(statusRow('', 'banners left alone here'));
+  else if (state.consent === 'acceptedSite') rows.push(statusRow('ok', 'cookies accepted (your choice)', state.cmp));
+  else if (state.consent === 'working') rows.push(statusRow('', `answering ${state.cmp}…`));
+  else rows.push(statusRow('', 'no cookie banner here'));
+  if (state.shortsLeak > 0) rows.push(statusRow('bad', `${state.shortsLeak} shorts got through`, `on ${state.leakPath}`));
+  $('status').replaceChildren(...rows);
+  $('pageSection').hidden = false;
 
-  if (state.shortsLeak > 0) {
-    $('shortsStatus').textContent = `${state.shortsLeak} Shorts link(s) got past the selectors on ${state.leakPath}`;
-    $('shortsStatus').className = 'bad';
+  // Per-site choice: refuse (default) / accept / leave alone.
+  const mode = s.exceptions.includes(host) ? 'ignore' : s.acceptSites.includes(host) ? 'accept' : 'refuse';
+  for (const b of $('siteMode').querySelectorAll('button')) {
+    b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
+    b.onclick = async () => {
+      const m = b.dataset.mode;
+      await save({
+        exceptions: [...s.exceptions.filter((h) => h !== host), ...(m === 'ignore' ? [host] : [])],
+        acceptSites: [...s.acceptSites.filter((h) => h !== host), ...(m === 'accept' ? [host] : [])],
+      });
+      api.tabs.reload(tab.id);
+      window.close();
+    };
   }
+  $('siteSection').hidden = false;
 
-  const paused = s.exceptions.includes(host);
-  $('pause').hidden = false;
-  $('pause').textContent = paused ? 'Answer banners on this site again' : 'Leave banners alone on this site';
-  $('pause').onclick = async () => {
-    await save({ exceptions: paused ? s.exceptions.filter((h) => h !== host) : [...s.exceptions, host] });
-    api.tabs.reload(tab.id);
-    window.close();
+  $('report').hidden = false;
+  $('report').onclick = async () => {
+    await api.runtime.sendMessage({ type: 'report', tabId: tab.id });
+    $('report').querySelector('.label').textContent = 'reported, thanks';
+    $('report').disabled = true;
+    $('reported').hidden = false;
   };
 }
 main();

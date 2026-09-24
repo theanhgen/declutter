@@ -102,7 +102,8 @@ const outcomeJs = fs.readFileSync(path.join(root, 'test/outcome.js'), 'utf8');
 // expect: 'done'  = a banner is known to show; our extension must answer it
 //         'clear' = no banner must be left visible (the site may not show one to a headless browser)
 //         'wall'  = consent-or-pay wall; must be recognised and left visible
-export async function consentCheck(page, sw, { host, expect }, wait = 15000) {
+export async function consentCheck(page, sw, { host, expect }, wait) {
+  wait ??= 15000;
   let err = null;
   await page.goto(`https://${host}/`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch((e) => { err = e.message.split('\n')[0]; });
   await page.waitForTimeout(wait);

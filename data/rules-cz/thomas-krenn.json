@@ -1,0 +1,27 @@
+{
+  "name": "thomas-krenn",
+  "_comment": "Categories start unticked; 'Auswahl übernehmen' saves essential only. (Consent-O-Matic had a rule.) No closing check: the panel slides off-screen (x<0) but autoconsent still counts it as visible.",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(thomas-krenn\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".xtx-privacy-cookie [data-cookie-overlay-save]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".xtx-privacy-cookie [data-cookie-overlay-save]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".xtx-privacy-cookie [data-cookie-overlay-accept-all]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".xtx-privacy-cookie [data-cookie-overlay-save]"
+    }
+  ]
+}

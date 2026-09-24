@@ -29,7 +29,7 @@ await Promise.all(Array.from({ length: WORKERS }, async () => {
   const page = await ctx.newPage();
   while (queue.length) {
     const site = queue.shift();
-    const r = await consentCheck(page, sw, site);
+    const r = await consentCheck(page, sw, site, site.wait);
     consent.push(r);
     check(`consent ${site.host}: ${site.expect}`, r.ok,
       r.ok ? '' : JSON.stringify({ state: r.state, banner: r.banners[0]?.slice(0, 120), err: r.err }));

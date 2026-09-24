@@ -8,12 +8,13 @@ const CHOICES = {
   walls: [['manual', 'manual'], ['auto', 'auto']],
   debug: [[false, 'off'], [true, 'on']],
 };
-const DEFAULTS = { shorts: true, consent: true, walls: 'manual', debug: false, exceptions: [] };
+const DEFAULTS = { shorts: true, consent: true, walls: 'manual', debug: false, exceptions: [], acceptSites: [] };
 
 const link = (text, onclick) => Object.assign(document.createElement('a'), { href: '#', textContent: text, onclick: (e) => { e.preventDefault(); onclick(); } });
 
 async function render() {
-  const { settings = {}, remoteData, remoteDataStatus } = await api.storage.local.get(['settings', 'remoteData', 'remoteDataStatus']);
+  const { settings = {}, remoteData, remoteDataStatus, stats = {}, reports = [] } =
+    await api.storage.local.get(['settings', 'remoteData', 'remoteDataStatus', 'stats', 'reports']);
   const s = { ...DEFAULTS, ...settings };
   const save = (patch) => api.storage.local.set({ settings: { ...s, ...patch } }).then(render);
 
@@ -26,10 +27,30 @@ async function render() {
     el.replaceChildren(...parts);
   }
 
-  $('exceptions').replaceChildren(...(s.exceptions.length
-    ? s.exceptions.flatMap((host, i) => [...(i ? [', '] : []), `${host} (`,
-      link('remove', () => save({ exceptions: s.exceptions.filter((h) => h !== host) })), ')'])
-    : [Object.assign(document.createElement('span'), { className: 'muted', textContent: 'no sites — add one from the toolbar menu on that site' })]));
+  const siteList = (key, empty) => $(key).replaceChildren(...(s[key].length
+    ? s[key].flatMap((host, i) => [...(i ? [', '] : []), `${host} (`,
+      link('remove', () => save({ [key]: s[key].filter((h) => h !== host) })), ')'])
+    : [Object.assign(document.createElement('span'), { className: 'muted', textContent: empty })]));
+  siteList('acceptSites', 'no sites');
+  siteList('exceptions', 'no sites');
+
+  const n = (k) => stats[k] ?? 0;
+  $('stats').textContent = stats.since
+    ? `${n('refused')} banners refused, ${n('accepted')} accepted by your choice, ${n('walls')} pay walls accepted, ` +
+      `${n('clicks')} clicks saved, ${n('shorts')} shorts sent to the normal player — since ${new Date(stats.since).toLocaleDateString()}.`
+    : 'nothing yet.';
+
+  const lines = reports.map((r) => `${new Date(r.at).toISOString().slice(0, 16).replace('T', ' ')}  ${r.url}  [${r.consent}${r.cmp ? ' ' + r.cmp : ''}]`);
+  $('reports').replaceChildren(...(reports.length
+    ? [...reports.map((r, i) => Object.assign(document.createElement('p'), { className: 'bullet', style: '--dot:#e5484d', textContent: lines[i] })),
+      Object.assign(document.createElement('p'), {}),
+    ]
+    : [Object.assign(document.createElement('p'), { className: 'muted', textContent: 'none.' })]));
+  if (reports.length) {
+    const actions = $('reports').lastChild;
+    actions.append(link('copy list', async () => { await navigator.clipboard.writeText(lines.join('\n')); actions.firstChild.textContent = 'copied'; }), ' / ',
+      link('clear', () => api.storage.local.set({ reports: [] }).then(render)));
+  }
 
   const bundled = await (await fetch(api.runtime.getURL('data.json'))).json();
   const data = remoteData?.generated > bundled.generated ? remoteData : bundled;
@@ -40,5 +61,8 @@ async function render() {
     (s.dataUrl || remoteDataStatus
       ? (remoteDataStatus?.ok ? `last update check ${when(remoteDataStatus.at)}.` : `last update check failed: ${remoteDataStatus?.error ?? 'not run yet'}.`)
       : 'no update server configured.');
+  if (s.dataUrl) {
+    $('data').append(' ', link('update now', async () => { await api.runtime.sendMessage({ type: 'updateData' }); render(); }));
+  }
 }
 render();

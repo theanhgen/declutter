@@ -19,7 +19,8 @@ Built and passing in Chrome; Safari app built, signed and registered, **waiting 
 | Safari (`npm run safari`) | app signed by team 28DMV2MR8T, installed to `~/Applications`, extension registered with Safari |
 | iPhone (`npm run ios`) | iOS app + extension built, signed and installed on "Maclura" (iPhone 17 Pro) via `devicectl` |
 | Mobile YouTube (`npm run test:mobile`) | 7/7 on m.youtube.com: bottom-bar Shorts tab hidden, search Shorts hidden, direct + in-app `/shorts/` → `/watch` |
-| International (36 sites, CZ IP, 2026-09-24) | 28 refused/no banner; 4 are consent-or-pay walls not yet on the list (lemonde, elpais, corriere, repubblica); 3 gaps: bbc (rule fails), nu.nl (DPG Media), airbnb |
+| International (CZ IP, 2026-09-24) | 8 more consent-or-pay walls on the wall list (lemonde, elpais, corriere, repubblica, spiegel, zeit, bild, heise) + metro.co.uk; bbc, nu.nl (DPG Media), airbnb fixed |
+| Consent-O-Matic parity (2026-09-24) | 204 CoM rules: 65 match ours/autoconsent by selector; the ~69 site-specific ones were run live: 21 refused by autoconsent, 20 showed no banner, **27 gaps → 26 new rules** (LEGO's is an age gate, not a banner). CoM features: per-site choice, local report, counters, update-now added; per-category choices not replicated (D10) |
 
 Research behind every claim here: `research/` (three reports + the scripts and raw results from the
 2026-09-21 runs). Anything marked **unverified** has not been tested yet and is a milestone gate.
@@ -40,6 +41,8 @@ Research behind every claim here: `research/` (three reports + the scripts and r
 | D3 | Our own code, MIT. Do not fork any Shorts blocker | **decided** (licenses leave no choice) | `research/shorts.md` |
 | D4 | Consent engine = DuckDuckGo **autoconsent** (MPL-2.0, npm dep, unmodified). Consent-O-Matic's CZ coverage is taken over by our CZ rule pack (bauhaus written fresh from the live page; rozhlas is already covered by autoconsent); CoM's engine is not bundled | **decided** by user 2026-09-24 | `research/consent.md` |
 | D5 | Consent-or-pay walls (Seznam, Mafra, CPEx) are never refused or hidden (refusing is impossible — verified 2026-09-24, see *Walls*). On a wall domain only the `cz-wall-*` rules run, so nothing else on the page is touched | **decided** by user 2026-09-21, refined by D9 | chat |
+| D10 | Per-site choice **refuse / accept / leave** (popup segmented control; settings lists). Consent-O-Matic's per-category choices are **not** replicated: autoconsent only knows accept-all/refuse-all, and categories would mean hand-writing every provider's toggles | **decided** 2026-09-24 | chat |
+| D11 | "Report this site" and counters are **local only** (settings shows them; copy the report list to get rules written). Nothing is ever sent, unlike Consent-O-Matic's report button | **decided** 2026-09-24 | chat |
 | D9 | Two wall modes (Settings): **Manual** (default) = detect the wall, show a **Kč** badge, accept only when the user presses "Accept this wall" in the popup; **Auto** = click "Souhlasím" on walls only. Loop guard: ≤2 automatic accepts per wall family per tab per minute, then fall back to manual | **decided** by user 2026-09-24 | chat |
 | D6 | Selectors and CZ rules live in data (JSON), fetched at runtime with a bundled fallback, so a fix is a data edit, not a Safari rebuild | **built**; needs a hosting URL (open question below) | chat, autoconsent 16.41.0 source |
 | D7 | Breakage detection = in-extension self-check + a daily canary on own hardware. **No auto-rewriting of selectors** | **built**; canary runs daily on Elaeis via launchd, Telegram not configured yet | chat |
@@ -257,6 +260,10 @@ certificate; the team already has one for App Store work).
 - **Codesign fails on ~/Desktop** ("resource fork, Finder information, or similar detritus not allowed"): iCloud
   adds xattrs. `scripts/safari.sh` builds in `~/Library/Developer/Xcode/DerivedData/declutter` and the copy phase
   runs `xattr -cr`.
+- **autoconsent's code-based rules** (Sourcepoint-frame, Onetrust, TrustArc-top, … `lib/cmps/*.ts`) are always
+  loaded, whatever rule bundle we pass. On wall sites they're switched off via `disabledCmps: BUILTIN_CMPS`
+  (unit-tested against the installed version); before that, the generic Sourcepoint rule sometimes grabbed
+  Spiegel's wall frame first (intermittent, ~1 in 2).
 - **Visibility traps:** KB and Seznam hide their banners with `visibility: hidden` and leave them in the page;
   autoconsent's visible check ignores `visibility`. Match a class/inline style that only exists while shown,
   or an auto-accept rule will loop (it did on Novinky before the fix and the loop guard).

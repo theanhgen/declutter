@@ -1,0 +1,33 @@
+{
+  "name": "fanatical",
+  "_comment": "Reject All Non-Essential Cookies. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(fanatical\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///section[contains(@class,'CookieConsent')]//button[contains(., 'Reject All')]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "xpath///section[contains(@class,'CookieConsent')]//button[contains(., 'Reject All')]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".CookieConsent .accept-cookies-btn"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///section[contains(@class,'CookieConsent')]//button[contains(., 'Reject All')]",
+      "retry": 2
+    },
+    {
+      "waitForVisible": "xpath///section[contains(@class,'CookieConsent')]//button[contains(., 'Reject All')]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

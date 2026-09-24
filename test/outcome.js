@@ -3,11 +3,11 @@
   const banners = [];
   for (const e of all) {
     const cs = getComputedStyle(e);
-    if (/^(HEADER|NAV|FOOTER)$/.test(e.tagName) || e.closest('header, nav')) continue;
+    if (/^(HEADER|NAV|FOOTER)$/.test(e.tagName) || e.closest('header, nav, aside, #guide, tp-yt-app-drawer')) continue;
     if ((cs.position === 'fixed' || cs.position === 'sticky') && e.offsetHeight > 40 && cs.display !== 'none' && cs.visibility !== 'hidden' && cs.opacity !== '0') {
-      const r = e.getBoundingClientRect(); if (r.bottom <= 0 || r.top >= innerHeight) continue;
+      const r = e.getBoundingClientRect(); if (r.bottom <= 0 || r.top >= innerHeight || r.right <= 0 || r.left >= innerWidth) continue;
       const t = (e.innerText || '').replace(/\s+/g, ' ');
-      if (/cookie|souhlas(em|u)? se? |soukromí|personaliz|consent/i.test(t) && t.length < 5000) banners.push(`${e.tagName.toLowerCase()}#${e.id}.${String(e.className).slice(0, 40)} :: ${t.slice(0, 90)}`);
+      if (/cookie|souhlas(em|u)? se? |soukromí|personaliz|consent/i.test(t) && t.length >= 40 && t.length < 5000) banners.push(`${e.tagName.toLowerCase()}#${e.id}.${String(e.className).slice(0, 40)} :: ${t.slice(0, 90)}`);
     }
     if (banners.length > 3) break;
   }
