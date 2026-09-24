@@ -1,0 +1,41 @@
+## www.tescoma.cz 
+  logs: [
+  'CMP Detected:  cookiescript',
+  'cookiescript - isShowing?',
+  'cookiescript - Showing',
+  'Showing progress...'
+] 
+  cookies: [
+  'CookieScriptConsent={"googleconsentmap":{"ad_storage":"targeting","analytics_storage":"performance","ad_user_data":"targeting","ad_personalization":"targeting","personalization_sto'
+]
+## www.rohlik.cz 
+  logs: [ 'No CMP detected in 5 seconds, stopping engine...' ] 
+  cookies: [ 'consentTracked=true' ]
+## www.o2.cz 
+  logs: [ 'No CMP detected in 5 seconds, stopping engine...' ] 
+  cookies: [
+  '__cmpcccx34520=aCQq7MwwAAqWAXQ9NAyVTAWBMAakmENEoYjAFKUkGRQGESTKqJoCCwA'
+]
+## www.bazos.cz 
+  logs: [ 'No CMP detected in 5 seconds, stopping engine...' ] 
+  cookies: [
+  'cookie_consent_level={"strictly-necessary":true,"functionality":false,"tracking":false,"targeting":false}'
+]
+## www.seznam.cz 
+  logs: [ 'No CMP detected in 5 seconds, stopping engine...' ] 
+  cookies: [ 'cmpsessid=fp6oaeq2kg', 'cmphitorder=2' ]
+## www.kupi.cz 
+  logs: [ 'No CMP detected in 5 seconds, stopping engine...' ] 
+  cookies: [ 'cmpsessid=jr1jhhsc5n', 'cmphitorder=5' ]
+## www.dm.cz 
+  logs: [ 'No CMP detected in 5 seconds, stopping engine...' ] 
+  cookies: []
+## www.forum24.cz 
+  logs: [
+  'CMP Detected:  bbc_fc',
+  'bbc_fc - isShowing?',
+  'bbc_fc - Showing',
+  'Showing progress...',
+  'No CMP detected in 5 seconds, stopping engine...'
+] 
+  cookies: []

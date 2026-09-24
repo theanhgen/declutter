@@ -1,0 +1,21 @@
+{
+  "name": "declutter",
+  "version": "0.1.0",
+  "description": "Hides YouTube Shorts and refuses cookie banners (Chrome + Safari)",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/",
+    "test:e2e": "node test/e2e.mjs",
+    "canary": "node canary/run.mjs"
+  },
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "playwright": "^1.63.0"
+  },
+  "dependencies": {
+    "@duckduckgo/autoconsent": "^16.41.0"
+  },
+  "private": true
+}

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root { color-scheme: light dark; --muted: #6b6b6b; --bad: #d93025; --ok: #1e8e3e; }
+  body { font: 13px/1.4 -apple-system, system-ui, sans-serif; margin: 0; padding: 12px 14px; width: 260px; }
+  h1 { font-size: 14px; margin: 0 0 10px; }
+  label { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .status { margin: 10px 0 0; padding-top: 8px; border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent); }
+  .status p { margin: 4px 0; }
+  .bad { color: var(--bad); } .ok { color: var(--ok); } .muted { color: var(--muted); }
+  button { margin-top: 8px; font: inherit; }
+</style>
+</head>
+<body>
+  <h1>Declutter</h1>
+  <label><input type="checkbox" id="shorts"> Hide YouTube Shorts</label>
+  <label><input type="checkbox" id="consent"> Refuse cookie banners</label>
+  <div class="status">
+    <p id="host" class="muted"></p>
+    <p id="consentStatus"></p>
+    <p id="shortsStatus"></p>
+    <button id="pause" hidden></button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

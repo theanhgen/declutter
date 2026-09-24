@@ -1,0 +1,56 @@
+## www.seznam.cz 
+  logs: [
+  'Trying generic rules [TrustArc-top, Cybotcookiebot, Sourcepoint-frame, consentmanager.net, Evidon, Onetrust, Klaro, Uniconsent, Conversant, ',
+  'error evaluating rule EVAL_GDPR_LEGAL_COOKIE_DETECT_CMP Error: timeout\n' +
+    '    at chrome-extension://lcemkigibnkmompgegfeeagmoondlgpb/content.bu',
+  'Trying heuristic rules [HEURISTIC]',
+  'no CMP found https://www.seznam.cz/'
+] 
+  cookies: [ 'cmpsessid=mdrkpuei1r', 'cmphitorder=2' ]
+## www.blesk.cz 
+  logs: [
+  'Trying generic rules [TrustArc-top, Cybotcookiebot, Sourcepoint-frame, consentmanager.net, Evidon, Onetrust, Klaro, Uniconsent, Conversant, ',
+  'Trying heuristic rules [HEURISTIC]',
+  'Found CMP: didomi https://www.blesk.cz/',
+  'CMP didomi: opt out on https://www.blesk.cz/',
+  'Initiated optOut() [Object]',
+  'didomi: opt out result true',
+  'CMP didomi: self-test on https://www.blesk.cz/'
+] 
+  cookies: [
+  'euconsent-v2=CQq5IMAQq5IMAAHABBENCxFgAAAAAAAAAAAAAAAAAAAA.IJpwMwAAgAKAAaABAACsAFwAZgA4ADsAHwAgABQACoAFoAMgAaABFACTAEwATYAqACqAFuALwAvgBiADYAH4AQEAgwCEAEQAIoARwAnQB3AD9AIsAUg',
+  'CMP_details=0',
+  'cncVendorConsent=false'
+]
+## www.kupi.cz 
+  logs: [
+  'Trying generic rules [TrustArc-top, Cybotcookiebot, Sourcepoint-frame, consentmanager.net, Evidon, Onetrust, Klaro, Uniconsent, Conversant, ',
+  'Trying heuristic rules [HEURISTIC]'
+] 
+  cookies: [ 'cmpsessid=nfmvmd89hp', 'cmphitorder=4' ]
+## www.czc.cz 
+  logs: [
+  'Trying generic rules [TrustArc-top, Cybotcookiebot, Sourcepoint-frame, consentmanager.net, Evidon, Onetrust, Klaro, Uniconsent, Conversant, ',
+  'Trying heuristic rules [HEURISTIC]'
+] 
+  cookies: []
+## www.lekarna.cz 
+  logs: [
+  'Trying generic rules [TrustArc-top, Cybotcookiebot, Sourcepoint-frame, consentmanager.net, Evidon, Onetrust, Klaro, Uniconsent, Conversant, ',
+  'Trying heuristic rules [HEURISTIC]'
+] 
+  cookies: []
+## www.idnes.cz 
+  logs: [
+  'Trying generic rules [TrustArc-top, Cybotcookiebot, Sourcepoint-frame, consentmanager.net, Evidon, Onetrust, Klaro, Uniconsent, Conversant, ',
+  'Found CMP: didomi https://www.idnes.cz/',
+  'autoconsent init https://gum.criteo.com/syncframe?origin=publishertag&topUrl=www.idnes.cz&gdpr=1&gdpr_consent=CQq5IMAQq5IMAAHABBENCxFgAAAAAE',
+  '[prehide] JSHandle@node https://gum.criteo.com/syncframe?origin=publishertag&topUrl=www.idnes.cz&gdpr=1&gdpr_consent=CQq5IMAQq5IMAAHABBENCxF',
+  'Detecting CMPs on https://gum.criteo.com/syncframe?origin=publishertag&topUrl=www.idnes.cz&gdpr=1&gdpr_consent=CQq5IMAQq5IMAAHABBENCxFgAAAAA',
+  '[undoprehide] JSHandle@node https://gum.criteo.com/syncframe?origin=publishertag&topUrl=www.idnes.cz&gdpr=1&gdpr_consent=CQq5IMAQq5IMAAHABBE',
+  'no CMP found https://www.impuls.cz/embed/player.html'
+] 
+  cookies: [
+  'adsCMP=czaid=0,groupm=0,id5=0,gemius=0,seznam=0,cpex=0,piano=0,full=0,base=0,google=0,purposes=0,firstPurpose=0,publisher=0000,aab=',
+  'dCMP=mafra=0000,all=0,reklama=0,part=1,cpex=0,google=0,gemius=0,id5=0,nase=0000,groupm=0,piano=0,seznam=0,geozo=0,czaid=0,click=0,vendors=none,'
+]

@@ -1,0 +1,33 @@
+## www.jobs.cz 
+  logs: [
+  'CMP Detected:  GLS',
+  'GLS - isShowing?',
+  'GLS - Showing',
+  'Showing progress...',
+  'No CMP detected in 5 seconds, stopping engine...'
+] 
+  cookies: []
+## www.datart.cz 
+  logs: [
+  'CMP Detected:  GLS',
+  'GLS - isShowing?',
+  'GLS - Showing',
+  'Showing progress...'
+] 
+  cookies: []
+## www.info.cz 
+  logs: [
+  'CMP Detected:  GLS',
+  'GLS - isShowing?',
+  'GLS - Showing',
+  'Showing progress...'
+] 
+  cookies: [
+  'cc_cookie={"level":["necessary"],"revision":0,"data":null,"rfc_cookie":false}'
+]
+## www.alza.cz 
+  logs: [ 'No CMP detected in 5 seconds, stopping engine...' ] 
+  cookies: [ 'ALZALSC=U|0|1' ]
+## www.ceskatelevize.cz 
+  logs: [ 'No CMP detected in 5 seconds, stopping engine...' ] 
+  cookies: []

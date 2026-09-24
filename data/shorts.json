@@ -1,0 +1,27 @@
+{
+  "hide": [
+    "ytd-rich-section-renderer:has(> #content > ytd-rich-shelf-renderer[is-shorts])",
+    "ytd-rich-section-renderer:has(a[href^=\"/shorts/\"])",
+    "ytd-rich-item-renderer:has(a[href^=\"/shorts/\"])",
+    "ytd-rich-item-renderer[rendered-from-rich-grid]:has(ytm-shorts-lockup-view-model)",
+    "grid-shelf-view-model:has(a[href^=\"/shorts/\"])",
+    "ytd-reel-shelf-renderer",
+    "ytd-video-renderer:has(a[href^=\"/shorts/\"])",
+    "yt-lockup-view-model:has(a[href^=\"/shorts/\"])",
+    "ytd-notification-renderer:has(> a[href^=\"/shorts/\"])",
+    "ytd-guide-entry-renderer:has(> a[title=\"Shorts\"])",
+    "ytd-mini-guide-entry-renderer:has(> a[aria-label=\"Shorts\"])",
+    "yt-tab-shape[tab-title=\"Shorts\"]",
+    "yt-chip-cloud-chip-renderer:has(yt-formatted-string[title=\"Shorts\"])"
+  ],
+  "cards": [
+    "ytd-rich-item-renderer",
+    "ytd-rich-section-renderer",
+    "grid-shelf-view-model",
+    "yt-lockup-view-model",
+    "ytd-video-renderer",
+    "ytd-compact-video-renderer",
+    "ytd-grid-video-renderer",
+    "ytd-notification-renderer"
+  ]
+}

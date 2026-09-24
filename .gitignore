@@ -1,0 +1,58 @@
+# === Language runtimes ===
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+.venv/
+
+# Node
+node_modules/
+dist/
+.next/
+.nuxt/
+
+# Swift
+.build/
+DerivedData/
+*.xcuserstate
+
+# === Sensitive data ===
+.env
+*.secret
+credentials.*
+data/raw/
+
+# === IDE & Agents ===
+.vscode/
+.idea/
+.claude/
+.gemini/
+.agent/
+.agents/
+.codex/
+*.swp
+*.swo
+
+# === Runtime artifacts ===
+tmp/
+logs/
+*.log
+.assistant_log.jsonl
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Extension builds ===
+build/
+xcuserdata/
+canary/profiles/
+canary/shots/
+
+# research logs are data
+!research/**/*.log
+tmp/
