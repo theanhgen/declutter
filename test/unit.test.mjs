@@ -12,6 +12,7 @@ test('redirectTarget: Shorts and channel Shorts tabs', () => {
   assert.equal(redirectTarget('https://www.youtube.com/shorts/abc_D-1?feature=share'), 'https://www.youtube.com/watch?v=abc_D-1');
   assert.equal(redirectTarget('https://www.youtube.com/@MrBeast/shorts'), 'https://www.youtube.com/@MrBeast/videos');
   assert.equal(redirectTarget('https://www.youtube.com/channel/UC123/shorts/'), 'https://www.youtube.com/channel/UC123/videos');
+  assert.equal(redirectTarget('https://m.youtube.com/shorts/abc_D-1'), 'https://m.youtube.com/watch?v=abc_D-1');
   assert.equal(redirectTarget('https://www.youtube.com/watch?v=abc'), null);
   assert.equal(redirectTarget('https://www.youtube.com/@shorts'), null);
   assert.equal(redirectTarget('https://www.youtube.com/results?search_query=shorts'), null);
@@ -93,7 +94,8 @@ test('DNR redirect regex stays inside the Safari-safe subset', () => {
     const re = r.condition.regexFilter;
     assert.ok(!/\||\{\d|\\d|\\w|\(\?[=!<]/.test(re), re);
     assert.ok(re.startsWith('^') && re.endsWith('.*'), 'must match the whole URL');
-    const m = 'https://www.youtube.com/shorts/abc_D-1?x=1'.match(new RegExp(re));
-    assert.equal(r.action.redirect.regexSubstitution.replace('\\1', m[1]), 'https://www.youtube.com/watch?v=abc_D-1');
+    const host = re.includes('m\\.youtube') ? 'm.youtube.com' : 'www.youtube.com';
+    const m = `https://${host}/shorts/abc_D-1?x=1`.match(new RegExp(re));
+    assert.equal(r.action.redirect.regexSubstitution.replace('\\1', m[1]), `https://${host}/watch?v=abc_D-1`);
   }
 });

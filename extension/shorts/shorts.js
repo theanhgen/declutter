@@ -1,4 +1,4 @@
-// YouTube only. shorts.css (built from data/shorts.json) does the hiding; this script:
+// www.youtube.com and m.youtube.com. shorts.css (built from data/shorts.json) does the hiding; this script:
 //  - sends /shorts/<id> to /watch?v=<id>, and a channel's /shorts tab to /videos
 //  - adds selectors from the remote data copy (D6)
 //  - self-check: any /shorts/ link still visible gets hidden by its card and reported (red badge)
@@ -35,7 +35,7 @@ const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).v
 let lastReported = -1;
 function selfCheck() {
   if (!enabled) return;
-  const leaked = [...document.querySelectorAll('a[href^="/shorts/"]')].filter(visible);
+  const leaked = [...document.querySelectorAll('a[href*="/shorts/"]')].filter(visible);
   for (const a of leaked) {
     const card = a.closest(cards.join(',')) ?? a;
     card.setAttribute('data-declutter-hidden', '');
@@ -48,7 +48,16 @@ function selfCheck() {
 }
 
 let timer;
-const scheduleCheck = () => { clearTimeout(timer); timer = setTimeout(selfCheck, 700); };
+let lastUrl = location.href;
+const scheduleCheck = () => {
+  // m.youtube.com has no yt-navigate-finish; notice in-app navigation from DOM changes instead.
+  if (location.href !== lastUrl) {
+    lastUrl = location.href;
+    if (redirectIfShort()) return;
+  }
+  clearTimeout(timer);
+  timer = setTimeout(selfCheck, 700);
+};
 
 function injectRemoteSelectors(selectors) {
   if (!selectors?.length) return;

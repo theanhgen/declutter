@@ -37,7 +37,8 @@
   "content_scripts": [
     {
       "matches": [
-        "*://www.youtube.com/*"
+        "*://www.youtube.com/*",
+        "*://m.youtube.com/*"
       ],
       "js": [
         "shorts/shorts.js"

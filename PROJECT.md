@@ -17,6 +17,9 @@ Built and passing in Chrome; Safari app built, signed and registered, **waiting 
 | Remote data (`test/remote-data.mjs`) | a changed `data.json` on a URL changes both modules with no rebuild |
 | Unit (`npm test`) | 9/9: pure helpers, rule schema, wall/rule overlap, CSS gating, manifests, Safari-safe regex |
 | Safari (`npm run safari`) | app signed by team 28DMV2MR8T, installed to `~/Applications`, extension registered with Safari |
+| iPhone (`npm run ios`) | iOS app + extension built, signed and installed on "Maclura" (iPhone 17 Pro) via `devicectl` |
+| Mobile YouTube (`npm run test:mobile`) | 7/7 on m.youtube.com: bottom-bar Shorts tab hidden, search Shorts hidden, direct + in-app `/shorts/` → `/watch` |
+| International (36 sites, CZ IP, 2026-09-24) | 28 refused/no banner; 4 are consent-or-pay walls not yet on the list (lemonde, elpais, corriere, repubblica); 3 gaps: bbc (rule fails), nu.nl (DPG Media), airbnb |
 
 Research behind every claim here: `research/` (three reports + the scripts and raw results from the
 2026-09-21 runs). Anything marked **unverified** has not been tested yet and is a milestone gate.
@@ -33,7 +36,7 @@ Research behind every claim here: `research/` (three reports + the scripts and r
 | # | Decision | Status | Source |
 |---|---|---|---|
 | D1 | One combined extension (Shorts + consent), not two | **decided** by user 2026-09-21 | chat |
-| D2 | Desktop only: Chrome + Safari macOS; Firefox later | **decided** | chat |
+| D2 | Chrome + Safari macOS, **and Safari on iPhone** (added 2026-09-24 by user); Firefox later | **decided** | chat |
 | D3 | Our own code, MIT. Do not fork any Shorts blocker | **decided** (licenses leave no choice) | `research/shorts.md` |
 | D4 | Consent engine = DuckDuckGo **autoconsent** (MPL-2.0, npm dep, unmodified). Consent-O-Matic's CZ coverage is taken over by our CZ rule pack (bauhaus written fresh from the live page; rozhlas is already covered by autoconsent); CoM's engine is not bundled | **decided** by user 2026-09-24 | `research/consent.md` |
 | D5 | Consent-or-pay walls (Seznam, Mafra, CPEx) are never refused or hidden (refusing is impossible — verified 2026-09-24, see *Walls*). On a wall domain only the `cz-wall-*` rules run, so nothing else on the page is touched | **decided** by user 2026-09-21, refined by D9 | chat |
@@ -99,7 +102,8 @@ declutter/
     shorts.json              # hide selectors + card containers for the self-check
     consent.json             # wall domains, disabled CMPs
     rules-cz/*.json          # 15 refuse rules (13 sites, Liferay generic, Seznam dialog) + 5 cz-wall-* accept rules
-  safari/project.yml         # xcodegen: container app + extension; run-script copies build/safari in
+  safari/project.yml         # xcodegen: macOS + iOS container apps and extensions; run-script copies build/safari in
+  scripts/ios.sh             # build + sign + install on the first paired iPhone
   scripts/safari.sh          # build + sign + install ~/Applications/Declutter.app
   scripts/canary-agent.sh    # install/remove the daily launchd job
   test/                      # unit (node --test), e2e.mjs (smoke), remote-data.mjs, lib.mjs (shared)

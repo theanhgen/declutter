@@ -9,7 +9,10 @@ export const root = path.resolve(path.dirname(new URL(import.meta.url).pathname)
 // Headless Chromium says "HeadlessChrome" in its UA and many CMPs then show nothing.
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36';
 
-export async function launch({ extension = true } = {}) {
+const IPHONE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
+
+// mobile: pose as iPhone Safari (YouTube then serves m.youtube.com). Chromium engine, real extension.
+export async function launch({ extension = true, mobile = false } = {}) {
   const ext = path.join(root, 'build/chrome');
   if (extension && !fs.existsSync(path.join(ext, 'manifest.json'))) throw new Error('run npm run build first');
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'declutter-'));
@@ -17,9 +20,10 @@ export async function launch({ extension = true } = {}) {
   const ctx = await chromium.launchPersistentContext(profile, {
     channel: 'chromium',
     headless: !process.env.HEADED,
-    userAgent: UA,
+    userAgent: mobile ? IPHONE_UA : UA,
     locale: 'cs-CZ',
-    viewport: { width: 1400, height: 900 },
+    viewport: mobile ? { width: 393, height: 852 } : { width: 1400, height: 900 },
+    ...(mobile && { isMobile: true, hasTouch: true, deviceScaleFactor: 3 }),
     // Without this navigator.webdriver is true, and some banners (orestbida cookieconsent) never show.
     args: ['--disable-blink-features=AutomationControlled',
       ...(extension ? [`--disable-extensions-except=${ext}`, `--load-extension=${ext}`] : [])],
