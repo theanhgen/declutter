@@ -4,14 +4,14 @@ Free, open-source browser extension that hides YouTube Shorts and answers cookie
 choose: refuse by default, or allow only the categories you pick; per site: refuse, accept, or leave alone.
 Consent-or-pay walls are never hidden. Nothing leaves your browser: no account, no analytics, no server.
 
-Chrome, Edge, Opera, Brave, Vivaldi, Firefox (desktop and Android), Safari (Mac, iPhone, iPad). Czech and
-European sites first; everything else through DuckDuckGo's [autoconsent](https://github.com/duckduckgo/autoconsent).
+Chrome, Edge, Opera, Brave, Vivaldi, Firefox (desktop and Android), Safari (Mac, iPhone, iPad). Works
+worldwide through DuckDuckGo's [autoconsent](https://github.com/duckduckgo/autoconsent), plus its own rule pack for sites it misses.
 
 **Build:** `npm install && npm run build`, then load `build/chrome` unpacked (`chrome://extensions` → Developer
 mode) or `build/firefox` (`about:debugging`). Safari: `npm run safari` (needs Xcode + xcodegen).
 **Store build:** `npm run store`. **Tests:** `npm test` (unit), `npm run test:e2e` (live sites).
 
-MIT. autoconsent is MPL-2.0, used unmodified. Privacy: [store/privacy.html](store/privacy.html).
+MIT. autoconsent is MPL-2.0, used unmodified. Privacy: [site/privacy.html](site/privacy.html).
 Project status and decisions: `PROJECT.md`.
 
 ## Workspace

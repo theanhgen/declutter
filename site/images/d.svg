@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <!-- The glyph and counter from build.mjs, with its darker rose stem. -->
+  <defs>
+    <path id="d" fill-rule="evenodd" d="M11.3 1.5L14 1.5L14 14L7.65 14C3.7 14 1.5 11.95 1.5 8.95C1.5 5.95 3.6 4 6.7 4C8.1 4 9.25 4.45 10.1 5.2L10.1 2.7C10.1 1.9 10.5 1.5 11.3 1.5ZM7.8 7C9.3 7 10.15 7.8 10.15 9.1L10.15 11.05L7.8 11.05C6.2 11.05 5.4 10.25 5.4 9.05C5.4 7.85 6.25 7 7.8 7Z"/>
+    <clipPath id="stem"><path d="M10.1 0H16V16H10.1Z"/></clipPath>
+  </defs>
+  <use href="#d" fill="#c96575"/>
+  <use href="#d" fill="#a84a5c" clip-path="url(#stem)"/>
+</svg>

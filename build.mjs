@@ -3,6 +3,7 @@
 //   node build.mjs            -> all targets
 //   node build.mjs chrome     -> one target
 //   DECLUTTER_DATA_URL=https://… node build.mjs   -> bake in the remote data URL
+//   DECLUTTER_TIP_URL=https://… node build.mjs    -> tip link in settings (not in Safari)
 //   node build.mjs --store    -> store build: walls default to manual (strangers opt in to accepting
 //                                 tracking), plus upload zips in dist/ for chrome (+ Edge) and firefox
 import * as esbuild from 'esbuild';
@@ -193,6 +194,8 @@ async function buildTarget(name, data) {
     define: {
       __DATA_URL__: JSON.stringify(process.env.DECLUTTER_DATA_URL ?? ''),
       __WALLS_DEFAULT__: JSON.stringify(STORE ? 'manual' : 'auto'),
+      // Tip link in settings. Never in Safari: App Store tips must be in-app purchases (the container app has them).
+      __TIP_URL__: JSON.stringify(name === 'safari' ? '' : process.env.DECLUTTER_TIP_URL ?? ''),
     },
     logLevel: 'warning',
   });

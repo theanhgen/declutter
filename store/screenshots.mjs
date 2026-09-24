@@ -14,8 +14,8 @@ const page = await ctx.newPage();
 await page.emulateMedia({ colorScheme: 'light' });
 
 // 1. The popup on a site whose banner was just refused, on a plain canvas with a caption.
-const r = await consentCheck(page, sw, { host: 'www.bazos.cz', expect: 'done' });
-if (!r.ok) throw new Error(`bazos not refused: ${JSON.stringify(r.state)}`);
+const r = await consentCheck(page, sw, { host: 'stackoverflow.com', expect: 'done' });
+if (!r.ok) throw new Error(`stackoverflow not refused: ${JSON.stringify(r.state)}`);
 const tabId = await sw.evaluate(async (u) => (await chrome.tabs.query({})).find((t) => t.url === u)?.id, page.url());
 const pop = await ctx.newPage();
 await pop.emulateMedia({ colorScheme: 'light' });

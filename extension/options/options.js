@@ -111,3 +111,6 @@ function showSection() {
 }
 addEventListener('hashchange', showSection);
 showSection();
+
+// Tip link: set at build time (DECLUTTER_TIP_URL), always empty in Safari builds.
+if (__TIP_URL__) { document.getElementById('tipLink').href = __TIP_URL__; document.getElementById('tip').hidden = false; }

@@ -50,8 +50,8 @@ You can instead allow categories (preferences, analytics, storage, content, ads,
 uses Cookiebot, Didomi, OneTrust or cookieconsent, your exact mix is applied through the banner's own
 settings, and elsewhere a mix is answered by refusing.
 • per site: refuse, accept, or leave the banner alone
-• covers hundreds of consent platforms (via DuckDuckGo's open-source autoconsent) plus its own rules for
-  Czech and European sites
+• works on sites worldwide: hundreds of consent platforms (via DuckDuckGo's open-source autoconsent) plus
+  its own rules for sites autoconsent misses
 • pay walls ("agree to tracking or subscribe") are never hidden or refused; Declutter shows a badge and
   lets you decide, or agrees automatically if you turn that on
 • a counter of clicks saved, and a "not handled right" list you keep locally
@@ -92,7 +92,7 @@ for anything unrelated to the single purpose, not used for creditworthiness.
 
 ## Privacy policy URL
 
-`store/privacy.html`, to be hosted (e.g. GitHub Pages: `https://theanhgen.github.io/declutter/privacy.html`).
+https://theanhgen.github.io/declutter/privacy.html (source `site/privacy.html`, deployed by `.github/workflows/pages.yml`).
 Needs the repo pushed and Pages enabled first.
 
 ## Screenshots
