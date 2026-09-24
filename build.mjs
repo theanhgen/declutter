@@ -98,6 +98,7 @@ async function buildTarget(name, data) {
       'consent/open-shadow': 'extension/consent/open-shadow.js',
       'shorts/shorts': 'extension/shorts/shorts.js',
       'popup/popup': 'extension/popup/popup.js',
+      'options/options': 'extension/options/options.js',
     },
     absWorkingDir: root,
     outdir: out,
@@ -115,6 +116,7 @@ async function buildTarget(name, data) {
     fs.copyFileSync(path.join(root, from), path.join(out, to));
   };
   copy('extension/popup/popup.html', 'popup/popup.html');
+  copy('extension/options/options.html', 'options/options.html');
   copy('extension/shorts/dnr-rules.json', 'shorts/dnr-rules.json');
   copy('node_modules/@duckduckgo/autoconsent/rules/compact-rules.json', 'consent/compact-rules.json');
   fs.writeFileSync(path.join(out, 'shorts/shorts.css'), shortsCss(data.shorts.hide));

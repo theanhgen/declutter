@@ -2,6 +2,7 @@ const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 
 async function main() {
+  $('settings').onclick = (e) => { e.preventDefault(); api.runtime.openOptionsPage(); window.close(); };
   const { settings = {} } = await api.storage.local.get('settings');
   const s = { shorts: true, consent: true, exceptions: [], ...settings };
   const save = (patch) => api.storage.local.set({ settings: { ...s, ...patch } }).then(() => Object.assign(s, patch));

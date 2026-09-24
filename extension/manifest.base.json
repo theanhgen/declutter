@@ -25,6 +25,15 @@
       "32": "icons/32.png"
     }
   },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "commands": {
+    "_execute_action": {
+      "description": "Open Declutter"
+    }
+  },
   "content_scripts": [
     {
       "matches": [

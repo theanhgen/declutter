@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Declutter settings</title>
+<style>
+  :root { color-scheme: light dark; --muted: #6b6b6b; --line: color-mix(in srgb, currentColor 15%, transparent); }
+  body { font: 14px/1.5 -apple-system, system-ui, sans-serif; max-width: 560px; margin: 32px auto; padding: 0 16px; }
+  h1 { font-size: 20px; margin: 0 0 16px; }
+  h2 { font-size: 14px; margin: 24px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+  label { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .muted { color: var(--muted); font-size: 13px; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+  button { font: inherit; }
+</style>
+</head>
+<body>
+  <h1>Declutter</h1>
+  <label><input type="checkbox" id="shorts"> Hide YouTube Shorts</label>
+  <label><input type="checkbox" id="consent"> Refuse cookie banners</label>
+
+  <h2>Sites where banners are left alone</h2>
+  <p class="muted">Add one from the toolbar popup on that site.</p>
+  <ul id="exceptions"></ul>
+  <p id="noExceptions" class="muted">None.</p>
+
+  <h2>Consent-or-pay walls</h2>
+  <p class="muted">Never answered or hidden; the choice is yours: <span id="walls"></span></p>
+
+  <h2>Rules and selectors</h2>
+  <p id="data" class="muted"></p>
+
+  <h2>Diagnostics</h2>
+  <label><input type="checkbox" id="debug"> Log cookie-banner steps to the page console</label>
+
+  <script src="options.js"></script>
+</body>
+</html>
