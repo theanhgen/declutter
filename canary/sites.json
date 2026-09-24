@@ -169,6 +169,11 @@
   {
    "host": "www.ceskatelevize.cz",
    "expect": "done"
+  },
+  {
+   "host": "www.i4wifi.cz",
+   "expect": "done",
+   "note": "Consent-O-Matic had a rule for this site"
   }
  ]
 }

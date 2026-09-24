@@ -1,0 +1,14 @@
+{
+  "name": "cz-i4wifi",
+  "_comment": "Covered by Consent-O-Matic, not by autoconsent. The panel is shared with 100mega.cz.",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(i4wifi|100mega)\\.cz/"
+  },
+  "detectCmp": [{ "exists": "#CPrivacy-Panel" }],
+  "detectPopup": [{ "visible": "#CPrivacy-Panel button.only-necessary" }],
+  "optIn": [{ "waitForThenClick": "#CPrivacy-Panel button.CP-allowAll" }],
+  "optOut": [
+    { "waitForThenClick": "#CPrivacy-Panel button.only-necessary", "retry": 2 },
+    { "waitForVisible": "#CPrivacy-Panel button.only-necessary", "check": "none", "timeout": 5000 }
+  ]
+}
