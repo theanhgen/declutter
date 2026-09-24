@@ -53,19 +53,26 @@
     border: 0; border-bottom: 1px solid var(--dim-line); padding: 2px 0; }
   input[type=url]:focus { outline: none; border-bottom-color: var(--fg); }
   .big { font-size: 28px; }
+  /* One section per page; the nav switches between them (options.js). */
+  section:not(.shown) { display: none; }
+  nav a.current:link, nav a.current:visited { color: var(--fg); text-decoration: none; }
 </style>
 </head>
 <body>
   <h1>declutter</h1>
   <p>Hides YouTube Shorts and answers cookie banners the way you choose. Everything runs in your browser;
     nothing is sent anywhere.</p>
-  <nav><a href="#choice">your choice</a> / <a href="#walls">pay walls</a> / <a href="#display">display</a> /
-    <a href="#lists">rule lists</a> / <a href="#about">about</a> / <a href="#dev">dev</a></nav>
+  <nav><a href="#youtube">youtube</a> / <a href="#choice">your choice</a> / <a href="#walls">pay walls</a> /
+    <a href="#display">display</a> / <a href="#lists">rule lists</a> / <a href="#about">about</a> / <a href="#dev">dev</a></nav>
 
+  <section id="youtube">
   <h2>youtube</h2>
   <p class="bullet" style="--dot:#e5484d">hide shorts: <span class="choice" data-choice="shorts"></span></p>
 
-  <h2 id="choice">your choice</h2>
+  </section>
+
+  <section id="choice">
+  <h2>your choice</h2>
   <p>What tracking to allow. All off (default) refuses everything; all on accepts. A mix is applied through the
     banner's own settings where Declutter knows how (Cookiebot, Didomi, OneTrust, cookieconsent); on other
     banners a mix is answered by refusing everything.</p>
@@ -75,25 +82,37 @@
   <p class="bullet" style="--dot:#8d8d8d">leave alone on: <span id="exceptions"></span></p>
   <p class="desc">set per site from the toolbar menu: refuse / accept / leave.</p>
 
-  <h2 id="walls">pay walls</h2>
+  </section>
+
+  <section id="walls">
+  <h2>pay walls</h2>
   <p>These sites offer only "agree to tracking" or "pay"; refusing is not possible, and Declutter never hides
     them. <span class="muted">auto</span> clicks "Souhlasím" for you (default); <span class="muted">manual</span>
     shows a Kč badge and waits for you.</p>
   <p class="bullet" style="--dot:#f76b15">mode: <span class="choice" data-choice="walls"></span></p>
   <p class="bullet" style="--dot:#8e4ec6">sites: <span id="wallSites" class="muted"></span></p>
 
-  <h2 id="display">display</h2>
+  </section>
+
+  <section id="display">
+  <h2>display</h2>
   <p class="bullet" style="--dot:#12a594">while a banner is being answered: <span class="choice" data-choice="display"></span></p>
   <p class="desc">hide: the banner is kept out of sight while Declutter clicks through it. show: you see it happen.</p>
 
-  <h2 id="lists">rule lists</h2>
+  </section>
+
+  <section id="lists">
+  <h2>rule lists</h2>
   <p>Declutter's own rules are built in. Add rule lists (a data.json URL) to get fixes without an update; they
     are checked every 12 hours.</p>
   <div id="ruleLists"></div>
   <p class="bullet" style="--dot:#8d8d8d"><input type="url" id="newList" placeholder="https://…/data.json"> <a href="#" id="addList">add list</a></p>
   <p class="bullet" style="--dot:#12a594" id="data"></p>
 
-  <h2 id="about">about</h2>
+  </section>
+
+  <section id="about">
+  <h2>about</h2>
   <p><span class="big" id="clicksSaved">0</span> clicks saved</p>
   <p class="bullet" style="--dot:#3e63dd" id="stats"></p>
   <div id="byCmp"></div>
@@ -103,10 +122,15 @@
     list to get rules written for them.</p>
   <div id="reports"></div>
 
-  <h2 id="dev">dev</h2>
+  </section>
+
+  <section id="dev">
+  <h2>dev</h2>
   <p class="bullet" style="--dot:#ffc53d">log each rule step to the page console: <span class="choice" data-choice="debug"></span></p>
   <p class="bullet" style="--dot:#ffc53d">log page-world evals: <span class="choice" data-choice="debugEvals"></span></p>
   <p class="bullet" style="--dot:#ffc53d">pause before each click (watch it work): <span class="choice" data-choice="clickDelay"></span></p>
+
+  </section>
 
   <p class="footnote">+ keyboard shortcut: Safari → Settings → Extensions → Declutter, or chrome://extensions/shortcuts.</p>
 

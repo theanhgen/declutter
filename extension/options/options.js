@@ -100,3 +100,12 @@ async function render() {
     : [el('p', { className: 'muted', textContent: 'none.' })]));
 }
 render();
+
+// One section at a time, picked by the #hash (so a tab survives reload and the back button works).
+function showSection() {
+  const id = document.getElementById(location.hash.slice(1))?.tagName === 'SECTION' ? location.hash.slice(1) : 'youtube';
+  for (const sec of document.querySelectorAll('section')) sec.classList.toggle('shown', sec.id === id);
+  for (const a of document.querySelectorAll('nav a')) a.classList.toggle('current', a.getAttribute('href') === `#${id}`);
+}
+addEventListener('hashchange', showSection);
+showSection();
