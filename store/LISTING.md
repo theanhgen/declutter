@@ -1,4 +1,24 @@
-# Store listing: Chrome Web Store, Edge Add-ons, Firefox AMO, Safari (App Store)
+# Store listing: every browser
+
+| Store | Browsers it reaches | Upload |
+|---|---|---|
+| Chrome Web Store | Chrome, Brave, Vivaldi, Arc, Dia, Comet, Yandex, Orion | `dist/declutter-chrome-<v>.zip` |
+| Edge Add-ons (Partner Center) | Edge (desktop) | same chrome zip |
+| Opera add-ons | Opera, Opera GX | same chrome zip |
+| Naver Whale store | Whale | same chrome zip |
+| Firefox AMO | Firefox desktop + Android, LibreWolf, Zen, Waterfox, Floorp | `dist/declutter-firefox-<v>.zip` + `dist/declutter-source-<v>.zip` (AMO asks for source of bundled code; build: `npm ci && npm run store`) |
+| App Store | Safari on Mac, iPhone, iPad | Xcode archive (`node build.mjs --store safari` first) |
+
+Not possible: Chrome on Android, Samsung Internet (no third-party extensions of this kind).
+Firefox build verified in real Firefox 156 (2026-09-24): banners answered, Shorts hidden, /shorts/ redirect.
+
+## Tip jar
+
+Free everywhere, tips optional. Chrome/Edge/Opera/Whale/Firefox: a link (AMO has a "contributions URL"
+field; build with `DECLUTTER_TIP_URL=…`). Safari: Apple rule 3.1.1 requires in-app purchase for tips, so the
+container apps carry a StoreKit tip jar (consumables `com.theanhgen.declutter.tip.small|medium|large`, create
+them in App Store Connect; `safari/Shared/Declutter.storekit` for local testing) and the Safari build must not
+show the outside link.
 
 Everything a submission form asks for, in one place. Build the uploads with `npm run store`:
 `dist/declutter-chrome-<v>.zip` (Chrome **and** Edge), `dist/declutter-firefox-<v>.zip` (AMO),

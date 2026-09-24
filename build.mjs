@@ -21,6 +21,8 @@ const TARGETS = {
     esbuild: ['chrome120'],
     manifest: (m) => {
       m.background = { service_worker: 'background.js' };
+      // content_scripts "world": "MAIN" needs 111; also stops older Chromium forks (Opera, Whale) installing it.
+      m.minimum_chrome_version = '111';
       // Lets the consent script reach about:blank / srcdoc frames that CMPs render into.
       m.content_scripts[1].match_origin_as_fallback = true;
       return m;
@@ -34,6 +36,7 @@ const TARGETS = {
       background: { scripts: ['background.js'] },
       browser_specific_settings: {
         gecko: { id: 'declutter@theanhgen', strict_min_version: '142.0', data_collection_permissions: { required: ['none'] } },
+        gecko_android: { strict_min_version: '142.0' }, // listed for Firefox for Android too
       },
     }),
   },
@@ -242,4 +245,9 @@ if (STORE) {
     execFileSync('zip', ['-qrX', zip, '.', '-x', '.*'], { cwd: path.join(root, 'build', n) });
     console.log(`packed ${path.relative(root, zip)}`);
   }
+  // AMO asks for source when the upload is bundled: the tracked tree, rebuilt with `npm ci && npm run store`.
+  const src = path.join(root, 'dist', `declutter-source-${pkg.version}.zip`);
+  fs.rmSync(src, { force: true });
+  execFileSync('git', ['archive', '--format=zip', '-o', src, 'HEAD'], { cwd: root });
+  console.log(`packed ${path.relative(root, src)}`);
 }
