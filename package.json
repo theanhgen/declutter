@@ -1,7 +1,7 @@
 {
   "name": "declutter",
   "version": "0.1.0",
-  "description": "Hides YouTube Shorts and refuses cookie banners (Chrome + Safari)",
+  "description": "Hides YouTube Shorts and answers cookie banners the way you choose (Chrome, Safari, Firefox)",
   "scripts": {
     "build": "node build.mjs",
     "test": "node build.mjs && node --test test/*.test.mjs",
@@ -12,7 +12,8 @@
     "ios": "scripts/ios.sh",
     "test:mobile": "node test/mobile.mjs",
     "test:features": "node test/features.mjs",
-    "test:categories": "node test/categories.mjs"
+    "test:categories": "node test/categories.mjs",
+    "store": "node build.mjs --store && node store/screenshots.mjs"
   },
   "license": "MIT",
   "type": "module",

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Declutter privacy</title>
+<style>
+  :root { --fg: hsl(0, 0%, 10%); --bg: hsl(0, 0%, 97%); --muted: hsl(0, 0%, 45%); }
+  @media (prefers-color-scheme: dark) { :root { --fg: hsl(0, 0%, 88%); --bg: hsl(0, 0%, 9%); } }
+  body { color: var(--fg); background: var(--bg); font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    line-height: 1.5; margin: 0 auto; max-width: 44em; padding: 2em 16px; font-size: 14px; }
+  h1, h2 { font-weight: normal; }
+  h2 { margin-top: 2em; font-size: 18px; }
+  a { color: inherit; }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+<h1>declutter: privacy</h1>
+<p class="muted">Applies to the Declutter browser extension for Chrome, Edge, Firefox and Safari. Last updated
+  24 September 2026.</p>
+
+<h2>short version</h2>
+<p>Declutter collects nothing. It has no account, no analytics, no tracking and no server.</p>
+
+<h2>what stays in your browser</h2>
+<p>Your settings, the sites you set to accept or leave alone, counters (banners answered, clicks saved) and the
+  list of sites you reported as "not handled right" are kept in the browser's extension storage on your device.
+  They are never sent anywhere. Removing the extension deletes them.</p>
+
+<h2>what the extension reads</h2>
+<p>To answer cookie banners, Declutter runs on the pages you open and looks for consent banners, then clicks
+  through them (or calls the banner's own API) according to your choice. To hide YouTube Shorts it runs on
+  youtube.com. It does not record, store or transmit the pages you visit or their contents. For the toolbar
+  menu, the status of each open tab (site name, what happened to its banner) is kept in session storage, which
+  the browser clears when it closes. Site names are saved only when you choose a per-site setting or press
+  "report".</p>
+
+<h2>network requests</h2>
+<p>Declutter makes no requests of its own, except fetching rule lists (JSON files) at URLs you add yourself in
+  settings. Those requests carry no information about you beyond what any download does (your IP address is
+  visible to that server).</p>
+
+<h2>third parties</h2>
+<p>None. Declutter includes DuckDuckGo's open-source autoconsent library, which runs locally and sends
+  nothing.</p>
+
+<h2>contact</h2>
+<p>Source and issues: <a href="https://github.com/theanhgen/declutter">github.com/theanhgen/declutter</a></p>
+</body>
+</html>

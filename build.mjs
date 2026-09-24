@@ -3,6 +3,8 @@
 //   node build.mjs            -> all targets
 //   node build.mjs chrome     -> one target
 //   DECLUTTER_DATA_URL=https://… node build.mjs   -> bake in the remote data URL
+//   node build.mjs --store    -> store build: walls default to manual (strangers opt in to accepting
+//                                 tracking), plus upload zips in dist/ for chrome (+ Edge) and firefox
 import * as esbuild from 'esbuild';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,6 +13,8 @@ import zlib from 'node:zlib';
 const root = path.dirname(new URL(import.meta.url).pathname);
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 const readJson = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
+
+const STORE = process.argv.includes('--store');
 
 const TARGETS = {
   chrome: {
@@ -21,6 +25,17 @@ const TARGETS = {
       m.content_scripts[1].match_origin_as_fallback = true;
       return m;
     },
+  },
+  firefox: {
+    esbuild: ['firefox128'],
+    // Firefox MV3: event-page background; content_scripts "world": "MAIN" needs 128, data_collection_permissions 140 (142 on Android).
+    manifest: (m) => ({
+      ...m,
+      background: { scripts: ['background.js'] },
+      browser_specific_settings: {
+        gecko: { id: 'declutter@theanhgen', strict_min_version: '142.0', data_collection_permissions: { required: ['none'] } },
+      },
+    }),
   },
   safari: {
     esbuild: ['safari16'],
@@ -172,7 +187,10 @@ async function buildTarget(name, data) {
     target: t.esbuild,
     legalComments: 'none',
     // Where the extension fetches newer data from (D6). Empty = bundled data only.
-    define: { __DATA_URL__: JSON.stringify(process.env.DECLUTTER_DATA_URL ?? '') },
+    define: {
+      __DATA_URL__: JSON.stringify(process.env.DECLUTTER_DATA_URL ?? ''),
+      __WALLS_DEFAULT__: JSON.stringify(STORE ? 'manual' : 'auto'),
+    },
     logLevel: 'warning',
   });
 
@@ -184,6 +202,8 @@ async function buildTarget(name, data) {
   copy('extension/options/options.html', 'options/options.html');
   copy('extension/shorts/dnr-rules.json', 'shorts/dnr-rules.json');
   copy('node_modules/@duckduckgo/autoconsent/rules/compact-rules.json', 'consent/compact-rules.json');
+  copy('LICENSE', 'LICENSE');
+  copy('node_modules/@duckduckgo/autoconsent/LICENSE', 'licenses/autoconsent-MPL-2.0.txt');
   fs.writeFileSync(path.join(out, 'shorts/shorts.css'), shortsCss(data.shorts.hide));
   fs.writeFileSync(path.join(out, 'data.json'), JSON.stringify(data));
   fs.mkdirSync(path.join(out, 'icons'));
@@ -203,10 +223,23 @@ if (process.argv.includes('--app-icon')) {
   process.exit(0);
 }
 
-const wanted = process.argv.slice(2);
+const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const names = wanted.length ? wanted : Object.keys(TARGETS);
 for (const n of names) if (!TARGETS[n]) throw new Error(`unknown target ${n}`);
 const data = buildData();
 fs.mkdirSync(path.join(root, 'build'), { recursive: true });
 fs.writeFileSync(path.join(root, 'build/data.json'), JSON.stringify(data, null, 2));
 for (const n of names) await buildTarget(n, data);
+
+// Store zips (manifest at the zip root). Chrome's zip also goes to Edge Add-ons unchanged; Safari ships
+// through App Store Connect from Xcode, not a zip.
+if (STORE) {
+  const { execFileSync } = await import('node:child_process');
+  fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
+  for (const n of names.filter((n) => n !== 'safari')) {
+    const zip = path.join(root, 'dist', `declutter-${n}-${pkg.version}.zip`);
+    fs.rmSync(zip, { force: true });
+    execFileSync('zip', ['-qrX', zip, '.', '-x', '.*'], { cwd: path.join(root, 'build', n) });
+    console.log(`packed ${path.relative(root, zip)}`);
+  }
+}

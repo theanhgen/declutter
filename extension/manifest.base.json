@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Declutter",
-  "description": "Hides YouTube Shorts and refuses cookie banners. Czech sites first.",
+  "description": "Hides YouTube Shorts and answers cookie banners the way you choose. Nothing leaves your browser.",
   "permissions": [
     "storage",
     "scripting",

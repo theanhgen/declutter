@@ -22,7 +22,7 @@ const CATEGORIES = [
   ['X', 'other purposes', 'anything the site does not describe clearly or that fits no other category.'],
 ];
 const DEFAULTS = {
-  shorts: true, consent: true, walls: 'auto', display: 'hide', debug: false, debugEvals: false, clickDelay: false,
+  shorts: true, consent: true, walls: __WALLS_DEFAULT__, display: 'hide', debug: false, debugEvals: false, clickDelay: false,
   exceptions: [], acceptSites: [], dataUrls: [], categories: Object.fromEntries(CATEGORIES.map(([k]) => [k, false])),
 };
 
@@ -103,8 +103,10 @@ render();
 
 // One section at a time, picked by the #hash (so a tab survives reload and the back button works).
 function showSection() {
-  const id = document.getElementById(location.hash.slice(1))?.tagName === 'SECTION' ? location.hash.slice(1) : 'youtube';
-  for (const sec of document.querySelectorAll('section')) sec.classList.toggle('shown', sec.id === id);
+  // data-tab, not id: an id would also be a scroll anchor and push the nav off screen.
+  const want = location.hash.slice(1);
+  const id = document.querySelector(`section[data-tab="${CSS.escape(want)}"]`) ? want : 'youtube';
+  for (const sec of document.querySelectorAll('section')) sec.classList.toggle('shown', sec.dataset.tab === id);
   for (const a of document.querySelectorAll('nav a')) a.classList.toggle('current', a.getAttribute('href') === `#${id}`);
 }
 addEventListener('hashchange', showSection);
