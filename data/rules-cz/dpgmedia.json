@@ -1,0 +1,43 @@
+{
+  "name": "dpg-media",
+  "_comment": "DPG Media (nu.nl, and its other NL/BE titles) consent page: Instellen -> Alles weigeren.",
+  "runContext": {
+    "urlPattern": "^https://myprivacy\\.dpgmedia\\.(nl|be)/consent"
+  },
+  "detectCmp": [
+    {
+      "exists": "#pg-shadow-host-dom"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": [
+        "#pg-shadow-host-dom",
+        "#pg-configure-btn"
+      ]
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": [
+        "#pg-shadow-host-dom",
+        "#pg-accept-btn"
+      ]
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": [
+        "#pg-shadow-host-dom",
+        "#pg-configure-btn"
+      ]
+    },
+    {
+      "waitForThenClick": [
+        "#pg-shadow-host-dom",
+        "#pg-reject-btn"
+      ],
+      "timeout": 5000
+    }
+  ]
+}

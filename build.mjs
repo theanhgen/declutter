@@ -38,8 +38,8 @@ function buildData() {
       if (!rule.name || !Array.isArray(rule.detectCmp) || !Array.isArray(rule.optIn) || !Array.isArray(rule.optOut)) {
         throw new Error(`data/rules-cz/${f}: needs name, detectCmp[], optIn[], optOut[]`);
       }
-      // Wall rules (cz-wall-*) only ever accept; every other rule must be able to refuse.
-      if (!rule.name.startsWith('cz-wall-') && !rule.optOut.length) throw new Error(`data/rules-cz/${f}: empty optOut`);
+      // Wall rules (cz-wall-*, wall-*) only ever accept; every other rule must be able to refuse.
+      if (!/^(cz-)?wall-/.test(rule.name) && !rule.optOut.length) throw new Error(`data/rules-cz/${f}: empty optOut`);
       return rule;
     });
   return {

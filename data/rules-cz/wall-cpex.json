@@ -11,7 +11,8 @@
   ],
   "detectPopup": [
     {
-      "visible": "#cpexSubs_consentButton"
+      "visible": "#cpexSubs_consentButton",
+      "check": "any"
     }
   ],
   "optIn": [

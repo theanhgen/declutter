@@ -17,7 +17,8 @@
       "visible": [
         "szn-cwl",
         "#cwl-main[style*=\"visibility: visible\"]"
-      ]
+      ],
+      "check": "any"
     }
   ],
   "optIn": [

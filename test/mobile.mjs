@@ -1,6 +1,6 @@
 // Shorts on m.youtube.com (what Safari on iPhone gets), with the real extension in Chromium posing as an iPhone.
 //   npm run build && node test/mobile.mjs
-import { launch, reporter, tabState } from './lib.mjs';
+import { consentCheck, launch, reporter, tabState } from './lib.mjs';
 
 const { results, check } = reporter();
 const { ctx, sw, close } = await launch({ mobile: true });
@@ -27,6 +27,12 @@ await page.waitForTimeout(5000);
 await page.evaluate((i) => { history.pushState({}, '', `/shorts/${i}`); document.body.append(document.createElement('div')); }, id);
 await page.waitForURL(/\/watch\?v=/, { timeout: 10000 }).catch(() => {});
 check('in-app navigation to a Short lands on /watch', page.url().includes(`/watch?v=${id}`), page.url().slice(0, 70));
+
+// Cookie banners on phone-sized sites (several Czech shops serve a separate m. site).
+for (const site of [{ host: 'www.alza.cz', expect: 'done' }, { host: 'www.o2.cz', expect: 'done' }, { host: 'www.blesk.cz', expect: 'wall' }]) {
+  const r = await consentCheck(page, sw, site, 18000);
+  check(`mobile consent ${site.host}: ${site.expect}`, r.ok, JSON.stringify({ url: page.url().slice(0, 40), state: r.state }));
+}
 
 await close();
 const failed = results.filter((r) => !r.ok);

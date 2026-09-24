@@ -1,8 +1,31 @@
 {
   "walls": [
-    "seznam.cz", "novinky.cz", "seznamzpravy.cz", "sreality.cz", "sport.cz", "super.cz", "firmy.cz",
-    "idnes.cz", "lidovky.cz", "expres.cz",
-    "blesk.cz", "e15.cz", "reflex.cz", "zive.cz", "aktualne.cz", "lupa.cz"
+    "seznam.cz",
+    "novinky.cz",
+    "seznamzpravy.cz",
+    "sreality.cz",
+    "sport.cz",
+    "super.cz",
+    "firmy.cz",
+    "idnes.cz",
+    "lidovky.cz",
+    "expres.cz",
+    "blesk.cz",
+    "e15.cz",
+    "reflex.cz",
+    "zive.cz",
+    "aktualne.cz",
+    "lupa.cz",
+    "lemonde.fr",
+    "elpais.com",
+    "corriere.it",
+    "repubblica.it",
+    "spiegel.de",
+    "zeit.de",
+    "bild.de",
+    "heise.de"
   ],
-  "disabledCmps": []
+  "disabledCmps": [
+    "bbc.com"
+  ]
 }

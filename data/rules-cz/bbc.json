@@ -1,0 +1,21 @@
+{
+  "name": "bbc",
+  "_comment": "Replaces autoconsent's bbc.com rule (disabled in data/consent.json): the current international prompt has no reject button, only 'Yes, I agree' / 'No, take me to settings'. Nothing non-essential is set without agreeing, so the prompt is hidden. The Sourcepoint ad frame is refused by autoconsent's generic rule.",
+  "runContext": { "urlPattern": "^https://(www\\.)?bbc\\.(com|co\\.uk)/" },
+  "detectCmp": [{ "any": [{ "exists": "#bbccookies-prompt" }, { "exists": "#consent-banner-title" }] }],
+  "detectPopup": [{ "any": [{ "visible": "#bbccookies-prompt" }, { "visible": "#consent-banner-title" }] }],
+  "optIn": [
+    { "if": { "exists": "#bbccookies-continue-button" },
+      "then": [{ "waitForThenClick": "#bbccookies-continue-button" }],
+      "else": [{ "waitForThenClick": "button[data-testid=\"accept-button\"]" }] }
+  ],
+  "optOut": [
+    { "if": { "exists": "button[data-testid=\"reject-button\"]" },
+      "then": [{ "waitForThenClick": "button[data-testid=\"reject-button\"]" }],
+      "else": [
+        { "if": { "exists": "#bbccookies-reject-button" },
+          "then": [{ "waitForThenClick": "#bbccookies-reject-button" }],
+          "else": [{ "hide": "#cookiePrompt, #bbccookies-prompt", "method": "display" }] }
+      ] }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "wall-elpais",
+  "_comment": "ACCEPT AND CONTINUE (button), or SUBSCRIBE AND DECLINE (link).",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(elpais\\.com)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#pmConsentWall"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#pmConsentWall button.pmConsentWall-button",
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#pmConsentWall button.pmConsentWall-button",
+      "retry": 3,
+      "retryInterval": 800
+    }
+  ],
+  "optOut": []
+}

@@ -5,27 +5,60 @@
   },
   "detectCmp": [
     {
-      "exists": ".js-cookies-info .js-cookies-info-reject"
+      "any": [
+        {
+          "exists": ".js-cookies-info .js-cookies-info-reject"
+        },
+        {
+          "exists": ".js-cookie-reject-all"
+        }
+      ]
     }
   ],
   "detectPopup": [
     {
-      "visible": ".js-cookies-info"
+      "visible": ".js-cookies-info .js-cookies-info-reject, .js-cookie-reject-all",
+      "check": "any"
     }
   ],
   "optIn": [
     {
-      "waitForThenClick": ".js-cookies-info .js-cookies-info-accept"
+      "if": {
+        "exists": ".js-cookie-accept-all"
+      },
+      "then": [
+        {
+          "waitForThenClick": ".js-cookie-accept-all"
+        }
+      ],
+      "else": [
+        {
+          "waitForThenClick": ".js-cookies-info .js-cookies-info-accept"
+        }
+      ]
     }
   ],
   "optOut": [
     {
-      "eval": "DECLUTTER_ALZA_REJECT"
+      "if": {
+        "exists": ".js-cookie-reject-all"
+      },
+      "then": [
+        {
+          "waitForThenClick": ".js-cookie-reject-all",
+          "retry": 2
+        }
+      ],
+      "else": [
+        {
+          "eval": "DECLUTTER_ALZA_REJECT"
+        }
+      ]
     },
     {
-      "waitForVisible": ".js-cookies-info",
+      "waitForVisible": ".js-cookies-info .js-cookies-info-reject, .js-cookie-reject-all",
       "check": "none",
-      "timeout": 3000
+      "timeout": 5000
     }
   ],
   "test": [
@@ -34,5 +67,6 @@
       "check": "none",
       "timeout": 3000
     }
-  ]
+  ],
+  "_comment": "Desktop www.alza.cz (reject link is a CSP-blocked javascript: URL -> snippet) and mobile m.alza.cz (plain link)."
 }

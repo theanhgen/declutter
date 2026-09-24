@@ -1,0 +1,28 @@
+{
+  "name": "wall-sourcepoint-de",
+  "_comment": "German Pur/abo walls (Sourcepoint, in an iframe): Zustimmen / Alle akzeptieren / Consent and continue, or subscribe.",
+  "runContext": {
+    "urlPattern": "^https://(consent-cdn\\.zeit\\.de|cmp2\\.bild\\.de|cmp\\.heise\\.de|sp-spiegel-de\\.spiegel\\.de)/",
+    "main": false,
+    "frame": true
+  },
+  "detectCmp": [
+    {
+      "exists": "button.message-button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "button.message-button[title*=\"ustimm\"], button.message-button[title*=\"kzeptier\"], button.message-button[title^=\"Consent\"], button.message-button[title^=\"Accept\"]",
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "button.message-button[title*=\"ustimm\"], button.message-button[title*=\"kzeptier\"], button.message-button[title^=\"Consent\"], button.message-button[title^=\"Accept\"]",
+      "retry": 3,
+      "retryInterval": 800
+    }
+  ],
+  "optOut": []
+}

@@ -58,11 +58,11 @@ test('build: data.json is valid and every CZ rule is well formed', () => {
 
 test('build: wall list and CZ rules never overlap (wall rules only accept)', () => {
   const data = JSON.parse(read('build/data.json'));
-  for (const r of data.consent.rules.filter((x) => x.name.startsWith('cz-wall-'))) {
+  for (const r of data.consent.rules.filter((x) => /^(cz-)?wall-/.test(x.name))) {
     assert.deepEqual(r.optOut, [], `${r.name} must never refuse`);
     assert.ok(r.optIn.length, `${r.name} needs optIn`);
   }
-  for (const r of data.consent.rules.filter((x) => !x.name.startsWith('cz-wall-'))) {
+  for (const r of data.consent.rules.filter((x) => !/^(cz-)?wall-/.test(x.name))) {
     for (const w of data.consent.walls) {
       const re = r.runContext?.urlPattern && new RegExp(r.runContext.urlPattern);
       assert.ok(!re || !re.test(`https://www.${w}/`), `rule ${r.name} targets wall ${w}`);

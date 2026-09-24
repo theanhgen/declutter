@@ -1,0 +1,26 @@
+{
+  "name": "wall-lemonde",
+  "_comment": "Accepter et continuer, or S'abonner.",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(lemonde\\.fr)/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".gdpr-lmd-wall"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".gdpr-lmd-wall button.gdpr-lmd-button",
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".gdpr-lmd-wall button.gdpr-lmd-button",
+      "retry": 3,
+      "retryInterval": 800
+    }
+  ],
+  "optOut": []
+}

@@ -1,0 +1,32 @@
+{
+  "name": "airbnb",
+  "_comment": "No stable attributes; buttons are Accept all / Only necessary / Manage, next to the cookie-policy text.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*airbnb\\.[a-z.]+/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///p[a[contains(@href,'/terms/cookie_policy')]]/../following-sibling::div//button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "xpath/(//p[a[contains(@href,'/terms/cookie_policy')]]/../following-sibling::div//button)[2]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath/(//p[a[contains(@href,'/terms/cookie_policy')]]/../following-sibling::div//button)[1]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath/(//p[a[contains(@href,'/terms/cookie_policy')]]/../following-sibling::div//button)[2]"
+    },
+    {
+      "waitForVisible": "xpath/(//p[a[contains(@href,'/terms/cookie_policy')]]/../following-sibling::div//button)[2]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ]
+}

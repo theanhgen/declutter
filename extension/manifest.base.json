@@ -63,7 +63,9 @@
         "*://*.mapy.com/*",
         "*://*.mapy.cz/*",
         "*://*.kupi.cz/*",
-        "*://cmp.seznam.cz/*"
+        "*://cmp.seznam.cz/*",
+        "*://myprivacy.dpgmedia.nl/*",
+        "*://myprivacy.dpgmedia.be/*"
       ],
       "js": [
         "consent/open-shadow.js"

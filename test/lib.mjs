@@ -110,7 +110,8 @@ export async function consentCheck(page, sw, { host, expect }, wait = 15000) {
   const out = await page.evaluate(outcomeJs).then(JSON.parse).catch((e) => ({ banners: [], evalErr: e.message }));
   const bannerVisible = out.banners.length > 0;
   let ok;
-  if (expect === 'wall') ok = state?.consent === 'wall' && bannerVisible;
+  // A wall inside an iframe (Sourcepoint) is invisible to the page-level banner check; trust the frame's detection.
+  if (expect === 'wall') ok = state?.consent === 'wall' && (bannerVisible || state.wallFrame > 0);
   else if (expect === 'done') ok = state?.consent === 'done' && !bannerVisible;
   else ok = !bannerVisible && state?.consent !== 'failed';
   return { host, expect, ok, state, bannerVisible, banners: out.banners, err };

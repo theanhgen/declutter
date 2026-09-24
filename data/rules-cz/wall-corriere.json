@@ -1,0 +1,26 @@
+{
+  "name": "wall-corriere",
+  "_comment": "ACCETTA E CONTINUA, or Rifiuta e abbonati.",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(corriere\\.it)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#privacy-cp-wall-accept"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#privacy-cp-wall-accept",
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#privacy-cp-wall-accept",
+      "retry": 3,
+      "retryInterval": 800
+    }
+  ],
+  "optOut": []
+}

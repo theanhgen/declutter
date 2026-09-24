@@ -11,7 +11,8 @@
   ],
   "detectPopup": [
     {
-      "visible": "a.contentwall_ok"
+      "visible": "a.contentwall_ok",
+      "check": "any"
     }
   ],
   "optIn": [

@@ -1,0 +1,26 @@
+{
+  "name": "wall-repubblica",
+  "_comment": "iubenda cookie wall: ACCETTA, or RIFIUTA E ABBONATI.",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(repubblica\\.it)/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".iubenda-cs-accept-btn"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".iubenda-cs-accept-btn",
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".iubenda-cs-accept-btn",
+      "retry": 3,
+      "retryInterval": 800
+    }
+  ],
+  "optOut": []
+}

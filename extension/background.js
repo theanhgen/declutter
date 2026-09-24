@@ -21,13 +21,13 @@ const DEFAULT_SETTINGS = {
   debug: false,
 };
 const DATA_REFRESH_MINUTES = 12 * 60;
-const isWallRule = (name) => name.startsWith('cz-wall-');
+const isWallRule = (name) => /^(cz-)?wall-/.test(name);
 // Loop guard: if a site keeps re-showing its wall after we accepted, stop auto-accepting in that tab.
 const WALL_AUTO_LIMIT = 2;
 const WALL_AUTO_WINDOW_MS = 60000;
 const wallLogKey = (tabId) => `wall-log-${tabId}`;
 // cz-wall-seznam-teaser and cz-wall-seznam-page are one flow: count them together.
-const wallFamily = (name) => name.split('-')[2];
+const wallFamily = (name) => name.replace(/^(cz-)?wall-/, '').split('-')[0];
 async function wallLog(tabId) {
   const log = (await api.storage.session.get(wallLogKey(tabId)))[wallLogKey(tabId)] ?? [];
   return log.filter((e) => Date.now() - e.at < WALL_AUTO_WINDOW_MS);
@@ -110,7 +110,11 @@ async function onConsentMessage(msg, sender) {
   const tabId = sender.tab.id;
   const frameId = sender.frameId ?? 0;
   const senderUrl = sender.url || `${sender.origin}/`;
-  const tabHost = new URL(sender.tab.url || senderUrl).hostname;
+  // The main frame knows its own URL; sub-frames use the host the main frame recorded, because
+  // sender.tab.url can still be the previous page while a navigation is in flight.
+  const tabHost = frameId === 0
+    ? new URL(senderUrl).hostname
+    : (await getTab(tabId)).host ?? new URL(sender.tab.url || senderUrl).hostname;
 
   switch (msg.type) {
     case 'init': {

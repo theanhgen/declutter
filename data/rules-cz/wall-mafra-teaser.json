@@ -11,7 +11,8 @@
   ],
   "detectPopup": [
     {
-      "visible": "a.cookie-info[href*=\"nastaveni-souhlasu\"]"
+      "visible": "a.cookie-info[href*=\"nastaveni-souhlasu\"]",
+      "check": "any"
     }
   ],
   "optIn": [

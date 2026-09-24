@@ -14,7 +14,8 @@
       "visible": [
         "div.szn-cmp-dialog-container",
         "[data-testid=\"cw-button-agree-with-ads\"]"
-      ]
+      ],
+      "check": "any"
     }
   ],
   "optIn": [
