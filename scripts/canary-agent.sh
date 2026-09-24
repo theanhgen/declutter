@@ -5,7 +5,7 @@ LABEL=com.theanhgen.declutter-canary
 DEST="$HOME/Library/LaunchAgents/$LABEL.plist"
 case "${1:-}" in
   install)
-    cp "$(dirname "$0")/../canary/$LABEL.plist" "$DEST"
+    sed "s|__REPO__|$(cd "$(dirname "$0")/.." && pwd)|" "$(dirname "$0")/../canary/$LABEL.plist" > "$DEST"
     launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
     launchctl bootstrap "gui/$(id -u)" "$DEST"
     echo "installed; log: /tmp/declutter-canary.log; run now: launchctl kickstart gui/$(id -u)/$LABEL" ;;

@@ -17,7 +17,7 @@ Built and passing in Chrome; Safari app built, signed and registered, **waiting 
 | Remote data (`test/remote-data.mjs`) | a changed `data.json` on a URL changes both modules with no rebuild |
 | Unit (`npm test`) | 9/9: pure helpers, rule schema, wall/rule overlap, CSS gating, manifests, Safari-safe regex |
 | Safari (`npm run safari`) | app signed by team 28DMV2MR8T, installed to `~/Applications`, extension registered with Safari |
-| iPhone (`npm run ios`) | iOS app + extension built, signed and installed on "Maclura" (iPhone 17 Pro) via `devicectl` |
+| iPhone (`npm run ios`) | iOS app + extension built, signed and installed on a physical iPhone via `devicectl` |
 | Mobile YouTube (`npm run test:mobile`) | 7/7 on m.youtube.com: bottom-bar Shorts tab hidden, search Shorts hidden, direct + in-app `/shorts/` → `/watch` |
 | International (CZ IP, 2026-09-24) | 8 more consent-or-pay walls on the wall list (lemonde, elpais, corriere, repubblica, spiegel, zeit, bild, heise) + metro.co.uk; bbc, nu.nl (DPG Media), airbnb fixed |
 | Consent-O-Matic parity (2026-09-24) | 204 CoM rules: 65 match ours/autoconsent by selector; the ~69 site-specific ones were run live: 21 refused by autoconsent, 20 showed no banner, **27 gaps → 26 new rules** (LEGO's is an age gate, not a banner). CoM features: per-site choice, local report, counters, update-now, per-category choice (4 CMP adapters, D10), display hide/show, several rule-list URLs, per-CMP stats, dev flags added |
@@ -45,7 +45,7 @@ Research behind every claim here: `research/` (three reports + the scripts and r
 | D11 | "Report this site" and counters are **local only** (settings shows them; copy the report list to get rules written). Nothing is ever sent, unlike Consent-O-Matic's report button | **decided** 2026-09-24 | chat |
 | D9 | Two wall modes (Settings): **Auto** (default since 2026-09-24, user's call) = click "Souhlasím" on walls only; **Manual** = detect the wall, show a **Kč** badge, accept only when the user presses "Accept this wall" in the popup. Tests and the canary run in manual so monitoring never consents. Loop guard: ≤2 automatic accepts per wall family per tab per minute, then fall back to manual | **decided** by user 2026-09-24 | chat |
 | D6 | Selectors and CZ rules live in data (JSON), fetched at runtime with a bundled fallback, so a fix is a data edit, not a Safari rebuild | **built**; needs a hosting URL (open question below) | chat, autoconsent 16.41.0 source |
-| D7 | Breakage detection = in-extension self-check + a daily canary on own hardware. **No auto-rewriting of selectors** | **built**; canary runs daily on Elaeis via launchd, Telegram not configured yet | chat |
+| D7 | Breakage detection = in-extension self-check + a daily canary on own hardware. **No auto-rewriting of selectors** | **built**; canary runs daily on the home Mac via launchd, Telegram not configured yet | chat |
 | D8 | Page-world code (snippets for rules, the open-shadow patch) lives in the extension, never in `data/`. Remote data can reference a named snippet but cannot add code | **decided** 2026-09-24 | this build |
 
 ### D4: "can we use both?"
@@ -185,8 +185,8 @@ T-Mobile's iframe dialog, and Seznam's dialog on mapy.com/kupi.cz. The 7 walls i
 2. **Self-check inside the extension.** After hiding, count visible `/shorts/` links. If any are left, hide them with
    the generic rule and turn the toolbar icon red. For consent: a banner is still showing after N seconds and it's
    not a known wall → mark the icon.
-3. **Daily canary on own hardware** (built: `canary/run.mjs`, launchd on Elaeis at 07:30; Asparagaceae later if
-   Elaeis's sleep makes it unreliable). The EU consent wall, bot checks on
+3. **Daily canary on own hardware** (built: `canary/run.mjs`, launchd on the home Mac at 07:30; the always-on Mac later if
+   the home Mac's sleep makes it unreliable). The EU consent wall, bot checks on
    datacenter IPs and the logged-out view all change what YouTube serves. The canary loads the built
    extension in Chrome for Testing (branded Chrome dropped `--load-extension` in 137):
    - YouTube: search, sidebar, click + direct load of a Short, watch page, channel tab (logged out; the

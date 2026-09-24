@@ -1,1 +1,0 @@
-/Users/nguyentheanh/.codex/AGENTS.md

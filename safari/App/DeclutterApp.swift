@@ -24,6 +24,8 @@ struct ContentView: View {
             Button("Open Safari Extensions Settings…") {
                 SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionID) { _ in }
             }
+            Divider().padding(.vertical, 4)
+            TipJarView()
         }
         .padding(24)
         .frame(width: 380)

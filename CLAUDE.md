@@ -13,7 +13,7 @@ app generated with xcodegen (team `28DMV2MR8T`). Tests and canary: Playwright's 
 - `extension/consent/`: unmodified autoconsent in every frame; `snippets.js` holds our page-world snippets.
 - `extension/background.js`: settings, data merge, autoconsent `init`/`eval`, per-tab status, badge.
 - `safari/project.yml`: container app + extension; a run-script copies `build/safari` into the appex.
-- `canary/`: daily full run (`sites.json` holds per-site expectations), launchd job on Elaeis.
+- `canary/`: daily full run (`sites.json` holds per-site expectations), launchd job on the home Mac.
 
 ## Commands
 

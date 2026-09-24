@@ -57,3 +57,4 @@ canary/shots/
 !research/**/*.log
 tmp/
 canary/results/
+AGENTS.md

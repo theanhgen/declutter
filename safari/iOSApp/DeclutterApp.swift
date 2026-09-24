@@ -14,7 +14,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("declutter")
                 .font(.system(.largeTitle, design: .monospaced))
-            Text("Hides YouTube Shorts and refuses cookie banners in Safari.")
+            Text("Hides YouTube Shorts and answers cookie banners in Safari.")
                 .font(.system(.body, design: .monospaced))
             VStack(alignment: .leading, spacing: 8) {
                 Text("to turn it on:")
@@ -24,6 +24,7 @@ struct ContentView: View {
             }
             .font(.system(.callout, design: .monospaced))
             .foregroundStyle(.secondary)
+            TipJarView().padding(.top, 8)
             Spacer()
         }
         .padding(24)

@@ -1,0 +1,36 @@
+{
+  "identifier" : "D1C1A7E0-0000-4000-8000-DEC1177E0001",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "D1C1A7E0-0000-4000-8000-DEC1177E0011",
+      "localizations" : [ { "description" : "A small thank-you.", "displayName" : "Small tip", "locale" : "en_US" } ],
+      "productID" : "com.theanhgen.declutter.tip.small",
+      "referenceName" : "Small tip",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : false,
+      "internalID" : "D1C1A7E0-0000-4000-8000-DEC1177E0012",
+      "localizations" : [ { "description" : "A medium thank-you.", "displayName" : "Medium tip", "locale" : "en_US" } ],
+      "productID" : "com.theanhgen.declutter.tip.medium",
+      "referenceName" : "Medium tip",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "D1C1A7E0-0000-4000-8000-DEC1177E0013",
+      "localizations" : [ { "description" : "A large thank-you.", "displayName" : "Large tip", "locale" : "en_US" } ],
+      "productID" : "com.theanhgen.declutter.tip.large",
+      "referenceName" : "Large tip",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : { "_storeKitErrors" : [] },
+  "subscriptionGroups" : [],
+  "version" : { "major" : 4, "minor" : 0 }
+}
