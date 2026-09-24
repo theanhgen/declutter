@@ -34,8 +34,7 @@ const tabId = (sw, url) => sw.evaluate(async (u) => (await chrome.tabs.query({})
 
 // ---- auto: accepted without asking, articles open directly ----
 {
-  const { ctx, sw, close } = await launch();
-  await setSettings(sw, { walls: 'auto' });
+  const { ctx, sw, close } = await launch({ walls: 'auto' });
   const page = await ctx.newPage();
   for (const [host, name, article] of [['www.blesk.cz', 'CPEx', null], ['www.novinky.cz', 'Seznam', 'a[href*="/clanek/"]'], ['www.idnes.cz', 'Mafra', 'a[href*="/zpravy/"]']]) {
     let url = `https://${host}/`;
@@ -51,6 +50,16 @@ const tabId = (sw, url) => sw.evaluate(async (u) => (await chrome.tabs.query({})
     await page.waitForTimeout(15000);
     check(`auto ${name}: accepted, content shown`, !(await wallVisible(page)) && page.url().includes(host), page.url().slice(0, 90));
   }
+  await close();
+}
+
+// ---- fresh install: auto is the default ----
+{
+  const { ctx, sw, close } = await launch({ walls: null });
+  const page = await ctx.newPage();
+  await page.goto('https://www.blesk.cz/', { waitUntil: 'domcontentloaded' }).catch(() => {});
+  await page.waitForTimeout(12000);
+  check('default (no settings): wall accepted automatically', !(await wallVisible(page)), JSON.stringify(await tabState(sw, page.url())));
   await close();
 }
 

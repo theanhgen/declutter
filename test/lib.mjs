@@ -12,7 +12,8 @@ const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 const IPHONE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
 
 // mobile: pose as iPhone Safari (YouTube then serves m.youtube.com). Chromium engine, real extension.
-export async function launch({ extension = true, mobile = false } = {}) {
+// walls: tests and the canary default to 'manual' so monitoring detects walls without consenting to them.
+export async function launch({ extension = true, mobile = false, walls = 'manual' } = {}) {
   const ext = path.join(root, 'build/chrome');
   if (extension && !fs.existsSync(path.join(ext, 'manifest.json'))) throw new Error('run npm run build first');
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'declutter-'));
@@ -29,6 +30,7 @@ export async function launch({ extension = true, mobile = false } = {}) {
       ...(extension ? [`--disable-extensions-except=${ext}`, `--load-extension=${ext}`] : [])],
   });
   const sw = extension ? (ctx.serviceWorkers()[0] ?? await ctx.waitForEvent('serviceworker')) : null;
+  if (sw && walls) await sw.evaluate((w) => chrome.storage.local.set({ settings: { walls: w } }), walls);
   const close = async () => { await ctx.close(); fs.rmSync(profile, { recursive: true, force: true }); };
   return { ctx, sw, close };
 }

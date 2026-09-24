@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
-import { badgeFor, hostMatches, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, choiceMode, hostMatches, mergeData, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -106,4 +106,24 @@ test('BUILTIN_CMPS lists every code-based autoconsent rule (walls switch them al
   const src = read('extension/background.js');
   const listed = JSON.parse(src.match(/BUILTIN_CMPS = (\[[^\]]+\])/)[1].replace(/'/g, '"'));
   assert.deepEqual([...listed].sort(), [...names].sort());
+});
+
+test('choiceMode: all off refuses, all on accepts, anything else is a mix', () => {
+  assert.equal(choiceMode({}), 'refuse');
+  assert.equal(choiceMode({ A: false, B: false, D: false, E: false, F: false, X: false }), 'refuse');
+  assert.equal(choiceMode({ A: true, B: true, D: true, E: true, F: true, X: true }), 'accept');
+  assert.equal(choiceMode({ A: true, B: true }), 'mix');
+});
+
+test('mergeData: a rule list overrides rules by name and unions everything else', () => {
+  const base = { schema: 1, generated: '2026-01-01', shorts: { hide: ['a'], cards: ['c'] },
+    consent: { walls: ['x.cz'], disabledCmps: [], rules: [{ name: 'r1', v: 1 }, { name: 'r2' }] } };
+  const extra = { schema: 1, generated: '2026-02-01', shorts: { hide: ['a', 'b'], cards: [] },
+    consent: { walls: ['y.cz'], disabledCmps: ['z'], rules: [{ name: 'r1', v: 2 }, { name: 'r3' }] } };
+  const m = mergeData(base, extra);
+  assert.deepEqual(m.shorts.hide, ['a', 'b']);
+  assert.deepEqual(m.consent.walls, ['x.cz', 'y.cz']);
+  assert.deepEqual(m.consent.rules.map((r) => `${r.name}${r.v ?? ''}`), ['r2', 'r12', 'r3']);
+  assert.equal(m.generated, '2026-02-01');
+  assert.equal(mergeData(base, null), base);
 });

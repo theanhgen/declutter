@@ -18,6 +18,7 @@ export function badgeFor(state, now = Date.now()) {
   if (state.shortsLeak > 0) return { text: '!', color: '#d93025', title: `Declutter: ${state.shortsLeak} Shorts link(s) got past the selectors` };
   if (state.consent === 'failed' || stuck) return { text: '!', color: '#d93025', title: `Declutter: cookie banner (${state.cmp}) not answered` };
   if (state.consent === 'wall') return { text: 'Kč', color: '#e37400', title: 'Declutter: consent-or-pay wall — agree or pay; accept from this menu' };
+  if (state.consent === 'choice') return { text: '', color: '#1e8e3e', title: `Declutter: applied your choice (${state.adapter})` };
   if (state.consent === 'accepted') return { text: '', color: '#777', title: `Declutter: accepted the pay wall (${state.cmp})` };
   if (state.consent === 'done') return { text: '', color: '#1e8e3e', title: `Declutter: refused ${state.cmp}` };
   return { text: '', color: '#777', title: 'Declutter' };
@@ -34,4 +35,29 @@ export function redirectTarget(url) {
   m = u.pathname.match(CHANNEL_SHORTS);
   if (m) return `${u.origin}${m[1]}/videos`;
   return null;
+}
+
+// Consent-O-Matic's categories -> how to answer: all off = refuse, all on = accept, anything else = mix.
+export const CATEGORY_KEYS = ['A', 'B', 'D', 'E', 'F', 'X'];
+export function choiceMode(categories = {}) {
+  const on = CATEGORY_KEYS.filter((k) => categories[k]).length;
+  return on === 0 ? 'refuse' : on === CATEGORY_KEYS.length ? 'accept' : 'mix';
+}
+
+// Merge a rule list over a base: rules by name (the list wins), walls / selectors / disabled CMPs as unions.
+export function mergeData(base, extra) {
+  if (!base) return extra;
+  if (!extra) return base;
+  const union = (a = [], b = []) => [...new Set([...a, ...b])];
+  const names = new Set(extra.consent.rules.map((r) => r.name));
+  return {
+    schema: 1,
+    generated: extra.generated > base.generated ? extra.generated : base.generated,
+    shorts: { hide: union(base.shorts.hide, extra.shorts.hide), cards: union(base.shorts.cards, extra.shorts.cards) },
+    consent: {
+      walls: union(base.consent.walls, extra.consent.walls),
+      disabledCmps: union(base.consent.disabledCmps, extra.consent.disabledCmps),
+      rules: [...base.consent.rules.filter((r) => !names.has(r.name)), ...extra.consent.rules],
+    },
+  };
 }

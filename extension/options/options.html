@@ -11,9 +11,10 @@
     --bg: hsl(0, 0%, 97%);
     --muted: hsl(0, 0%, 45%);
     --link: black;
+    --dim-line: hsl(0, 0%, 80%);
   }
   @media (prefers-color-scheme: dark) {
-    :root { --fg: hsl(0, 0%, 88%); --bg: hsl(0, 0%, 9%); --muted: hsl(0, 0%, 58%); --link: white; }
+    :root { --fg: hsl(0, 0%, 88%); --bg: hsl(0, 0%, 9%); --muted: hsl(0, 0%, 45%); --link: white; --dim-line: hsl(0, 0%, 30%); }
   }
   body {
     color: var(--fg);
@@ -30,6 +31,10 @@
   h1 { margin-top: 0.25em; }
   a:link, a:visited { color: var(--link); cursor: pointer; }
   a:active { color: gray; }
+  /* A choice line: the current value is full-strength [bracketed]; the others are dimmed links. */
+  .choice .current { color: var(--fg); }
+  .choice a:link, .choice a:visited { color: var(--muted); text-decoration-color: var(--dim-line); }
+  .choice a:hover { color: var(--fg); }
   .bullet { position: relative; margin-left: 23px; }
   .bullet::before {
     content: " "; position: absolute; left: -20px; top: 8px;
@@ -37,42 +42,71 @@
   }
   .muted { color: var(--muted); }
   .footnote { margin-top: 4em; font-size: 10px; color: var(--muted); }
+  .desc { margin: -0.6em 0 1.2em 23px; color: var(--muted); font-size: 12px; }
+  nav { font-size: 14px; margin: 0.5em 0 0; }
+  nav a:link, nav a:visited { color: var(--muted); text-decoration-color: var(--dim-line); }
+  table { border-collapse: collapse; font-size: 13px; margin: 0.5em 0 0 23px; }
+  th, td { text-align: left; padding: 2px 16px 2px 0; }
+  th { font-weight: normal; color: var(--muted); }
+  td.n { text-align: right; }
+  input[type=url] { font: inherit; font-size: 13px; width: 28em; max-width: 70%; background: none; color: inherit;
+    border: 0; border-bottom: 1px solid var(--dim-line); padding: 2px 0; }
+  input[type=url]:focus { outline: none; border-bottom-color: var(--fg); }
+  .big { font-size: 28px; }
 </style>
 </head>
 <body>
   <h1>declutter</h1>
-  <p>Hides YouTube Shorts and refuses cookie banners, Czech sites first. Everything runs in your browser;
+  <p>Hides YouTube Shorts and answers cookie banners the way you choose. Everything runs in your browser;
     nothing is sent anywhere.</p>
+  <nav><a href="#choice">your choice</a> / <a href="#walls">pay walls</a> / <a href="#display">display</a> /
+    <a href="#lists">rule lists</a> / <a href="#about">about</a> / <a href="#dev">dev</a></nav>
 
   <h2>youtube</h2>
-  <p class="bullet" style="--dot:#e5484d">hide shorts: <span data-choice="shorts"></span></p>
+  <p class="bullet" style="--dot:#e5484d">hide shorts: <span class="choice" data-choice="shorts"></span></p>
 
-  <h2>cookie banners</h2>
-  <p class="bullet" style="--dot:#3e63dd">refuse banners: <span data-choice="consent"></span></p>
-  <p class="bullet" style="--dot:#30a46c">accepted on (your choice): <span id="acceptSites"></span></p>
-  <p class="bullet" style="--dot:#8d8d8d">left alone on: <span id="exceptions"></span></p>
-  <p class="muted" style="margin-left:23px">change these per site from the toolbar menu: refuse / accept / leave.</p>
+  <h2 id="choice">your choice</h2>
+  <p>What tracking to allow. All off (default) refuses everything; all on accepts. A mix is applied through the
+    banner's own settings where Declutter knows how (Cookiebot, Didomi, OneTrust, cookieconsent); on other
+    banners a mix is answered by refusing everything.</p>
+  <p class="bullet" style="--dot:#3e63dd">answer cookie banners: <span class="choice" data-choice="consent"></span></p>
+  <div id="categories"></div>
+  <p class="bullet" style="--dot:#30a46c">always accept on: <span id="acceptSites"></span></p>
+  <p class="bullet" style="--dot:#8d8d8d">leave alone on: <span id="exceptions"></span></p>
+  <p class="desc">set per site from the toolbar menu: refuse / accept / leave.</p>
 
-  <h2>pay walls</h2>
+  <h2 id="walls">pay walls</h2>
   <p>These sites offer only "agree to tracking" or "pay"; refusing is not possible, and Declutter never hides
-    them. <span class="muted">manual</span> shows a Kč badge and waits for you; <span class="muted">auto</span>
-    clicks "Souhlasím" for you, on these sites only.</p>
-  <p class="bullet" style="--dot:#f76b15">mode: <span data-choice="walls"></span></p>
-  <p class="bullet" style="--dot:#8e4ec6">sites: <span id="walls" class="muted"></span></p>
+    them. <span class="muted">auto</span> clicks "Souhlasím" for you (default); <span class="muted">manual</span>
+    shows a Kč badge and waits for you.</p>
+  <p class="bullet" style="--dot:#f76b15">mode: <span class="choice" data-choice="walls"></span></p>
+  <p class="bullet" style="--dot:#8e4ec6">sites: <span id="wallSites" class="muted"></span></p>
 
-  <h2>so far</h2>
+  <h2 id="display">display</h2>
+  <p class="bullet" style="--dot:#12a594">while a banner is being answered: <span class="choice" data-choice="display"></span></p>
+  <p class="desc">hide: the banner is kept out of sight while Declutter clicks through it. show: you see it happen.</p>
+
+  <h2 id="lists">rule lists</h2>
+  <p>Declutter's own rules are built in. Add rule lists (a data.json URL) to get fixes without an update; they
+    are checked every 12 hours.</p>
+  <div id="ruleLists"></div>
+  <p class="bullet" style="--dot:#8d8d8d"><input type="url" id="newList" placeholder="https://…/data.json"> <a href="#" id="addList">add list</a></p>
+  <p class="bullet" style="--dot:#12a594" id="data"></p>
+
+  <h2 id="about">about</h2>
+  <p><span class="big" id="clicksSaved">0</span> clicks saved</p>
   <p class="bullet" style="--dot:#3e63dd" id="stats"></p>
+  <div id="byCmp"></div>
 
   <h2>reported sites</h2>
   <p class="muted">sites you flagged from the toolbar menu as not handled right. nothing is sent anywhere; copy the
     list to get rules written for them.</p>
   <div id="reports"></div>
 
-  <h2>rules</h2>
-  <p class="bullet" style="--dot:#12a594" id="data"></p>
-
-  <h2>diagnostics</h2>
-  <p class="bullet" style="--dot:#ffc53d">log banner steps to the page console: <span data-choice="debug"></span></p>
+  <h2 id="dev">dev</h2>
+  <p class="bullet" style="--dot:#ffc53d">log each rule step to the page console: <span class="choice" data-choice="debug"></span></p>
+  <p class="bullet" style="--dot:#ffc53d">log page-world evals: <span class="choice" data-choice="debugEvals"></span></p>
+  <p class="bullet" style="--dot:#ffc53d">pause before each click (watch it work): <span class="choice" data-choice="clickDelay"></span></p>
 
   <p class="footnote">+ keyboard shortcut: Safari → Settings → Extensions → Declutter, or chrome://extensions/shortcuts.</p>
 

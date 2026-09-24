@@ -11,7 +11,8 @@
     "test:walls": "node test/walls.mjs",
     "ios": "scripts/ios.sh",
     "test:mobile": "node test/mobile.mjs",
-    "test:features": "node test/features.mjs"
+    "test:features": "node test/features.mjs",
+    "test:categories": "node test/categories.mjs"
   },
   "license": "MIT",
   "type": "module",

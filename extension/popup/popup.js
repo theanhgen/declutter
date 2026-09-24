@@ -37,7 +37,8 @@ async function main() {
 
   const rows = [];
   const stuck = state.consent === 'working' && Date.now() - state.since > 15000;
-  if (state.consent === 'done') rows.push(statusRow('ok', 'cookies refused', state.cmp));
+  if (state.consent === 'done') rows.push(statusRow('ok', 'cookies refused', state.choiceFallback ? `${state.cmp} — your mix isn't supported by this banner, so everything was refused` : state.cmp));
+  else if (state.consent === 'choice') rows.push(statusRow('ok', 'your choice applied', `${state.cmp} via ${state.adapter}`));
   else if (state.consent === 'failed' || stuck) rows.push(statusRow('bad', 'banner not answered', state.cmp));
   else if (state.consent === 'wall') {
     rows.push(statusRow('wall', 'pay wall: agree or pay', state.looping

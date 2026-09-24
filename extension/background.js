@@ -1,7 +1,8 @@
 // Background: settings, data (bundled + remote, D6), autoconsent wiring, per-tab status and badge.
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
+import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, hostMatches, validData } from './lib.js';
+import { badgeFor, choiceMode, hostMatches, mergeData, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -9,15 +10,24 @@ Object.assign(evalSnippets, declutterSnippets);
 const DEFAULT_SETTINGS = {
   shorts: true,
   consent: true,
-  // Remote copy of build/data.json, baked in at build time (DECLUTTER_DATA_URL). Empty = bundled copy only.
+  // Rule lists (Consent-O-Matic's "Rule Lists"): extra data.json URLs merged over the bundled data. The one baked
+  // in at build time (DECLUTTER_DATA_URL) comes first; dataUrl is the older single-URL setting.
   // eslint-disable-next-line no-undef
-  dataUrl: __DATA_URL__,
+  dataUrls: __DATA_URL__ ? [__DATA_URL__] : [],
+  dataUrl: '',
+  // "Your choice" (Consent-O-Matic's categories). All off = refuse everything (default).
+  categories: { A: false, B: false, D: false, E: false, F: false, X: false },
+  // Display: 'hide' the banner while answering (prehide), or 'show' it.
+  display: 'hide',
+  // Dev: autoconsent's eval log and a delay before each click (to watch it work).
+  debugEvals: false,
+  clickDelay: false,
   // Per-site choices: banners left alone (exceptions) or accepted (acceptSites). Everywhere else: refused.
   exceptions: [],
   acceptSites: [],
-  // Consent-or-pay walls: 'manual' = detect and show a Kč badge, accept only when asked from the popup;
-  // 'auto' = accept (Souhlasím) automatically. Walls are never refused or hidden either way.
-  walls: 'manual',
+  // Consent-or-pay walls: 'auto' (default) = accept (Souhlasím) automatically; 'manual' = detect, show a Kč
+  // badge, accept only when asked from the popup. Walls are never refused or hidden either way.
+  walls: 'auto',
   // autoconsent's own console logging, for diagnosing a site (canary: DEBUG=1).
   debug: false,
 };
@@ -51,30 +61,41 @@ async function getSettings() {
   return { ...DEFAULT_SETTINGS, ...settings };
 }
 
-// ---- data: bundled data.json, replaced by a newer valid remote copy ----
+// ---- data: bundled data.json merged with every rule list (D6) ----
 let bundledData;
 async function getBundledData() {
   bundledData ??= await (await fetch(api.runtime.getURL('data.json'))).json();
   return bundledData;
 }
 
+// remoteData = the rule lists already merged together (also read by the Shorts content script).
 async function getData() {
-  const bundled = await getBundledData();
   const { remoteData } = await api.storage.local.get('remoteData');
-  return validData(remoteData) && remoteData.generated > bundled.generated ? remoteData : bundled;
+  return mergeData(await getBundledData(), validData(remoteData) ? remoteData : null);
 }
 
+const ruleListUrls = (s) => [...new Set([...(s.dataUrls ?? []), s.dataUrl].filter(Boolean))];
+
 async function refreshRemoteData() {
-  const { dataUrl } = await getSettings();
-  if (!dataUrl) return;
-  try {
-    const res = await fetch(dataUrl, { cache: 'no-store' });
-    const d = await res.json();
-    if (!res.ok || !validData(d)) throw new Error(`invalid payload (${res.status})`);
-    await api.storage.local.set({ remoteData: d, remoteDataStatus: { ok: true, at: Date.now(), generated: d.generated } });
-  } catch (e) {
-    await api.storage.local.set({ remoteDataStatus: { ok: false, at: Date.now(), error: String(e.message || e) } });
+  const urls = ruleListUrls(await getSettings());
+  const { remoteStatus = {} } = await api.storage.local.get('remoteStatus');
+  const lists = [];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      const d = await res.json();
+      if (!res.ok || !validData(d)) throw new Error(`invalid payload (${res.status})`);
+      lists.push(d);
+      remoteStatus[url] = { ok: true, at: Date.now(), generated: d.generated, rules: d.consent.rules.length };
+    } catch (e) {
+      remoteStatus[url] = { ok: false, at: Date.now(), error: String(e.message || e) };
+    }
   }
+  for (const url of Object.keys(remoteStatus)) if (!urls.includes(url)) delete remoteStatus[url];
+  const merged = lists.reduce((acc, d) => mergeData(acc, d), null);
+  await api.storage.local.set({ remoteData: merged, remoteStatus,
+    // kept for older settings pages / tests
+    remoteDataStatus: urls.length ? { ok: lists.length === urls.length, at: Date.now(), ...(merged && { generated: merged.generated }) } : undefined });
 }
 
 // ---- autoconsent rules ----
@@ -105,10 +126,16 @@ async function paintBadge(tabId, state) {
   } catch { /* tab closed */ }
 }
 
-// ---- counters (Settings shows them); local only ----
-async function bump(patch) {
+// ---- counters (Settings → about); local only ----
+async function bump(patch, cmp, clicks = 0) {
   const { stats = {} } = await api.storage.local.get('stats');
   for (const [k, v] of Object.entries(patch)) stats[k] = (stats[k] ?? 0) + v;
+  if (cmp) {
+    stats.byCmp ??= {};
+    const row = (stats.byCmp[cmp] ??= { filled: 0, clicks: 0 });
+    row.filled += 1;
+    row.clicks += clicks;
+  }
   stats.since ??= Date.now();
   await api.storage.local.set({ stats });
 }
@@ -159,7 +186,9 @@ async function onConsentMessage(msg, sender) {
         await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil }),
           ...(excepted ? { consent: 'paused' } : kept) }, true);
       }
-      const logs = { lifecycle: settings.debug, rulesteps: settings.debug, detectionsteps: settings.debug, errors: true };
+      const logs = { lifecycle: settings.debug, rulesteps: settings.debug, detectionsteps: settings.debug, evals: settings.debugEvals, errors: true };
+      // refuse (all categories off) / accept (all on) / mix (applied per CMP on popupFound, else refused).
+      const mode = accepting ? 'accept' : choiceMode(settings.categories);
       // On a wall site only the wall rules run: nothing else on the page is refused, hidden or pre-hidden.
       // Manual mode detects the wall and waits for an optIn from the popup; auto mode accepts at once.
       const config = wall
@@ -167,8 +196,9 @@ async function onConsentMessage(msg, sender) {
           enablePrehide: false, enableCosmeticRules: false, enableGeneratedRules: false, disabledCmps: BUILTIN_CMPS,
           // Sourcepoint wall frames (Spiegel) sometimes render late; look for longer than the default 20 tries.
           detectRetries: 60, logs }
-        : { enabled: settings.consent && !excepted, autoAction: accepting ? 'optIn' : 'optOut', disabledCmps: data.consent.disabledCmps,
-          enablePrehide: true, enableCosmeticRules: true, logs };
+        : { enabled: settings.consent && !excepted, autoAction: { refuse: 'optOut', accept: 'optIn', mix: null }[mode],
+          disabledCmps: data.consent.disabledCmps, enablePrehide: settings.display !== 'show', enableCosmeticRules: true,
+          visualTest: settings.clickDelay, logs };
       const rules = wall
         ? { autoconsent: wallRules }
         : {
@@ -206,6 +236,9 @@ async function onConsentMessage(msg, sender) {
           : { consent: 'wall', cmp: msg.cmp, wallFrame: frameId, looping });
       } else {
         await setTab(tabId, { consent: 'working', cmp: msg.cmp, since: Date.now() });
+        const settings = await getSettings();
+        const siteAccepted = hostMatches(tabHost, settings.acceptSites ?? []);
+        if (!siteAccepted && choiceMode(settings.categories) === 'mix') await applyChoice(tabId, frameId, msg.cmp, settings.categories);
       }
       break;
     case 'optOutResult':
@@ -219,12 +252,33 @@ async function onConsentMessage(msg, sender) {
         : siteAccepted
           ? { consent: 'acceptedSite', cmp: msg.cmp }
           : { consent: 'done', cmp: msg.cmp, doneAt: Date.now() });
-      await bump({ clicks: msg.totalClicks ?? 0, ...(isWallRule(msg.cmp) ? { walls: 1 } : siteAccepted ? { accepted: 1 } : { refused: 1 }) });
+      const mode = siteAccepted ? 'accept' : choiceMode((await getSettings()).categories);
+      await bump({ clicks: msg.totalClicks ?? 0, ...(isWallRule(msg.cmp) ? { walls: 1 } : mode === 'accept' ? { accepted: 1 } : { refused: 1 }) },
+        msg.cmp, msg.totalClicks ?? 0);
       break;
     }
     case 'autoconsentError':
       console.warn('declutter: autoconsent error', msg.details);
       break;
+  }
+}
+
+// "Your choice" with a mix of categories: autoconsent found a banner and waits (autoAction null). Apply the mix
+// through the CMP's own API when there is an adapter; otherwise refuse everything, which is the safe side.
+async function applyChoice(tabId, frameId, cmp, categories) {
+  let adapter = '';
+  try {
+    const [r] = await api.scripting.executeScript({ target: { tabId, frameIds: [frameId] }, world: 'MAIN', func: applyCategories, args: [categories] });
+    adapter = r?.result ?? '';
+  } catch (e) {
+    console.warn('declutter: category adapter failed', cmp, e);
+  }
+  if (adapter) {
+    await setTab(tabId, { consent: 'choice', cmp, adapter });
+    await bump({ choice: 1 }, cmp);
+  } else {
+    await setTab(tabId, { choiceFallback: true });
+    await api.tabs.sendMessage(tabId, { type: 'optOut' }, { frameId });
   }
 }
 
@@ -268,7 +322,8 @@ api.tabs.onRemoved.addListener((tabId) => api.storage.session.remove([tabKey(tab
 api.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local' || !changes.settings) return;
   applyShortsRedirect();
-  if (changes.settings.newValue?.dataUrl !== changes.settings.oldValue?.dataUrl) refreshRemoteData();
+  const urls = (x) => JSON.stringify(ruleListUrls(x ?? {}));
+  if (urls(changes.settings.newValue) !== urls(changes.settings.oldValue)) refreshRemoteData();
 });
 
 api.alarms.onAlarm.addListener((a) => { if (a.name === 'data') refreshRemoteData(); });
