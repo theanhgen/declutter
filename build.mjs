@@ -35,9 +35,11 @@ function buildData() {
   const rules = fs.readdirSync(rulesDir).filter((f) => f.endsWith('.json')).sort()
     .map((f) => {
       const rule = readJson(`data/rules-cz/${f}`);
-      if (!rule.name || !Array.isArray(rule.detectCmp) || !Array.isArray(rule.optOut)) {
-        throw new Error(`data/rules-cz/${f}: needs name, detectCmp[], optOut[]`);
+      if (!rule.name || !Array.isArray(rule.detectCmp) || !Array.isArray(rule.optIn) || !Array.isArray(rule.optOut)) {
+        throw new Error(`data/rules-cz/${f}: needs name, detectCmp[], optIn[], optOut[]`);
       }
+      // Wall rules (cz-wall-*) only ever accept; every other rule must be able to refuse.
+      if (!rule.name.startsWith('cz-wall-') && !rule.optOut.length) throw new Error(`data/rules-cz/${f}: empty optOut`);
       return rule;
     });
   return {
@@ -55,19 +57,86 @@ function shortsCss(selectors) {
     ' {\n  display: none !important;\n}\n';
 }
 
-// ---- icons: a dark disc with a light slash, drawn without an image library ----
+// ---- icons: a clean teal frame with its overlay peeled away ----
 function png(size) {
   const px = Buffer.alloc(size * (size * 4 + 1));
-  const c = (size - 1) / 2, r = size / 2 - 0.5, w = size / 9;
+  // At 16px, keep the fold solid and at least two gap pixels clear; AA only outer corners.
+  const toolbarPixels = [
+    '................',
+    '..aTTT..FPPPPp..',
+    '.aTTTT...FPPPPP.',
+    '.TTSSSS...FPPPP.',
+    '.TTSSSSS...FPPP.',
+    '.TTSSSSSSS..FPP.',
+    '.TTSSSSSSSS..FP.',
+    '.TTSSSSSSSSS..F.',
+    '.TTSSSSSSSSSS...',
+    '.TTSSSSSSSSSSTT.',
+    '.TTSSSSSSSSSSTT.',
+    '.TTSSSSSSSSSSTT.',
+    '.TTTSSSSSSSSTTT.',
+    '.aTTTTTTTTTTTTa.',
+    '..aTTTTTTTTTTa..',
+    '................',
+  ];
+  const toolbarColors = {
+    T: [8, 136, 135, 255],
+    S: [238, 255, 249, 255],
+    P: [65, 215, 180, 255],
+    F: [5, 89, 88, 255],
+    a: [8, 136, 135, 128],
+    p: [65, 215, 180, 128],
+  };
+  const samples = 8;
+  const small = size <= 16;
+  const inset = small ? 3 : 3.25;
+  const roundedBox = (x, y, left, top, right, bottom, radius) => {
+    const dx = Math.max(left + radius - x, 0, x - right + radius);
+    const dy = Math.max(top + radius - y, 0, y - bottom + radius);
+    return dx * dx + dy * dy <= radius * radius;
+  };
+  const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+  const colorAt = (x, y) => {
+    if (!roundedBox(x, y, 1, 1, 15, 15, small ? 3 : 3.5)) return null;
+    const diagonal = x - y;
+    const peelEdge = 6.5 + 0.32 * (y - 1) + 0.08 * (y - 1) ** 2;
+    if (x > peelEdge && diagonal < 8) return null;
+    if (diagonal >= 8) {
+      if (!small && diagonal < 8.7 + 0.09 * (y - 1) ** 2) return [9, 116, 110];
+      return mix([59, 211, 177], [21, 161, 150], y / 8);
+    }
+    if (roundedBox(x, y, inset, inset, 16 - inset, 16 - inset, small ? 1 : 1.5)) {
+      return [235, 255, 247];
+    }
+    return mix([14, 157, 145], [7, 125, 131], y / 16);
+  };
   for (let y = 0; y < size; y++) {
     px[y * (size * 4 + 1)] = 0;
     for (let x = 0; x < size; x++) {
       const i = y * (size * 4 + 1) + 1 + x * 4;
-      const d = Math.hypot(x - c, y - c);
-      const inDisc = d <= r;
-      const onSlash = Math.abs((x - c) - (y - c)) / Math.SQRT2 <= w && d <= r * 0.72;
-      const [R, G, B] = onSlash ? [245, 245, 240] : [28, 30, 36];
-      px[i] = R; px[i + 1] = G; px[i + 2] = B; px[i + 3] = inDisc ? 255 : 0;
+      if (size === 16) {
+        const color = toolbarColors[toolbarPixels[y][x]];
+        if (color) px.set(color, i);
+        continue;
+      }
+      let red = 0, green = 0, blue = 0, covered = 0;
+      for (let sy = 0; sy < samples; sy++) {
+        for (let sx = 0; sx < samples; sx++) {
+          const color = colorAt(
+            (x + (sx + 0.5) / samples) * 16 / size,
+            (y + (sy + 0.5) / samples) * 16 / size,
+          );
+          if (!color) continue;
+          red += color[0]; green += color[1]; blue += color[2]; covered++;
+        }
+      }
+      // Average covered samples only, so transparent edges have no dark fringe.
+      if (covered) {
+        px[i] = Math.round(red / covered);
+        px[i + 1] = Math.round(green / covered);
+        px[i + 2] = Math.round(blue / covered);
+        px[i + 3] = Math.round(255 * covered / (samples * samples));
+      }
     }
   }
   const chunk = (type, data) => {
