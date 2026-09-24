@@ -1,0 +1,38 @@
+{
+  "name": "cz-mironet",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*mironet\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookiesDialog [onclick=\"saveCS(2)\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookiesDialog"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookiesDialog [onclick=\"saveCS(1)\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookiesDialog [onclick=\"saveCS(2)\"]"
+    },
+    {
+      "waitForVisible": "#cookiesDialog [onclick=\"saveCS(2)\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookiesDialog",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

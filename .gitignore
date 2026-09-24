@@ -56,3 +56,4 @@ canary/shots/
 # research logs are data
 !research/**/*.log
 tmp/
+canary/results/

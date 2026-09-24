@@ -1,0 +1,38 @@
+{
+  "name": "cz-cd",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*cd\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#consentBtnrefuse"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#c22overlay"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#consentBtnall"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#consentBtnrefuse"
+    },
+    {
+      "waitForVisible": "#consentBtnrefuse",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#c22overlay",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "cz-lekarna",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*lekarna\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-test=\"cookie-popup-reject-all\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "dialog#customer-data"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-test=\"cookie-popup-accept-all\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-test=\"cookie-popup-reject-all\"]"
+    },
+    {
+      "waitForVisible": "[data-test=\"cookie-popup-reject-all\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "dialog#customer-data",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

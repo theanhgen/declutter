@@ -4,6 +4,20 @@
 > (2) answers cookie-consent banners, with Czech sites as the coverage target. One product, one extension.
 > Firefox is nice-to-have. Working name, rename freely. Started 2026-09-21.
 
+## Status (2026-09-24)
+
+Built and passing in Chrome; Safari app built, signed and registered, **waiting on the manual Safari checks**
+(see *Safari checklist*). One source tree, one data folder, one command per target:
+
+| | Result |
+|---|---|
+| Chrome e2e (`npm run test:e2e`) | 16/16: Shorts hidden on search/sidebar/channel/watch, click + direct load → `/watch`, module toggle, 3 banners refused, Blesk wall left alone |
+| Canary (`npm run canary`, 42 sites + YouTube) | 51/52 on the first clean run; the miss was a wrong expectation (kupi, see gotchas), since fixed |
+| Czech coverage | **all 35 answerable sites** refused (target was 28 of 30); the 7 walls left alone |
+| Remote data (`test/remote-data.mjs`) | a changed `data.json` on a URL changes both modules with no rebuild |
+| Unit (`npm test`) | 9/9: pure helpers, rule schema, wall/rule overlap, CSS gating, manifests, Safari-safe regex |
+| Safari (`npm run safari`) | app signed by team 28DMV2MR8T, installed to `~/Applications`, extension registered with Safari |
+
 Research behind every claim here: `research/` (three reports + the scripts and raw results from the
 2026-09-21 runs). Anything marked **unverified** has not been tested yet and is a milestone gate.
 
@@ -21,10 +35,11 @@ Research behind every claim here: `research/` (three reports + the scripts and r
 | D1 | One combined extension (Shorts + consent), not two | **decided** by user 2026-09-21 | chat |
 | D2 | Desktop only: Chrome + Safari macOS; Firefox later | **decided** | chat |
 | D3 | Our own code, MIT. Do not fork any Shorts blocker | **decided** (licenses leave no choice) | `research/shorts.md` |
-| D4 | Consent engine = DuckDuckGo **autoconsent** (MPL-2.0, npm dep, unmodified). Consent-O-Matic's CZ rules (bauhaus.cz, rozhlas.cz, i4wifi) get **ported into our CZ rule pack**; CoM's engine is not bundled | **proposed**. User asked "can we use both?", see below | `research/consent.md` |
-| D5 | Consent-or-pay walls (Seznam, Mafra, CPEx): **leave the wall to the user**. No auto-accept, no hiding | **decided** by user 2026-09-21 | chat |
-| D6 | Selectors and CZ rules live in data (JSON), fetched at runtime with a bundled fallback, so a fix is a data edit, not a Safari rebuild | **proposed**; the autoconsent half is now confirmed possible, see below | chat, autoconsent 16.41.0 source |
-| D7 | Breakage detection = in-extension self-check + a daily canary on own hardware. **No auto-rewriting of selectors** | **proposed** | chat |
+| D4 | Consent engine = DuckDuckGo **autoconsent** (MPL-2.0, npm dep, unmodified). Consent-O-Matic's CZ coverage is taken over by our CZ rule pack (bauhaus written fresh from the live page; rozhlas is already covered by autoconsent); CoM's engine is not bundled | **decided** by user 2026-09-24 | `research/consent.md` |
+| D5 | Consent-or-pay walls (Seznam, Mafra, CPEx): **leave the wall to the user**. No auto-accept, no hiding. Implemented as: autoconsent is disabled for the whole tab on a wall domain (`data/consent.json` → `walls`), so nothing underneath is touched either | **decided** by user 2026-09-21 | chat |
+| D6 | Selectors and CZ rules live in data (JSON), fetched at runtime with a bundled fallback, so a fix is a data edit, not a Safari rebuild | **built**; needs a hosting URL (open question below) | chat, autoconsent 16.41.0 source |
+| D7 | Breakage detection = in-extension self-check + a daily canary on own hardware. **No auto-rewriting of selectors** | **built**; canary runs daily on Elaeis via launchd, Telegram not configured yet | chat |
+| D8 | Page-world code (snippets for rules, the open-shadow patch) lives in the extension, never in `data/`. Remote data can reference a named snippet but cannot add code | **decided** 2026-09-24 | this build |
 
 ### D4: "can we use both?"
 
@@ -48,23 +63,30 @@ that is what `initialize()` parses (`lib/web.ts:53-95`, `:619-627`; `lib/message
 filters by domain before sending (`filterCompactRules(storageGet('rules'), {url, mainFrame})`) and ships
 `rules.json`, `compact-rules.json` and a `rule-index.json` — mirror that shape so the remote payload stays small.
 
-## Architecture (target)
+## Architecture (as built)
 
 ```
 declutter/
-  extension/                 # one MV3 source tree, bundled by esbuild (autoconsent is an npm/TS package)
-    manifest.base.json       # + per-browser overrides merged at build (chrome / safari / firefox)
-    background.js            # autoconsent wiring, per-CMP policy (D5), remote-data fetch (D6), badge
-    shorts/
-      shorts.css             # :has() rules, injected at document_start, youtube.com only
-      shorts.js              # /shorts/<id> -> /watch?v=<id> on yt-navigate-finish + capture-phase click; self-check
-      dnr-rules.json         # static redirect for full page loads (Chrome/Firefox; Safari unreliable)
-    consent/
-      rules-cz/*.json        # our Czech rule pack (autoconsent JSON rule format)
-  data/                      # remote-served selectors + CZ rules (D6), e.g. via raw GitHub URL
-  safari/project.yml         # xcodegen: container macOS app + Safari web-extension target, team 28DMV2MR8T
-  canary/                    # Playwright harness (seeded from research/consent-run-2026-09-21/harness.mjs)
-  build/{chrome,safari,firefox}/
+  build.mjs                  # esbuild → build/{chrome,safari}/ + build/data.json; per-browser manifest; icons
+  extension/
+    manifest.base.json
+    lib.js                   # pure helpers (redirect target, host match, badge, data validation) — unit-tested
+    background.js            # settings, data (bundled + remote), autoconsent init/eval, per-tab status, badge
+    shorts/shorts.js         # redirect, remote selectors, self-check (css is generated from data/shorts.json)
+    shorts/dnr-rules.json    # static /shorts/<id> → /watch redirect for full page loads
+    consent/content.js       # AutoConsent in every frame
+    consent/snippets.js      # our named page-world snippets (DECLUTTER_*), D8
+    consent/open-shadow.js   # page world, mapy/kupi only: opens Seznam's closed shadow root
+    popup/                   # two toggles, this site's status, "leave banners alone on this site"
+  data/                      # EVERYTHING that changes when a site changes (D6)
+    shorts.json              # hide selectors + card containers for the self-check
+    consent.json             # wall domains, disabled CMPs
+    rules-cz/*.json          # 15 autoconsent rules (13 site rules, Liferay generic, Seznam dialog)
+  safari/project.yml         # xcodegen: container app + extension; run-script copies build/safari in
+  scripts/safari.sh          # build + sign + install ~/Applications/Declutter.app
+  scripts/canary-agent.sh    # install/remove the daily launchd job
+  test/                      # unit (node --test), e2e.mjs (smoke), remote-data.mjs, lib.mjs (shared)
+  canary/                    # run.mjs, sites.json (expectations), results/ + shots/ (gitignored)
 ```
 
 Separate content scripts per module: the Shorts script matches `*://www.youtube.com/*` only, so a bug in
@@ -128,8 +150,9 @@ Full table in `research/consent.md`, raw results in `research/consent-run-2026-0
 | In-house banners | alza, czc, kosik, lekarna, cd, regiojet, ceskaposta, kb, vodafone, mironet, pilulka, bonprix | ✗ | ✗ | **write CZ rules**, the main work in M2 |
 | Untested | heureka, notino (Cloudflare check), t-mobile (dialog in an iframe) | — | — | test manually |
 
-Result at the end of M2: 17 (autoconsent) + 1 (bauhaus) + up to 12 in-house + 2 Seznam banners ≈ **30 of 39**. The other
-9 are the walls we're choosing to leave alone.
+Planned: ≈ 30 of 39. **Built (2026-09-24): all 35 non-wall sites in `canary/sites.json` pass** — autoconsent covers
+the CMPs (incl. heureka/Didomi, notino/Usercentrics); `data/rules-cz/` covers the 12 in-house banners, bauhaus,
+T-Mobile's iframe dialog, and Seznam's dialog on mapy.com/kupi.cz. The 7 walls in the canary are left alone.
 
 ## Keeping it working
 
@@ -138,12 +161,15 @@ Result at the end of M2: 17 (autoconsent) + 1 (bauhaus) + up to 12 in-house + 2 
 2. **Self-check inside the extension.** After hiding, count visible `/shorts/` links. If any are left, hide them with
    the generic rule and turn the toolbar icon red. For consent: a banner is still showing after N seconds and it's
    not a known wall → mark the icon.
-3. **Daily canary on own hardware** (Asparagaceae or the Pi, not the cloud). The EU consent wall, bot checks on
+3. **Daily canary on own hardware** (built: `canary/run.mjs`, launchd on Elaeis at 07:30; Asparagaceae later if
+   Elaeis's sleep makes it unreliable). The EU consent wall, bot checks on
    datacenter IPs and the logged-out view all change what YouTube serves. The canary loads the built
    extension in Chrome for Testing (branded Chrome dropped `--load-extension` in 137):
-   - YouTube: search, channel, watch page, and home/subscriptions using a throwaway logged-in account
-   - the 42 Czech sites
-   - alerts to Telegram when a result changes. `research/consent-run-2026-09-21/harness.mjs` is the seed.
+   - YouTube: search, sidebar, click + direct load of a Short, watch page, channel tab (logged out; the
+     home/subscriptions checks need a throwaway logged-in account, not set up)
+   - the 42 Czech sites, each with an expectation (`done` / `clear` / `wall`)
+   - Telegram message when the set of failing checks changes (token: Keychain `declutter-telegram-token`,
+     chat: `DECLUTTER_TELEGRAM_CHAT_ID`). Without them it prints the alert to the log.
 4. **Fixes ship as data** (D6). An edit to the remote JSON reaches both browsers with no Xcode rebuild.
 
 A scraper that rewrites selectors on its own was **rejected**: it can tell that something broke but not
@@ -151,32 +177,62 @@ reliably what the new element is, and a wrong guess hides the wrong content with
 
 ## Milestones
 
-| M | Scope | Done when |
-|---|---|---|
-| M0 | Scaffold: esbuild, manifest merge, xcodegen container app, signing on team 28DMV2MR8T | A no-op extension loads in Chrome (unpacked) and in Safari (signed), and **stays enabled after quitting Safari** |
-| M1 | Shorts module: CSS + redirect + self-check badge | No Shorts on search/channel/sidebar/watch in both browsers; clicking a Short opens `/watch`; Czech UI works |
-| M2 | Consent module: autoconsent + CZ pack (bauhaus, 12 in-house, 2 Seznam banners) + wall policy | ≥28 of the 30 reachable sites clear in Chrome; walls untouched; same run in Safari by hand |
-| M3 | Canary + remote data | Daily run on own hardware, Telegram alert on regression, one data-only fix shipped end to end |
+| M | Scope | Done when | State 2026-09-24 |
+|---|---|---|---|
+| M0 | Scaffold: esbuild, manifest merge, xcodegen container app, signing on team 28DMV2MR8T | A no-op extension loads in Chrome (unpacked) and in Safari (signed), and **stays enabled after quitting Safari** | Chrome ✓. Safari built, signed, registered; **enable + restart check is yours** |
+| M1 | Shorts module: CSS + redirect + self-check badge | No Shorts on search/channel/sidebar/watch in both browsers; clicking a Short opens `/watch`; Czech UI works | Chrome ✓ (cs-CZ UI). Safari: checklist |
+| M2 | Consent module: autoconsent + CZ pack (bauhaus, 12 in-house, 2 Seznam banners) + wall policy | ≥28 of the 30 reachable sites clear in Chrome; walls untouched; same run in Safari by hand | Chrome ✓ 35/35, walls untouched. Safari: checklist |
+| M3 | Canary + remote data | Daily run on own hardware, Telegram alert on regression, one data-only fix shipped end to end | Canary daily ✓. Remote data proven against a local URL; needs a hosting URL + Telegram chat |
+
+## Safari checklist (manual; nothing automates Safari extensions)
+
+1. Safari → Settings → Extensions: turn **Consent-O-Matic off**, turn **Declutter on**, and in its permissions
+   choose **Always Allow on Every Website**.
+2. youtube.com: search "minecraft" → no Shorts shelf, no Shorts in the sidebar; paste a `/shorts/<id>` link →
+   opens `/watch?v=<id>`; click a Short somewhere → `/watch`.
+3. alza.cz, o2.cz, mapy.com: banner refused (toolbar popup says "Refused cookies"). o2 and mapy exercise the
+   page-world parts (`world: MAIN` eval and the open-shadow script), the M2 Safari gate.
+4. blesk.cz: the wall stays; popup says "left to you".
+5. **Quit Safari (⌘Q), reopen: Declutter is still enabled** — the M0 gate. Repeat after a reboot once.
+
+If step 5 fails, the fallback is Developer ID signing + notarization (needs the paid program's Developer ID
+certificate; the team already has one for App Store work).
 
 ## Open questions / unverified (gates)
 
-- **Safari keeps a build signed with team 28DMV2MR8T across restarts.** Apple docs imply it; not tested (M0 gate).
-- **autoconsent in Safari:** it runs some steps with `chrome.scripting.executeScript({world:'MAIN'})`
-  (`addon/background.ts:40-45`). Not tested in Safari. Fallback: its `isMainWorld: true` mode (M2 gate).
+- **Safari keeps a build signed with team 28DMV2MR8T across restarts.** Signing verified
+  (`codesign --verify --deep --strict`), registration verified (`pluginkit`); restart survival is checklist step 5.
+- **autoconsent in Safari** (`scripting.executeScript({world:'MAIN'})`) and the manifest `world: MAIN`
+  content script (Safari 18+): checklist step 3. Fallback: autoconsent's `isMainWorld: true` mode.
+- **Where remote data is hosted** (D6). Mechanism done: build with `DECLUTTER_DATA_URL=<url>` and publish
+  `build/data.json` there; the extension refetches every 12 h. Options: raw URL of a public GitHub repo/gist, or
+  an existing server over Tailscale Funnel. Not decided — it publishes the data file.
 - ~~Can autoconsent take extra rules at runtime from our background script (for D6)?~~ **Answered
   2026-09-23**: yes, via the `initResp` message. See D6 above.
 - The second Mac: a development-signed build may not run there. The documented routes are Developer ID +
   notarization, or TestFlight.
-- Home, subscriptions and notifications selectors need a logged-in check.
+- Home, subscriptions and notifications selectors need a logged-in check (canary account not set up).
 - Firefox: not installed; unsigned installs need Developer Edition or Nightly. Deferred.
 
-## Gotchas for day one
+## Gotchas
 
 - **The Mac App Store Consent-O-Matic 1.1.3 is installed** (`/Applications/Consent-O-Matic.app`). Disable it in
-  Safari while testing, or both extensions will answer the same banners.
+  Safari, or both extensions will answer the same banners.
 - Safari "Allow unsigned extensions" resets when Safari quits. Don't rely on it; sign the build.
 - Safari runs content scripts only after the user grants site access in the toolbar popover. The consent
   module needs a one-time "Always Allow on Every Website".
-- Branded Chrome 137+ ignores `--load-extension`. Automated runs use Chrome for Testing / Playwright's
-  Chromium.
+- Branded Chrome 137+ ignores `--load-extension`. Automated runs use Playwright's Chromium (`channel: 'chromium'`).
+- **Headless tests lie unless they look like a person:** without a desktop UA many CMPs show nothing
+  ("HeadlessChrome"), and without `--disable-blink-features=AutomationControlled` (`navigator.webdriver`)
+  orestbida banners don't show and **Seznam switches its dialog to an open shadow root** — so a rule can pass in
+  the test and fail for you. `test/lib.mjs` sets both.
+- **Seznam's consent dialog uses a closed shadow root** for real browsers. `consent/open-shadow.js` (page world,
+  mapy/kupi only) opens that one root; walls are on the wall list and never reach it.
+- **Seznam shares the choice across its sites**: refusing on mapy.com also clears kupi.cz in the same browser.
+- Some sites **reload after the choice** (T-Mobile); the background keeps "done" for the same host for 60 s.
+- **Alza's reject link is `href="javascript:…"`**, which Alza's CSP blocks when an extension clicks it. The rule calls
+  the page's own `Alza.Web.Cookies.rejectAllCookies()` through the `DECLUTTER_ALZA_REJECT` snippet (D8).
+- **Codesign fails on ~/Desktop** ("resource fork, Finder information, or similar detritus not allowed"): iCloud
+  adds xattrs. `scripts/safari.sh` builds in `~/Library/Developer/Xcode/DerivedData/declutter` and the copy phase
+  runs `xattr -cr`.
 - `pensieve/project.yml` is the xcodegen reference (one app + extension targets, team 28DMV2MR8T).

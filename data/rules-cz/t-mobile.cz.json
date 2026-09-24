@@ -1,0 +1,36 @@
+{
+  "name": "cz-t-mobile",
+  "runContext": {
+    "urlPattern": "^https://www\\.t-mobile\\.cz/_cookies/dialog",
+    "main": false,
+    "frame": true
+  },
+  "detectCmp": [
+    {
+      "exists": "#rejectAllQuick"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#rejectAllQuick"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#acceptAllQuick"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#rejectAllQuick"
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#rejectAllQuick",
+      "check": "none",
+      "timeout": 3000
+    }
+  ],
+  "_comment": "No closing check: the page reloads after the click and destroys this frame first."
+}

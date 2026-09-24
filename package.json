@@ -4,9 +4,10 @@
   "description": "Hides YouTube Shorts and refuses cookie banners (Chrome + Safari)",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test test/",
+    "test": "node build.mjs && node --test test/*.test.mjs",
     "test:e2e": "node test/e2e.mjs",
-    "canary": "node canary/run.mjs"
+    "canary": "node canary/run.mjs",
+    "safari": "scripts/safari.sh"
   },
   "license": "MIT",
   "type": "module",

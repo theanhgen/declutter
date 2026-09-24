@@ -1,0 +1,38 @@
+{
+  "name": "cz-kosik",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*kosik\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-tid=\"cookie-bar__decline-button\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".cmp-modal"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-tid=\"cookie-bar__accept-button\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-tid=\"cookie-bar__decline-button\"]"
+    },
+    {
+      "waitForVisible": "[data-tid=\"cookie-bar__decline-button\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".cmp-modal",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

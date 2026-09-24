@@ -2,6 +2,7 @@
 // the payload the extension also fetches remotely (D6).
 //   node build.mjs            -> all targets
 //   node build.mjs chrome     -> one target
+//   DECLUTTER_DATA_URL=https://… node build.mjs   -> bake in the remote data URL
 import * as esbuild from 'esbuild';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -94,6 +95,7 @@ async function buildTarget(name, data) {
     entryPoints: {
       background: 'extension/background.js',
       'consent/content': 'extension/consent/content.js',
+      'consent/open-shadow': 'extension/consent/open-shadow.js',
       'shorts/shorts': 'extension/shorts/shorts.js',
       'popup/popup': 'extension/popup/popup.js',
     },
@@ -103,6 +105,8 @@ async function buildTarget(name, data) {
     format: 'iife',
     target: t.esbuild,
     legalComments: 'none',
+    // Where the extension fetches newer data from (D6). Empty = bundled data only.
+    define: { __DATA_URL__: JSON.stringify(process.env.DECLUTTER_DATA_URL ?? '') },
     logLevel: 'warning',
   });
 

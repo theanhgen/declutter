@@ -1,0 +1,38 @@
+{
+  "name": "cz-bauhaus",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*bauhaus\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///div[contains(@class,'cookie-modal-wrap')]//a[contains(., 'zamítnout')]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".cookie-modal-wrap"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///div[contains(@class,'cookie-modal-wrap')]//button[contains(., 'Povolit vše')]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///div[contains(@class,'cookie-modal-wrap')]//a[contains(., 'zamítnout')]"
+    },
+    {
+      "waitForVisible": "xpath///div[contains(@class,'cookie-modal-wrap')]//a[contains(., 'zamítnout')]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".cookie-modal-wrap",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

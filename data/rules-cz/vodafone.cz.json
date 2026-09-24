@@ -1,0 +1,38 @@
+{
+  "name": "cz-vodafone",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*vodafone\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///div[contains(@class,'vfcc__overlay')]//button[contains(., 'jen nezbytné')]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".vfcc__overlay"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///div[contains(@class,'vfcc__overlay')]//button[contains(., 'Povolit vše')]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///div[contains(@class,'vfcc__overlay')]//button[contains(., 'jen nezbytné')]"
+    },
+    {
+      "waitForVisible": "xpath///div[contains(@class,'vfcc__overlay')]//button[contains(., 'jen nezbytné')]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".vfcc__overlay",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

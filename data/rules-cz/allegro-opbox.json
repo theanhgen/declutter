@@ -1,0 +1,38 @@
+{
+  "name": "cz-allegro-opbox",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(czc|allegro)\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#opbox-gdpr-consents-modal [data-role=\"reject-rodo\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#opbox-gdpr-consents-modal"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#opbox-gdpr-consents-modal [data-role=\"accept-consent\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#opbox-gdpr-consents-modal [data-role=\"reject-rodo\"]"
+    },
+    {
+      "waitForVisible": "#opbox-gdpr-consents-modal [data-role=\"reject-rodo\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#opbox-gdpr-consents-modal",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

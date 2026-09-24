@@ -1,0 +1,39 @@
+{
+  "name": "cz-kb",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*kb\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-testid=\"cookie-bar-decline-all\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".cookie-bar.active"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-testid=\"cookie-bar-accept-all\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-testid=\"cookie-bar-decline-all\"]"
+    },
+    {
+      "waitForVisible": ".cookie-bar.active [data-testid=\"cookie-bar-decline-all\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".cookie-bar",
+      "check": "none",
+      "timeout": 3000
+    }
+  ],
+  "_comment": "The bar closes with visibility:hidden (which autoconsent does not treat as hidden) and loses .active."
+}

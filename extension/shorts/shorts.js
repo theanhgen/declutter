@@ -3,21 +3,10 @@
 //  - adds selectors from the remote data copy (D6)
 //  - self-check: any /shorts/ link still visible gets hidden by its card and reported (red badge)
 import bundled from '../../data/shorts.json';
+import { redirectTarget } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const html = document.documentElement;
-
-const SHORT = /^\/shorts\/([A-Za-z0-9_-]+)/;
-const CHANNEL_SHORTS = /^(\/(?:@[^/]+|channel\/[^/]+|c\/[^/]+|user\/[^/]+))\/shorts\/?$/;
-
-export function redirectTarget(url) {
-  const u = new URL(url);
-  let m = u.pathname.match(SHORT);
-  if (m) return `${u.origin}/watch?v=${m[1]}`;
-  m = u.pathname.match(CHANNEL_SHORTS);
-  if (m) return `${u.origin}${m[1]}/videos`;
-  return null;
-}
 
 let enabled = true;
 let cards = bundled.cards;

@@ -1,0 +1,38 @@
+{
+  "name": "cz-regiojet",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*regiojet\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "button[data-id=\"reject-cookies\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "button[data-id=\"reject-cookies\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "button[data-id=\"accept-cookies\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "button[data-id=\"reject-cookies\"]"
+    },
+    {
+      "waitForVisible": "button[data-id=\"reject-cookies\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "button[data-id=\"reject-cookies\"]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "cz-pilulka",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*pilulka\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///div[contains(@class,'cookiebar')]//button[contains(., 'Odmítnout')]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".cookiebar"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".cookiebar [data-cy=\"accept-cookies\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///div[contains(@class,'cookiebar')]//button[contains(., 'Odmítnout')]"
+    },
+    {
+      "waitForVisible": "xpath///div[contains(@class,'cookiebar')]//button[contains(., 'Odmítnout')]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".cookiebar",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "name": "cz-seznam-cmp",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(mapy\\.com|mapy\\.cz|kupi\\.cz)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "div.szn-cmp-dialog-container"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": [
+        "div.szn-cmp-dialog-container",
+        "[data-testid=\"button-reject\"], [data-testid=\"button-next\"], [data-testid=\"button-agree\"]"
+      ],
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": [
+        "div.szn-cmp-dialog-container",
+        "[data-testid=\"button-agree\"]"
+      ]
+    }
+  ],
+  "optOut": [
+    {
+      "if": {
+        "visible": [
+          "div.szn-cmp-dialog-container",
+          "[data-testid=\"button-reject\"]"
+        ]
+      },
+      "then": [
+        {
+          "waitForThenClick": [
+            "div.szn-cmp-dialog-container",
+            "[data-testid=\"button-reject\"]"
+          ],
+          "retry": 4,
+          "retryInterval": 800
+        }
+      ],
+      "else": [
+        {
+          "waitForThenClick": [
+            "div.szn-cmp-dialog-container",
+            "[data-testid=\"button-next\"]"
+          ],
+          "retry": 4,
+          "retryInterval": 800
+        },
+        {
+          "waitForThenClick": [
+            "div.szn-cmp-dialog-container",
+            "[data-testid=\"button-reject-all\"]"
+          ],
+          "timeout": 5000,
+          "retry": 4,
+          "retryInterval": 800
+        }
+      ]
+    },
+    {
+      "waitForVisible": [
+        "div.szn-cmp-dialog-container",
+        "[data-testid=\"button-reject\"], [data-testid=\"button-next\"], [data-testid=\"button-agree\"]"
+      ],
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": [
+        "div.szn-cmp-dialog-container",
+        "[data-testid=\"button-reject\"], [data-testid=\"button-next\"], [data-testid=\"button-agree\"]"
+      ],
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

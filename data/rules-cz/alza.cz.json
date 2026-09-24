@@ -1,0 +1,38 @@
+{
+  "name": "cz-alza",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*alza\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".js-cookies-info .js-cookies-info-reject"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".js-cookies-info"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".js-cookies-info .js-cookies-info-accept"
+    }
+  ],
+  "optOut": [
+    {
+      "eval": "DECLUTTER_ALZA_REJECT"
+    },
+    {
+      "waitForVisible": ".js-cookies-info",
+      "check": "none",
+      "timeout": 3000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".js-cookies-info",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+name: Declutter
+options:
+  bundleIdPrefix: com.theanhgen
+  deploymentTarget:
+    macOS: "14.0"
+  # Must be >= the Xcode the project is opened with, or Xcode offers "Update to recommended
+  # settings". Never accept it: it edits the generated pbxproj, which xcodegen discards.
+  xcodeVersion: "27.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 28DMV2MR8T
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    ENABLE_HARDENED_RUNTIME: "YES"
+
+targets:
+  Declutter:
+    type: application
+    platform: macOS
+    sources: [App]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.theanhgen.declutter
+        CODE_SIGN_ENTITLEMENTS: App/Declutter.entitlements
+        GENERATE_INFOPLIST_FILE: "YES"
+        INFOPLIST_KEY_CFBundleDisplayName: Declutter
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+    dependencies:
+      - target: DeclutterExtension
+        embed: true
+        codeSign: true
+
+  DeclutterExtension:
+    type: app-extension
+    platform: macOS
+    sources: [Extension]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.theanhgen.declutter.extension
+        CODE_SIGN_ENTITLEMENTS: Extension/DeclutterExtension.entitlements
+        GENERATE_INFOPLIST_FILE: "YES"
+        INFOPLIST_KEY_CFBundleDisplayName: Declutter
+        # The run-script phase reads ../build/safari, outside the sandboxed script inputs.
+        ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+    info:
+      path: Extension/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.Safari.web-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
+    frameworks: []
+    dependencies:
+      - sdk: SafariServices.framework
+    postBuildScripts:
+      # The web extension is whatever `npm run build` put in build/safari. Copied as a tree so the
+      # folder layout (shorts/, consent/, …) survives; Xcode resource groups would flatten it.
+      - name: Copy web extension
+        basedOnDependencyAnalysis: false
+        script: |
+          set -euo pipefail
+          SRC="${PROJECT_DIR}/../build/safari"
+          [ -f "$SRC/manifest.json" ] || { echo "error: $SRC/manifest.json missing - run npm run build first"; exit 1; }
+          DEST="${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
+          mkdir -p "$DEST"
+          rsync -a --delete --exclude Info.plist "$SRC/" "$DEST/"
+          # ~/Desktop is in iCloud; the xattrs it adds make codesign fail ("detritus not allowed").
+          xattr -cr "$DEST"

@@ -1,0 +1,35 @@
+{
+  "name": "liferay-cookies-banner",
+  "detectCmp": [
+    {
+      "exists": "#_com_liferay_cookies_banner_web_portlet_CookiesBannerPortlet_declineAllButton"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#_com_liferay_cookies_banner_web_portlet_CookiesBannerPortlet_declineAllButton"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#_com_liferay_cookies_banner_web_portlet_CookiesBannerPortlet_acceptAllButton"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#_com_liferay_cookies_banner_web_portlet_CookiesBannerPortlet_declineAllButton"
+    },
+    {
+      "waitForVisible": "#_com_liferay_cookies_banner_web_portlet_CookiesBannerPortlet_declineAllButton",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#_com_liferay_cookies_banner_web_portlet_CookiesBannerPortlet_declineAllButton",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

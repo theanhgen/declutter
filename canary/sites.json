@@ -1,0 +1,174 @@
+{
+ "_comment": "expect: done = banner shows and must be refused; clear = no banner may be left visible; wall = consent-or-pay wall, must be left alone.",
+ "sites": [
+  {
+   "host": "www.seznam.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.novinky.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.sreality.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.idnes.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.blesk.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.aktualne.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.lupa.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "mapy.com",
+   "expect": "done"
+  },
+  {
+   "host": "www.kupi.cz",
+   "expect": "clear",
+   "note": "Seznam shares the choice across its sites: after mapy.com is refused in the same run, kupi shows nothing. mapy.com covers the rule."
+  },
+  {
+   "host": "www.denik.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.heureka.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.csfd.cz",
+   "expect": "done"
+  },
+  {
+   "host": "tn.nova.cz",
+   "expect": "done"
+  },
+  {
+   "host": "idos.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.forum24.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.irozhlas.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.jobs.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.datart.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.rohlik.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.notino.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.dm.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.o2.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.tescoma.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.csob.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.bezrealitky.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.bazos.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.alza.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.czc.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.kosik.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.lekarna.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.cd.cz",
+   "expect": "done"
+  },
+  {
+   "host": "regiojet.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.ceskaposta.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.kb.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.vodafone.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.mironet.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.bauhaus.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.pilulka.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.bonprix.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.info.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.t-mobile.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.ceskatelevize.cz",
+   "expect": "done"
+  }
+ ]
+}

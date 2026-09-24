@@ -1,20 +1,25 @@
 // Background: settings, data (bundled + remote, D6), autoconsent wiring, per-tab status and badge.
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
+import { declutterSnippets } from './consent/snippets.js';
+import { badgeFor, hostMatches, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
+Object.assign(evalSnippets, declutterSnippets);
 
 const DEFAULT_SETTINGS = {
   shorts: true,
   consent: true,
-  // Remote copy of build/data.json. Empty = use the bundled copy only.
-  dataUrl: '',
+  // Remote copy of build/data.json, baked in at build time (DECLUTTER_DATA_URL). Empty = bundled copy only.
+  // eslint-disable-next-line no-undef
+  dataUrl: __DATA_URL__,
   // Hosts where the consent module stays out (user's own choice, on top of the walls).
   exceptions: [],
+  // autoconsent's own console logging, for diagnosing a site (canary: DEBUG=1).
+  debug: false,
 };
 const DATA_REFRESH_MINUTES = 12 * 60;
-const STUCK_AFTER_MS = 15000;
 
-export async function getSettings() {
+async function getSettings() {
   const { settings } = await api.storage.local.get('settings');
   return { ...DEFAULT_SETTINGS, ...settings };
 }
@@ -26,14 +31,7 @@ async function getBundledData() {
   return bundledData;
 }
 
-export function validData(d) {
-  return !!d && d.schema === 1 && typeof d.generated === 'string' &&
-    Array.isArray(d.shorts?.hide) && Array.isArray(d.shorts?.cards) &&
-    Array.isArray(d.consent?.walls) && Array.isArray(d.consent?.rules) &&
-    Array.isArray(d.consent?.disabledCmps);
-}
-
-export async function getData() {
+async function getData() {
   const bundled = await getBundledData();
   const { remoteData } = await api.storage.local.get('remoteData');
   return validData(remoteData) && remoteData.generated > bundled.generated ? remoteData : bundled;
@@ -59,9 +57,6 @@ async function getCompactRules() {
   return compactRules;
 }
 
-export const hostMatches = (host, domains) =>
-  domains.some((d) => host === d || host.endsWith('.' + d));
-
 // ---- per-tab status (session storage survives the worker being suspended) ----
 const tabKey = (tabId) => `tab-${tabId}`;
 async function getTab(tabId) {
@@ -74,14 +69,6 @@ async function setTab(tabId, patch, reset = false) {
   return next;
 }
 
-export function badgeFor(state, now = Date.now()) {
-  const stuck = state.consent === 'working' && now - (state.since ?? now) > STUCK_AFTER_MS;
-  if (state.shortsLeak > 0) return { text: '!', color: '#d93025', title: `Declutter: ${state.shortsLeak} Shorts link(s) got past the selectors` };
-  if (state.consent === 'failed' || stuck) return { text: '!', color: '#d93025', title: `Declutter: cookie banner (${state.cmp}) not answered` };
-  if (state.consent === 'wall') return { text: '', color: '#777', title: 'Declutter: consent-or-pay wall, left to you' };
-  if (state.consent === 'done') return { text: '', color: '#1e8e3e', title: `Declutter: refused ${state.cmp}` };
-  return { text: '', color: '#777', title: 'Declutter' };
-}
 
 async function paintBadge(tabId, state) {
   const b = badgeFor(state);
@@ -111,7 +98,11 @@ async function onConsentMessage(msg, sender) {
       const wall = hostMatches(tabHost, data.consent.walls);
       const excepted = hostMatches(tabHost, settings.exceptions);
       if (frameId === 0) {
-        await setTab(tabId, wall ? { consent: 'wall' } : excepted ? { consent: 'paused' } : {}, true);
+        const prev = await getTab(tabId);
+        // Many sites reload themselves after the choice is saved; keep showing that it was refused.
+        const kept = prev.consent === 'done' && prev.host === tabHost && Date.now() - prev.doneAt < 60000
+          ? { consent: 'done', cmp: prev.cmp, doneAt: prev.doneAt } : {};
+        await setTab(tabId, { host: tabHost, ...(wall ? { consent: 'wall' } : excepted ? { consent: 'paused' } : kept) }, true);
       }
       const enabled = settings.consent && !wall && !excepted;
       const rules = {
@@ -122,7 +113,10 @@ async function onConsentMessage(msg, sender) {
       await api.tabs.sendMessage(tabId, {
         type: 'initResp',
         rules,
-        config: { enabled, autoAction: 'optOut', disabledCmps: data.consent.disabledCmps, enablePrehide: true, enableCosmeticRules: true },
+        config: {
+          enabled, autoAction: 'optOut', disabledCmps: data.consent.disabledCmps, enablePrehide: true, enableCosmeticRules: true,
+          logs: { lifecycle: settings.debug, rulesteps: settings.debug, detectionsteps: settings.debug, errors: true },
+        },
       }, { frameId });
       break;
     }
@@ -148,7 +142,7 @@ async function onConsentMessage(msg, sender) {
       if (!msg.result) await setTab(tabId, { consent: 'failed', cmp: msg.cmp });
       break;
     case 'autoconsentDone':
-      await setTab(tabId, { consent: 'done', cmp: msg.cmp });
+      await setTab(tabId, { consent: 'done', cmp: msg.cmp, doneAt: Date.now() });
       break;
     case 'autoconsentError':
       console.warn('declutter: autoconsent error', msg.details);

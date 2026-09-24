@@ -1,0 +1,38 @@
+{
+  "name": "cz-bonprix",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*bonprix\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[id$=\"_inlineRejectBar_btn\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[id$=\"_bar_holder\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[id$=\"_acceptAllBar_btn\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[id$=\"_inlineRejectBar_btn\"]"
+    },
+    {
+      "waitForVisible": "[id$=\"_inlineRejectBar_btn\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "[id$=\"_bar_holder\"]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}
