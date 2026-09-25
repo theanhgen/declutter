@@ -40,7 +40,7 @@ struct TipJarView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("tip jar").font(.system(.headline, design: .monospaced))
-            Text(jar.thanks ? "thank you." : "Declutter is free. If it saves you clicks, a tip keeps the rules up to date.")
+            Text(jar.thanks ? "thank you." : "declutter is free. If it saves you clicks, a tip keeps the rules up to date.")
                 .font(.system(.callout, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

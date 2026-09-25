@@ -17,4 +17,4 @@ xcodebuild -project safari/Declutter.xcodeproj -scheme Declutter-iOS -configurat
 APP="$DD/Build/Products/Debug-iphoneos/Declutter.app"
 codesign --verify --deep --strict "$APP"
 xcrun devicectl device install app --device "$DEVICE" "$APP" >/dev/null
-echo "Installed on $DEVICE. iPhone: Settings → Apps → Safari → Extensions → Declutter."
+echo "Installed on $DEVICE. iPhone: Settings → Apps → Safari → Extensions → declutter."

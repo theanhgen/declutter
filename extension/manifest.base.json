@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Declutter",
+  "name": "declutter",
   "description": "Hides YouTube Shorts and answers cookie banners the way you choose. Nothing leaves your browser.",
   "permissions": [
     "storage",
@@ -18,7 +18,7 @@
     "128": "icons/128.png"
   },
   "action": {
-    "default_title": "Declutter",
+    "default_title": "declutter",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/16.png",
@@ -31,7 +31,7 @@
   },
   "commands": {
     "_execute_action": {
-      "description": "Open Declutter"
+      "description": "Open declutter"
     }
   },
   "content_scripts": [

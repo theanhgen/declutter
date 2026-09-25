@@ -29,8 +29,8 @@ tracking, and reviewers read "clicks agree to tracking by default" as a dark pat
 
 ## Name
 
-`Declutter: Shorts & Cookie Banners` (the bare name "Declutter" is likely taken on at least one store; check
-before submitting. The manifest `name` stays `Declutter`.)
+`declutter: shorts & cookies` (the bare name "declutter" is likely taken on at least one store; check
+before submitting. The manifest `name` stays `declutter`.)
 
 ## Short description (≤132 chars, Chrome "summary")
 
@@ -38,7 +38,7 @@ Hides YouTube Shorts and answers cookie banners the way you choose. Nothing leav
 
 ## Long description
 
-Declutter does two things, both entirely inside your browser.
+declutter does two things, both entirely inside your browser.
 
 YOUTUBE SHORTS
 Removes the Shorts shelf, the Shorts tab and Shorts in search and subscriptions, on desktop and mobile
@@ -52,13 +52,13 @@ settings, and elsewhere a mix is answered by refusing.
 • per site: refuse, accept, or leave the banner alone
 • works on sites worldwide: hundreds of consent platforms (via DuckDuckGo's open-source autoconsent) plus
   its own rules for sites autoconsent misses
-• pay walls ("agree to tracking or subscribe") are never hidden or refused; Declutter shows a badge and
+• pay walls ("agree to tracking or subscribe") are never hidden or refused; declutter shows a badge and
   lets you decide, or agrees automatically if you turn that on
 • a counter of clicks saved, and a "not handled right" list you keep locally
 
 PRIVACY
 No account, no analytics, no servers. Settings, counters and your reported-sites list stay in the
-browser's extension storage. The only network request Declutter itself makes is fetching rule lists you add
+browser's extension storage. The only network request declutter itself makes is fetching rule lists you add
 yourself in settings.
 
 Open source (MIT): https://github.com/theanhgen/declutter
