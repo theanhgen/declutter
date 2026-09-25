@@ -21,6 +21,7 @@ app generated with xcodegen (team `28DMV2MR8T`). Tests and canary: Playwright's 
 - Unit: `npm test` (builds first)
 - E2E smoke (live sites): `npm run test:e2e` · walls: `npm run test:walls` · features: `npm run test:features` · remote data: `node test/remote-data.mjs`
 - Canary: `npm run canary` (all) · `node canary/run.mjs <host> …` (subset, no alert)
+- Xcode: `safari.sh`/`ios.sh` use 27.2 beta; `scripts/archive.sh` (App Store) uses release Xcode, since beta builds are rejected
 - Safari: `npm run safari` (build, sign, install `~/Applications/Declutter.app`)
 - iPhone: `npm run ios` (build, sign, install on a paired iPhone; `IPHONE=<udid>` to pick one) · mobile test: `npm run test:mobile`
 - Load in Chrome: `chrome://extensions` → Developer mode → Load unpacked → `build/chrome`

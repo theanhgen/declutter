@@ -232,6 +232,8 @@ certificate; the team already has one for App Store work).
 - **Where remote data is hosted** (D6). Mechanism done: build with `DECLUTTER_DATA_URL=<url>` and publish
   `build/data.json` there; the extension refetches every 12 h. Options: raw URL of a public GitHub repo/gist, or
   an existing server over Tailscale Funnel. Not decided — it publishes the data file.
+- **Which tip link** (`DECLUTTER_TIP_URL`). Parked 2026-09-24: fee research and leaning in
+  `research/tip-fees.md` (Revolut Business or Stripe link + Czech QR). Not decided.
 - ~~Can autoconsent take extra rules at runtime from our background script (for D6)?~~ **Answered
   2026-09-23**: yes, via the `initResp` message. See D6 above.
 - The second Mac: a development-signed build may not run there. The documented routes are Developer ID +

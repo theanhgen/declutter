@@ -2,6 +2,8 @@
 # Build the web extension, the signed Safari container app, and install it to ~/Applications.
 # DerivedData stays outside ~/Desktop: iCloud's xattrs there make codesign fail.
 set -euo pipefail
+# Xcode 27.2 beta for local builds (override: DEVELOPER_DIR=…).
+export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode-27.2-beta.app/Contents/Developer}"
 cd "$(dirname "$0")/.."
 node build.mjs safari
 (cd safari && xcodegen generate -q)
