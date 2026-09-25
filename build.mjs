@@ -222,10 +222,26 @@ async function buildTarget(name, data) {
 }
 
 // node build.mjs --app-icon: regenerate the iPhone home-screen icon (1024, opaque) from the same glyph.
+// The Mac icon set is downscaled from the same 1024 with sips (full-bleed square; macOS applies its own mask).
 if (process.argv.includes('--app-icon')) {
   const out = path.join(root, 'safari/iOSApp/Assets.xcassets/AppIcon.appiconset/icon.png');
   fs.writeFileSync(out, png(1024, { background: [247, 247, 247], scale: 0.62, ss: 2 }));
   console.log(`wrote ${path.relative(root, out)}`);
+  const { execFileSync } = await import('node:child_process');
+  const mac = path.join(root, 'safari/App/Assets.xcassets/AppIcon.appiconset');
+  fs.mkdirSync(mac, { recursive: true });
+  const images = [];
+  for (const pt of [16, 32, 128, 256, 512]) {
+    for (const scale of [1, 2]) {
+      const file = `icon_${pt}x${pt}@${scale}x.png`, px = pt * scale;
+      if (px === 1024) fs.copyFileSync(out, path.join(mac, file));
+      else execFileSync('sips', ['-z', String(px), String(px), out, '--out', path.join(mac, file)], { stdio: 'ignore' });
+      images.push({ filename: file, idiom: 'mac', scale: `${scale}x`, size: `${pt}x${pt}` });
+    }
+  }
+  fs.writeFileSync(path.join(mac, 'Contents.json'), JSON.stringify({ images, info: { author: 'xcode', version: 1 } }, null, 2));
+  fs.writeFileSync(path.join(root, 'safari/App/Assets.xcassets/Contents.json'), JSON.stringify({ info: { author: 'xcode', version: 1 } }, null, 2));
+  console.log(`wrote ${path.relative(root, mac)} (${images.length} sizes)`);
   process.exit(0);
 }
 

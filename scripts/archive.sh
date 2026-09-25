@@ -5,6 +5,8 @@
 #   xcrun altool --upload-package … / Transporter with the exported .pkg/.ipa.
 #   scripts/archive.sh            -> both platforms
 #   scripts/archive.sh ios|macos  -> one
+#   UPLOAD=1 scripts/archive.sh   -> also upload to App Store Connect (processing, then TestFlight / attach to a
+#                                    version; nothing is submitted for review)
 set -euo pipefail
 # App Store Connect rejects builds from a beta Xcode (non-RC), so store builds use the release Xcode.
 # XCODE=beta forces the beta (local testing only; not submittable).
@@ -26,7 +28,7 @@ cat > "$OPTS" <<PLIST
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>method</key><string>app-store-connect</string>
-  <key>destination</key><string>export</string>
+  <key>destination</key><string>$([ "${UPLOAD:-}" = 1 ] && echo upload || echo export)</string>
   <key>teamID</key><string>28DMV2MR8T</string>
   <key>signingStyle</key><string>automatic</string>
 </dict></plist>
@@ -43,5 +45,14 @@ for p in ${1:-macos ios}; do
     -archivePath "$archive" "${AUTH[@]}" -quiet clean archive
   xcodebuild -exportArchive -archivePath "$archive" -exportPath "$DIST/$p" -exportOptionsPlist "$OPTS" \
     "${AUTH[@]}" -quiet
-  echo "$p: archive $archive, export $(ls "$DIST/$p" | grep -E '\.(pkg|ipa)$')"
+  if [ "${UPLOAD:-}" = 1 ]; then echo "$p: archive $archive, uploaded"
+  else echo "$p: archive $archive, export $(ls "$DIST/$p" | grep -E '\.(pkg|ipa)$')"; fi
+done
+# Archiving leaves a copy of the Mac app in DerivedData, and Safari lists every registered copy as its own
+# extension. Unregister and delete it so only ~/Applications/Declutter.app remains.
+LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+for app in "$HOME"/Library/Developer/Xcode/DerivedData/Declutter-*/Build/Intermediates.noindex/ArchiveIntermediates/*/InstallationBuildProductsLocation/Applications/Declutter.app; do
+  [ -d "$app" ] || continue
+  "$LSREGISTER" -u "$app" 2>/dev/null || true
+  rm -rf "$app"
 done
