@@ -17,7 +17,10 @@ struct ContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("declutter").font(.title2.bold())
+            HStack(spacing: 10) {
+                Image("Logo").resizable().scaledToFit().frame(width: 28, height: 28)
+                Text("declutter").font(.title2.bold())
+            }
             Text(status)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

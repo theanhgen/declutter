@@ -23,8 +23,10 @@
     -webkit-font-smoothing: antialiased;
   }
   html.ios body { width: auto; padding: 16px 16px 24px; font-size: 15px; }
-  header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 4px 12px; }
-  h1 { margin: 0; font-size: 1.35em; font-weight: normal; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 4px 12px; }
+  h1 { margin: 0; font-size: 1.35em; font-weight: normal; display: flex; align-items: center; gap: 8px; }
+  /* The rose d from the app icon, sized to the wordmark's cap height. */
+  .logo { width: 1.1em; height: 1.1em; flex: none; }
   #host { color: var(--muted); font-size: .85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .caption { margin: 16px 12px 6px; color: var(--muted); font-size: .8em; text-transform: lowercase; }
   .group { background: var(--card); border-radius: 12px; overflow: hidden; }
@@ -67,7 +69,7 @@
 </style>
 </head>
 <body>
-  <header><h1>declutter</h1><span id="host"></span></header>
+  <header><h1><img src="d.svg" alt="" class="logo">declutter</h1><span id="host"></span></header>
 
   <div class="group">
     <label class="row"><span class="label">hide shorts</span><input type="checkbox" class="switch" id="shorts"></label>

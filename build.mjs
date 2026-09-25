@@ -205,6 +205,7 @@ async function buildTarget(name, data) {
     fs.copyFileSync(path.join(root, from), path.join(out, to));
   };
   copy('extension/popup/popup.html', 'popup/popup.html');
+  copy('extension/popup/d.svg', 'popup/d.svg');
   copy('extension/options/options.html', 'options/options.html');
   copy('extension/shorts/dnr-rules.json', 'shorts/dnr-rules.json');
   copy('node_modules/@duckduckgo/autoconsent/rules/compact-rules.json', 'consent/compact-rules.json');

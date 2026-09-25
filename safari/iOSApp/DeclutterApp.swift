@@ -12,8 +12,11 @@ struct DeclutterApp: App {
 struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("declutter")
-                .font(.system(.largeTitle, design: .monospaced))
+            HStack(spacing: 12) {
+                Image("Logo").resizable().scaledToFit().frame(width: 40, height: 40)
+                Text("declutter")
+                    .font(.system(.largeTitle, design: .monospaced))
+            }
             Text("Hides YouTube Shorts and answers cookie banners in Safari.")
                 .font(.system(.body, design: .monospaced))
             VStack(alignment: .leading, spacing: 8) {
