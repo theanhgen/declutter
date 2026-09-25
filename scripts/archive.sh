@@ -11,6 +11,11 @@ set -euo pipefail
 if [ "${XCODE:-}" = beta ]; then export DEVELOPER_DIR=/Applications/Xcode-27.2-beta.app/Contents/Developer
 else export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"; fi
 cd "$(dirname "$0")/.."
+# Sign with the App Store Connect API key (~/.appstoreconnect/asc.env), not the Xcode account session,
+# which xcodebuild does not always see ("No Accounts").
+source "$HOME/.appstoreconnect/asc.env"
+AUTH=(-allowProvisioningUpdates -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID"
+  -authenticationKeyIssuerID "$ASC_ISSUER_ID")
 node build.mjs --store safari
 (cd safari && xcodegen generate -q && rm -rf "Declutter 2.xcodeproj")
 OUT="$HOME/Library/Developer/Xcode/Archives/declutter"   # off ~/Desktop: iCloud xattrs break codesign
@@ -35,8 +40,8 @@ for p in ${1:-macos ios}; do
   archive="$OUT/$p.xcarchive"
   rm -rf "$archive" "$DIST/$p"
   xcodebuild -project safari/Declutter.xcodeproj -scheme "$scheme" -configuration Release -destination "$dest" \
-    -archivePath "$archive" -allowProvisioningUpdates -quiet clean archive
+    -archivePath "$archive" "${AUTH[@]}" -quiet clean archive
   xcodebuild -exportArchive -archivePath "$archive" -exportPath "$DIST/$p" -exportOptionsPlist "$OPTS" \
-    -allowProvisioningUpdates -quiet
+    "${AUTH[@]}" -quiet
   echo "$p: archive $archive, export $(ls "$DIST/$p" | grep -E '\.(pkg|ipa)$')"
 done

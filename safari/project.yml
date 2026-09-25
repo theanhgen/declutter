@@ -85,7 +85,7 @@ targets:
       storeKitConfiguration: Shared/Declutter.storekit
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.theanhgen.declutter.ios
+        PRODUCT_BUNDLE_IDENTIFIER: com.theanhgen.declutter  # same as macOS: one App Store record (universal purchase)
         PRODUCT_NAME: Declutter
         GENERATE_INFOPLIST_FILE: "YES"
         INFOPLIST_KEY_CFBundleDisplayName: Declutter
@@ -109,7 +109,7 @@ targets:
     sources: [Extension/SafariWebExtensionHandler.swift]
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.theanhgen.declutter.ios.extension
+        PRODUCT_BUNDLE_IDENTIFIER: com.theanhgen.declutter.extension
         PRODUCT_NAME: DeclutterExtension
         GENERATE_INFOPLIST_FILE: "YES"
         INFOPLIST_KEY_CFBundleDisplayName: Declutter

@@ -105,8 +105,8 @@ Chrome also wants a 440x280 promo tile (optional) and the 128px icon (in the zip
 - Needs a paid Apple Developer Program membership (the machine only has an "Apple Development"
   certificate; distribution needs "Apple Distribution", which Xcode creates on first archive if the team is
   paid).
-- App Store Connect: new app record for the macOS container (`com.theanhgen.declutter`) and the iOS one
-  (`com.theanhgen.declutter.ios`), or one universal purchase; privacy "nutrition label": Data Not Collected.
+- App Store Connect: one app record, platforms iOS + macOS, bundle ID `com.theanhgen.declutter` on both
+  (universal purchase; the extensions are `….extension` on both). Privacy "nutrition label": Data Not Collected.
 - Build the store variant first (`node build.mjs --store safari`), then Archive in Xcode.
 
 ## Before submitting (checklist)
