@@ -50,6 +50,15 @@ struct TipJarView: View {
                         .buttonStyle(.bordered)
                         .font(.system(.body, design: .monospaced))
                 }
+                #if DEBUG
+                // Debug builds launched outside Xcode have no StoreKit config and the products are not live yet;
+                // show the prices (from Declutter.storekit) so the layout can be seen and screenshotted.
+                if jar.products.isEmpty {
+                    ForEach(["$0.99", "$2.99", "$4.99"], id: \.self) { price in
+                        Button(price) {}.buttonStyle(.bordered).font(.system(.body, design: .monospaced))
+                    }
+                }
+                #endif
             }
         }
         .task { await jar.load() }

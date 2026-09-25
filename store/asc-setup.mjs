@@ -103,3 +103,57 @@ for (const v of versions) {
     attributes: { copyright: '2026 theanhgen' } } });
   console.log(`${v.attributes.platform} ${v.attributes.versionString}: text set`);
 }
+
+// ---- age rating: none of the content descriptors apply (a Safari extension + a settings screen) ----
+const decl = (await asc('GET', `/v1/appInfos/${info.id}/ageRatingDeclaration`)).data;
+const level = 'NONE';
+await asc('PATCH', `/v1/ageRatingDeclarations/${decl.id}`, { data: { type: 'ageRatingDeclarations', id: decl.id, attributes: {
+  alcoholTobaccoOrDrugUseOrReferences: level, contests: level, gamblingSimulated: level, gunsOrOtherWeapons: level,
+  horrorOrFearThemes: level, matureOrSuggestiveThemes: level, medicalOrTreatmentInformation: level,
+  profanityOrCrudeHumor: level, sexualContentGraphicAndNudity: level, sexualContentOrNudity: level,
+  violenceCartoonOrFantasy: level, violenceRealistic: level, violenceRealisticProlongedGraphicOrSadistic: level,
+  advertising: false, gambling: false, healthOrWellnessTopics: false, lootBox: false, messagingAndChat: false,
+  parentalControls: false, ageAssurance: false, socialMedia: false, unrestrictedWebAccess: false,
+  userGeneratedContent: false,
+} } });
+console.log('age rating: all none');
+
+// ---- content rights: no third-party content (autoconsent is code, MPL-2.0) ----
+await asc('PATCH', `/v1/apps/${APP}`, { data: { type: 'apps', id: APP,
+  attributes: { contentRightsDeclaration: 'DOES_NOT_USE_THIRD_PARTY_CONTENT' } } });
+console.log('content rights: does not use third-party content');
+
+// ---- price: free ----
+const freePoint = (await all(`/v1/apps/${APP}/appPricePoints?filter[territory]=USA&limit=200`))
+  .find((p) => Number(p.attributes.customerPrice) === 0);
+await asc('POST', '/v1/appPriceSchedules', {
+  data: { type: 'appPriceSchedules', relationships: {
+    app: { data: { type: 'apps', id: APP } },
+    baseTerritory: { data: { type: 'territories', id: 'USA' } },
+    manualPrices: { data: [{ type: 'appPrices', id: '${p0}' }] } } },
+  included: [{ type: 'appPrices', id: '${p0}', attributes: { startDate: null },
+    relationships: { appPricePoint: { data: { type: 'appPricePoints', id: freePoint.id } } } }],
+});
+console.log('price: free');
+
+// ---- availability: every territory, and new ones automatically ----
+try {
+  await asc('POST', '/v2/appAvailabilities', {
+    data: { type: 'appAvailabilities', attributes: { availableInNewTerritories: true }, relationships: {
+      app: { data: { type: 'apps', id: APP } },
+      territoryAvailabilities: { data: territories.map((t, i) => ({ type: 'territoryAvailabilities', id: `\${t${i}}` })) } } },
+    included: territories.map((t, i) => ({ type: 'territoryAvailabilities', id: `\${t${i}}`, attributes: { available: true },
+      relationships: { territory: { data: t } } })),
+  });
+  console.log(`availability: ${territories.length} territories`);
+} catch (e) { if (/already|exists|409/.test(e.message)) console.log('availability: already set'); else throw e; }
+
+// ---- attach the newest valid build to each 1.0 version ----
+const builds = (await asc('GET', `/v1/builds?filter[app]=${APP}&filter[processingState]=VALID&include=preReleaseVersion&sort=-uploadedDate`));
+const pre = Object.fromEntries((builds.included ?? []).map((v) => [v.id, v.attributes]));
+for (const v of versions) {
+  const b = builds.data.find((b) => pre[b.relationships.preReleaseVersion.data.id]?.platform === v.attributes.platform);
+  if (!b) { console.log(`${v.attributes.platform}: no valid build yet`); continue; }
+  await asc('PATCH', `/v1/appStoreVersions/${v.id}/relationships/build`, { data: { type: 'builds', id: b.id } });
+  console.log(`${v.attributes.platform} ${v.attributes.versionString}: build ${b.attributes.version} attached`);
+}
