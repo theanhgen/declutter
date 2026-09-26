@@ -13,11 +13,16 @@ export function validData(d) {
     Array.isArray(d.consent?.disabledCmps);
 }
 
+// The pay-wall badge shows the site's own currency, read from its country domain. Consent-or-pay walls are a
+// GDPR-era European pattern, so a .com or unknown domain falls back to the euro.
+const CURRENCY = { cz: 'Kč', uk: '£', pl: 'zł', ch: 'CHF', hu: 'Ft', se: 'kr', dk: 'kr', no: 'kr', ro: 'lei', bg: 'лв', us: '$', ca: '$', au: '$' };
+export const currencyFor = (host = '') => CURRENCY[host.split('.').pop()] ?? '€';
+
 export function badgeFor(state, now = Date.now()) {
   const stuck = state.consent === 'working' && now - (state.since ?? now) > STUCK_AFTER_MS;
   if (state.shortsLeak > 0) return { text: '!', color: '#d93025', title: `declutter: ${state.shortsLeak} Shorts link(s) got past the selectors` };
   if (state.consent === 'failed' || stuck) return { text: '!', color: '#d93025', title: `declutter: cookie banner (${state.cmp}) not answered` };
-  if (state.consent === 'wall') return { text: 'Kč', color: '#e37400', title: 'declutter: consent-or-pay wall — agree or pay; accept from this menu' };
+  if (state.consent === 'wall') return { text: currencyFor(state.host), color: '#e37400', title: 'declutter: consent-or-pay wall — agree or pay; accept from this menu' };
   if (state.consent === 'choice') return { text: '', color: '#1e8e3e', title: `declutter: applied your choice (${state.adapter})` };
   if (state.consent === 'accepted') return { text: '', color: '#777', title: `declutter: accepted the pay wall (${state.cmp})` };
   if (state.consent === 'done') return { text: '', color: '#1e8e3e', title: `declutter: refused ${state.cmp}` };

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
-import { badgeFor, choiceMode, hostMatches, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, currencyFor, choiceMode, hostMatches, mergeData, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -31,8 +31,16 @@ test('badgeFor: problems are red, everything else is quiet', () => {
   assert.equal(badgeFor({ consent: 'working', since: 0 }, 20000).text, '!');
   assert.equal(badgeFor({ consent: 'working', since: 10000 }, 20000).text, '');
   assert.equal(badgeFor({ consent: 'done', cmp: 'x' }).text, '');
-  assert.equal(badgeFor({ consent: 'wall' }).text, 'Kč');
+  assert.equal(badgeFor({ consent: 'wall', host: 'www.seznam.cz' }).text, 'Kč');
+  assert.equal(badgeFor({ consent: 'wall', host: 'www.spiegel.de' }).text, '€');
   assert.equal(badgeFor({ consent: 'accepted', cmp: 'x' }).text, '');
+});
+
+test('currencyFor: country domain, euro otherwise', () => {
+  assert.equal(currencyFor('metro.co.uk'), '£');
+  assert.equal(currencyFor('elpais.com'), '€');
+  assert.equal(currencyFor('lemonde.fr'), '€');
+  assert.equal(currencyFor(undefined), '€');
 });
 
 test('validData rejects malformed remote payloads', () => {

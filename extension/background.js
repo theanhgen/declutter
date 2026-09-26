@@ -25,7 +25,7 @@ const DEFAULT_SETTINGS = {
   // Per-site choices: banners left alone (exceptions) or accepted (acceptSites). Everywhere else: refused.
   exceptions: [],
   acceptSites: [],
-  // Consent-or-pay walls: 'auto' (default; 'manual' in store builds, see build.mjs --store) = accept (Souhlasím) automatically; 'manual' = detect, show a Kč
+  // Consent-or-pay walls: 'auto' (default; 'manual' in store builds, see build.mjs --store) = accept (Souhlasím) automatically; 'manual' = detect, show a currency
   // badge, accept only when asked from the popup. Walls are never refused or hidden either way.
   walls: __WALLS_DEFAULT__,
   // autoconsent's own console logging, for diagnosing a site (canary: DEBUG=1).
