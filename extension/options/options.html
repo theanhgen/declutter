@@ -28,7 +28,8 @@
   }
   p { font-size: 14px; margin: 1em 0; }
   h1, h2 { margin: 1.5em 0 0; line-height: 1.2; font-weight: normal; text-transform: lowercase; }
-  h1 { margin-top: 0.25em; }
+  h1 { margin-top: 0.25em; display: flex; align-items: center; gap: 0.35em; }
+  h1 .logo { width: 0.95em; height: 0.95em; flex: none; }
   a:link, a:visited { color: var(--link); cursor: pointer; }
   a:active { color: gray; }
   /* A choice line: the current value is full-strength [bracketed]; the others are dimmed links. */
@@ -59,7 +60,7 @@
 </style>
 </head>
 <body>
-  <h1>declutter</h1>
+  <h1><img src="../popup/d.svg" alt="" class="logo">declutter</h1>
   <p>Hides YouTube Shorts and answers cookie banners the way you choose. Everything runs in your browser;
     nothing is sent anywhere.</p>
   <nav><a href="#youtube">youtube</a> / <a href="#choice">your choice</a> / <a href="#walls">pay walls</a> /
