@@ -1,0 +1,23 @@
+# Unit tests on every push to main and every PR. Pure Node (build + node --test), so a
+# Linux runner is enough. The e2e, walls and canary suites hit live sites through
+# Playwright and stay local.
+name: CI
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**/*.md', 'research/**', 'site/**', 'store/**']
+  pull_request:
+    paths-ignore: ['**/*.md', 'research/**', 'site/**', 'store/**']
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 26, cache: npm }
+      - run: npm ci
+      - run: npm test
