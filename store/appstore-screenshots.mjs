@@ -14,7 +14,7 @@ const DEVICES = {
 const SHOTS = [
   { name: '1-popup', title: 'cookie banners,\nanswered for you', body: 'Refuses tracking by default. Per site: refuse, accept or leave alone.' },
   { name: '2-choice', title: 'your choice,\ncategory by category', body: 'Allow only what you want. Applied through the banner’s own settings.', tab: 'choice' },
-  { name: '3-about', title: 'nothing leaves\nyour device', body: 'No account, no analytics, no server. Counters stay local.', tab: 'about' },
+  { name: '3-about', title: 'no tracking,\nno account', body: 'No analytics. Settings and counters stay on your device.', tab: 'about' },
 ];
 const out = path.join(root, 'dist/appstore-screenshots');
 fs.rmSync(out, { recursive: true, force: true });

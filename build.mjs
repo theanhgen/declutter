@@ -36,7 +36,7 @@ const TARGETS = {
       ...m,
       background: { scripts: ['background.js'] },
       browser_specific_settings: {
-        gecko: { id: 'declutter@theanhgen', strict_min_version: '142.0', data_collection_permissions: { required: ['none'] } },
+        gecko: { id: 'declutter@theanhgen', strict_min_version: '142.0', data_collection_permissions: { required: ['none'], optional: ['browsingActivity'] } },
         gecko_android: { strict_min_version: '142.0' }, // listed for Firefox for Android too
       },
     }),
@@ -194,6 +194,7 @@ async function buildTarget(name, data) {
     define: {
       __DATA_URL__: JSON.stringify(process.env.DECLUTTER_DATA_URL ?? ''),
       __WALLS_DEFAULT__: JSON.stringify(STORE ? 'manual' : 'auto'),
+      __TARGET__: JSON.stringify(name),
       // Tip link in settings. Never in Safari: App Store tips must be in-app purchases (the container app has them).
       __TIP_URL__: JSON.stringify(name === 'safari' ? '' : process.env.DECLUTTER_TIP_URL ?? ''),
     },

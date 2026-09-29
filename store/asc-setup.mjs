@@ -15,7 +15,7 @@ const TIPS = [
 
 const SUBTITLE = 'Hide Shorts, answer cookies'; // 30 chars max
 const KEYWORDS = 'cookie,consent,banner,gdpr,youtube,shorts,privacy,extension,reject,popup,tracking,block,safari';
-const PROMO = 'Free. Cookie banners answered the way you choose, YouTube Shorts gone. Nothing leaves your browser.';
+const PROMO = 'Free. Cookie banners answered the way you choose, YouTube Shorts gone. No tracking, no account.';
 const DESCRIPTION = `declutter is a Safari extension that does two things, entirely on your device.
 
 YOUTUBE SHORTS
@@ -29,7 +29,7 @@ Answers cookie-consent banners for you. By default it refuses everything that is
 • a counter of clicks saved, and a "not handled right" list you keep on your device
 
 PRIVACY
-No account, no analytics, no servers. Settings and counters stay in Safari's extension storage on your device.
+No account, no analytics, no tracking. Settings and counters stay in Safari's extension storage on your device. If a site is not handled right, you can choose to send its address (without query string) to the developer; nothing is sent otherwise.
 
 FREE
 Everything is free. If it saves you clicks, there is an optional tip jar in the app.

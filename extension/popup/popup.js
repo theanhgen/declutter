@@ -1,3 +1,5 @@
+import { reportUrl } from '../lib.js';
+
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 
@@ -81,6 +83,18 @@ async function main() {
     $('report').querySelector('.label').textContent = 'reported, thanks';
     $('report').disabled = true;
     $('reported').hidden = false;
+    // Offer to send it, showing exactly what goes out. Nothing is sent without this second press.
+    $('sendNote').textContent = `sends ${reportUrl(tab.url)}, what declutter saw here, and its version. nothing else.`;
+    $('sendNote').hidden = false;
+    $('send').hidden = false;
+  };
+  $('send').onclick = async () => {
+    // Firefox: sending a page address is optional data collection, granted in its own prompt (from this click).
+    if (__TARGET__ === 'firefox' && !(await api.permissions.request({ data_collection: ['browsingActivity'] }))) return;
+    $('send').disabled = true;
+    const ok = await api.runtime.sendMessage({ type: 'sendReport', tabId: tab.id });
+    $('send').querySelector('.label').textContent = ok ? 'sent, thanks' : 'could not send, try later';
+    if (!ok) $('send').disabled = false;
   };
 }
 main();

@@ -32,7 +32,7 @@ await shot.setContent(`<body style="margin:0;height:800px;display:flex;align-ite
   background:#f7f7f7;font-family:ui-monospace,'SF Mono',Menlo,monospace;color:#1a1a1a">
   <div style="max-width:420px"><div style="font-size:34px;line-height:1.2">cookie banners,<br>answered for you</div>
   <p style="font-size:17px;line-height:1.5;color:#737373">Refuses tracking by default, or applies the categories you
-  allow. Per-site accept / refuse / leave alone. Nothing leaves your browser.</p></div>
+  allow. Per-site accept / refuse / leave alone. No tracking.</p></div>
   <img src="data:image/png;base64,${popupPng.toString('base64')}" style="width:300px;border-radius:14px;
   box-shadow:0 10px 40px rgba(0,0,0,.14)"></body>`);
 await shot.screenshot({ path: path.join(out, '1-popup.png') });

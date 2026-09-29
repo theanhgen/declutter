@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
-import { badgeFor, currencyFor, choiceMode, hostMatches, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, currencyFor, reportUrl, choiceMode, hostMatches, mergeData, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -41,6 +41,10 @@ test('currencyFor: country domain, euro otherwise', () => {
   assert.equal(currencyFor('elpais.com'), '€');
   assert.equal(currencyFor('lemonde.fr'), '€');
   assert.equal(currencyFor(undefined), '€');
+});
+
+test('reportUrl drops the query string and fragment', () => {
+  assert.equal(reportUrl('https://www.idnes.cz/zpravy/a?utm=x&email=a@b.c#top'), 'https://www.idnes.cz/zpravy/a');
 });
 
 test('validData rejects malformed remote payloads', () => {

@@ -34,7 +34,7 @@ before submitting. The manifest `name` stays `declutter`.)
 
 ## Short description (≤132 chars, Chrome "summary")
 
-Hides YouTube Shorts and answers cookie banners the way you choose. Nothing leaves your browser.
+Hides YouTube Shorts and answers cookie banners the way you choose. No tracking, no account.
 
 ## Long description
 
@@ -57,8 +57,9 @@ settings, and elsewhere a mix is answered by refusing.
 • a counter of clicks saved, and a "not handled right" list you keep locally
 
 PRIVACY
-No account, no analytics, no servers. Settings, counters and your reported-sites list stay in the
-browser's extension storage. The only network request declutter itself makes is fetching rule lists you add
+No account, no analytics, no tracking. Settings, counters and your reported-sites list stay in the
+browser's extension storage. declutter sends something only when you ask: a site you choose to send to the
+developer (its address without query string, what declutter saw, the version), and rule lists you add
 yourself in settings.
 
 Open source (MIT): https://github.com/theanhgen/declutter
@@ -85,10 +86,11 @@ Reduce page clutter: hide YouTube Shorts and answer cookie-consent banners accor
 **Remote code:** No. All executed code is in the package. Rule lists are JSON data (selectors and click
 steps); they can reference bundled functions by name but cannot add code.
 
-**Data usage** (Chrome disclosure checkboxes): collects none of the listed data types. Not sold, not used
+**Data usage** (Chrome disclosure checkboxes): "Web history", only the address of a page the user explicitly
+chooses to send as a report (query string removed). Nothing else. Not sold, not used
 for anything unrelated to the single purpose, not used for creditworthiness.
 
-**Firefox** `data_collection_permissions: none` is set in the manifest.
+**Firefox** `data_collection_permissions`: `required: ['none']`, `optional: ['browsingActivity']`; the popup asks for it before the first send.
 
 ## Privacy policy URL
 

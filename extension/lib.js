@@ -29,6 +29,9 @@ export function badgeFor(state, now = Date.now()) {
   return { text: '', color: '#777', title: 'declutter' };
 }
 
+// What a sent report carries of the page address: no query string or fragment (they can hold tokens or emails).
+export const reportUrl = (url) => { const u = new URL(url); return `${u.origin}${u.pathname}`.slice(0, 500); };
+
 const SHORT = /^\/shorts\/([A-Za-z0-9_-]+)/;
 const CHANNEL_SHORTS = /^(\/(?:@[^/]+|channel\/[^/]+|c\/[^/]+|user\/[^/]+))\/shorts\/?$/;
 

@@ -2,7 +2,7 @@
 
 Free, open-source browser extension that hides YouTube Shorts and answers cookie-consent banners the way you
 choose: refuse by default, or allow only the categories you pick; per site: refuse, accept, or leave alone.
-Consent-or-pay walls are never hidden. Nothing leaves your browser: no account, no analytics, no server.
+Consent-or-pay walls are never hidden. Nothing leaves your browser unless you send a report: no account, no analytics, no tracking.
 
 Chrome, Edge, Opera, Brave, Vivaldi, Firefox (desktop and Android), Safari (Mac, iPhone, iPad). Works
 worldwide through DuckDuckGo's [autoconsent](https://github.com/duckduckgo/autoconsent), plus its own rule pack for sites it misses.

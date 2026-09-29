@@ -2,7 +2,7 @@
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, choiceMode, hostMatches, mergeData, validData } from './lib.js';
+import { badgeFor, choiceMode, hostMatches, mergeData, reportUrl, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -292,6 +292,22 @@ async function acceptWall(tabId) {
   return true;
 }
 
+// "send to developer": only when the user presses it in the popup, after seeing the address. Goes to an
+// insert-only Supabase table (supabase/migrations); the publishable key can add rows, never read them.
+const REPORTS_URL = 'https://wpsmgzihqgdmsrvzpcca.supabase.co/rest/v1/reports';
+const REPORTS_KEY = 'sb_publishable_TxwGZ6G_q388MjPCCrFs6w_s9nu8hvC';
+async function sendReport(tabId) {
+  const tab = await api.tabs.get(tabId);
+  const state = await getTab(tabId);
+  const res = await fetch(REPORTS_URL, {
+    method: 'POST',
+    headers: { apikey: REPORTS_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify({ url: reportUrl(tab.url), consent: state.consent ?? 'none', cmp: (state.cmp ?? '').slice(0, 60),
+      version: api.runtime.getManifest().version, browser: __TARGET__ }),
+  });
+  return res.ok;
+}
+
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'acceptWall') {
     acceptWall(msg.tabId).then(sendResponse, () => sendResponse(false));
@@ -299,6 +315,10 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
   if (msg.type === 'report') {
     report(msg.tabId).then(sendResponse, () => sendResponse(false));
+    return true;
+  }
+  if (msg.type === 'sendReport') {
+    sendReport(msg.tabId).then(sendResponse, () => sendResponse(false));
     return true;
   }
   if (msg.type === 'updateData') {
