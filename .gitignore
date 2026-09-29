@@ -58,3 +58,4 @@ canary/shots/
 tmp/
 canary/results/
 AGENTS.md
+supabase/.temp/
