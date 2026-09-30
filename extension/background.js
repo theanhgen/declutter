@@ -56,9 +56,20 @@ async function logAutoAccept(tabId, cmp) {
   await api.storage.session.set({ [wallLogKey(tabId)]: [...await wallLog(tabId), { family: wallFamily(cmp), at: Date.now() }] });
 }
 
-async function getSettings() {
-  const { settings } = await api.storage.local.get('settings');
-  return { ...DEFAULT_SETTINGS, ...settings };
+// Settings and merged data are read for every frame's init; keep them for the worker's lifetime and drop them
+// when storage changes (the listener below). Promises, so concurrent frames share one read. Treat as read-only.
+let settingsCache;
+let dataCache;
+api.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local') return;
+  if (changes.settings) settingsCache = null;
+  if (changes.remoteData) dataCache = null;
+});
+
+function getSettings() {
+  settingsCache ??= api.storage.local.get('settings').then(({ settings }) => ({ ...DEFAULT_SETTINGS, ...settings }));
+  settingsCache.catch(() => { settingsCache = null; });
+  return settingsCache;
 }
 
 // ---- data: bundled data.json merged with every rule list (D6) ----
@@ -69,10 +80,20 @@ async function getBundledData() {
 }
 
 // remoteData = the rule lists already merged together (also read by the Shorts content script).
-async function getData() {
-  const { remoteData } = await api.storage.local.get('remoteData');
-  return mergeData(await getBundledData(), validData(remoteData) ? remoteData : null);
+function getData() {
+  dataCache ??= Promise.all([api.storage.local.get('remoteData'), getBundledData()])
+    .then(([{ remoteData }, bundled]) => mergeData(bundled, validData(remoteData) ? remoteData : null));
+  // A failed read must not stick for the worker's lifetime.
+  dataCache.catch(() => { dataCache = null; });
+  return dataCache;
 }
+
+// Wall rules' urlPatterns, compiled once per pattern instead of on every frame's init.
+const patterns = new Map();
+const pattern = (source = '') => {
+  if (!patterns.has(source)) patterns.set(source, new RegExp(source));
+  return patterns.get(source);
+};
 
 const ruleListUrls = (s) => [...new Set([...(s.dataUrls ?? []), s.dataUrl].filter(Boolean))];
 
@@ -177,7 +198,7 @@ async function onConsentMessage(msg, sender) {
       const prev = await getTab(tabId);
       // "Accept" on Seznam's/Mafra's bottom bar navigates to their consent page; accept there too.
       const wallRules = data.consent.rules.filter((r) => isWallRule(r.name));
-      const families = wallRules.filter((r) => new RegExp(r.runContext?.urlPattern ?? '').test(senderUrl)).map((r) => wallFamily(r.name));
+      const families = wallRules.filter((r) => pattern(r.runContext?.urlPattern).test(senderUrl)).map((r) => wallFamily(r.name));
       const looping = wall && await isLooping(tabId, families);
       const acceptPending = prev.acceptUntil > Date.now() && !looping;
       if (frameId === 0) {
