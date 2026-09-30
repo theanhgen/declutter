@@ -2,7 +2,7 @@
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, choiceMode, hostMatches, mergeData, reportUrl, validData } from './lib.js';
+import { badgeFor, choiceMode, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -78,24 +78,25 @@ const ruleListUrls = (s) => [...new Set([...(s.dataUrls ?? []), s.dataUrl].filte
 
 async function refreshRemoteData() {
   const urls = ruleListUrls(await getSettings());
-  const { remoteStatus = {} } = await api.storage.local.get('remoteStatus');
-  const lists = [];
+  const { remoteStatus = {}, remoteLists: previous } = await api.storage.local.get(['remoteStatus', 'remoteLists']);
+  const fetched = {};
   for (const url of urls) {
     try {
       const res = await fetch(url, { cache: 'no-store' });
       const d = await res.json();
       if (!res.ok || !validData(d)) throw new Error(`invalid payload (${res.status})`);
-      lists.push(d);
+      fetched[url] = d;
       remoteStatus[url] = { ok: true, at: Date.now(), generated: d.generated, rules: d.consent.rules.length };
     } catch (e) {
       remoteStatus[url] = { ok: false, at: Date.now(), error: String(e.message || e) };
     }
   }
   for (const url of Object.keys(remoteStatus)) if (!urls.includes(url)) delete remoteStatus[url];
-  const merged = lists.reduce((acc, d) => mergeData(acc, d), null);
-  await api.storage.local.set({ remoteData: merged, remoteStatus,
+  const remoteLists = keepRemoteLists(urls, previous, fetched);
+  const merged = urls.map((u) => remoteLists[u]).filter(Boolean).reduce((acc, d) => mergeData(acc, d), null);
+  await api.storage.local.set({ remoteData: merged, remoteLists, remoteStatus,
     // kept for older settings pages / tests
-    remoteDataStatus: urls.length ? { ok: lists.length === urls.length, at: Date.now(), ...(merged && { generated: merged.generated }) } : undefined });
+    remoteDataStatus: urls.length ? { ok: Object.keys(fetched).length === urls.length, at: Date.now(), ...(merged && { generated: merged.generated }) } : undefined });
 }
 
 // ---- autoconsent rules ----
@@ -309,19 +310,16 @@ async function sendReport(tabId) {
 }
 
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === 'acceptWall') {
-    acceptWall(msg.tabId).then(sendResponse, () => sendResponse(false));
+  // Popup / settings requests come from extension pages only. autoconsent's content script sends its own 'report'
+  // (on every state update), which must not reach the popup's handler. Extension pages can be in a tab (tests), so
+  // check the sender's URL, not sender.tab (falling back to it if a browser leaves sender.url out).
+  const fromExtension = sender.url ? sender.url.startsWith(api.runtime.getURL('')) : !sender.tab;
+  const popupRequest = { acceptWall, report, sendReport }[msg.type];
+  if (fromExtension && popupRequest) {
+    popupRequest(msg.tabId).then(sendResponse, () => sendResponse(false));
     return true;
   }
-  if (msg.type === 'report') {
-    report(msg.tabId).then(sendResponse, () => sendResponse(false));
-    return true;
-  }
-  if (msg.type === 'sendReport') {
-    sendReport(msg.tabId).then(sendResponse, () => sendResponse(false));
-    return true;
-  }
-  if (msg.type === 'updateData') {
+  if (fromExtension && msg.type === 'updateData') {
     refreshRemoteData().then(() => sendResponse(true));
     return true;
   }

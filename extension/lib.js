@@ -5,12 +5,21 @@ export const STUCK_AFTER_MS = 15000;
 export const hostMatches = (host, domains) =>
   domains.some((d) => host === d || host.endsWith('.' + d));
 
-// A remote data.json is only used if it has this shape (and is newer than the bundled one).
+// A remote data.json is only used if it has this shape (and is newer than the bundled one). Every rule needs a name
+// and a urlPattern that compiles: the background builds a RegExp from it on every frame's init.
+const compiles = (re) => { try { new RegExp(re ?? ''); return true; } catch { return false; } };
+const validRule = (r) => !!r && typeof r.name === 'string' && compiles(r.runContext?.urlPattern);
 export function validData(d) {
   return !!d && d.schema === 1 && typeof d.generated === 'string' &&
     Array.isArray(d.shorts?.hide) && Array.isArray(d.shorts?.cards) &&
     Array.isArray(d.consent?.walls) && Array.isArray(d.consent?.rules) &&
-    Array.isArray(d.consent?.disabledCmps);
+    Array.isArray(d.consent?.disabledCmps) && d.consent.rules.every(validRule);
+}
+
+// The rule lists to keep after a refresh, by URL: a fresh copy if the fetch worked, else the last good one (so being
+// offline never drops rules); URLs no longer in settings drop out.
+export function keepRemoteLists(urls, previous = {}, fetched = {}) {
+  return Object.fromEntries(urls.map((u) => [u, fetched[u] ?? (validData(previous[u]) ? previous[u] : null)]).filter(([, d]) => d));
 }
 
 // The pay-wall badge shows the site's own currency, read from its country domain. Consent-or-pay walls are a

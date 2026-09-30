@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
-import { badgeFor, currencyFor, reportUrl, choiceMode, hostMatches, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
+import { applyCategories } from '../extension/consent/categories.js';
+import { badgeFor, currencyFor, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -53,6 +55,39 @@ test('validData rejects malformed remote payloads', () => {
   assert.ok(!validData({ ...good, schema: 2 }));
   assert.ok(!validData({ ...good, shorts: { hide: 'a' } }));
   assert.ok(!validData(null));
+  const withRules = (rules) => ({ ...good, consent: { ...good.consent, rules } });
+  assert.ok(validData(withRules([{ name: 'r', runContext: { urlPattern: '^https://x\\.cz/' } }])));
+  assert.ok(!validData(withRules([{ name: 'r', runContext: { urlPattern: '([' } }])), 'regex that does not compile');
+  assert.ok(!validData(withRules([{ runContext: {} }])), 'rule without a name');
+  assert.ok(!validData(withRules([null])));
+});
+
+test('keepRemoteLists: a failed fetch keeps the last good copy, removed URLs drop out', () => {
+  const d = (g) => ({ schema: 1, generated: g, shorts: { hide: [], cards: [] }, consent: { walls: [], rules: [], disabledCmps: [] } });
+  const prev = { a: d('1'), b: d('1'), gone: d('1') };
+  assert.deepEqual(keepRemoteLists(['a', 'b'], prev, { a: d('2') }), { a: d('2'), b: d('1') });
+  assert.deepEqual(keepRemoteLists(['a'], undefined, {}), {}, 'offline on first run: nothing, not an error');
+  assert.deepEqual(keepRemoteLists(['a'], { a: { schema: 2 } }, {}), {}, 'an invalid stored copy is not kept');
+});
+
+test('applyCategories: Czech category names map to the right category', async () => {
+  const accepted = [];
+  const names = ['necessary', 'Funkční', 'Analytické', 'Reklamní', 'Cílení', 'Marketingové', 'Sociální sítě', 'download_stats', 'ad_storage'];
+  globalThis.window = { CookieConsent: {
+    acceptCategory: (cats) => accepted.push(...cats), getConfig: () => Object.fromEntries(names.map((n) => [n, {}])), hide() {}, hidePreferences() {},
+  } };
+  try {
+    // "other" on, ads off: Czech ad categories must stay off (they used to fall through to "other"), and
+    // download_stats is "other", not an ad (the old /ad/ matched "load").
+    assert.equal(await applyCategories({ A: true, B: false, D: false, E: false, F: false, X: true }), 'cookieconsent-v3');
+    assert.deepEqual(accepted, ['necessary', 'Funkční', 'Sociální sítě', 'download_stats']);
+  } finally { delete globalThis.window; }
+});
+
+test('options and background default to the same rule lists (a saved default would pin it for good)', () => {
+  for (const f of ['extension/background.js', 'extension/options/options.js']) {
+    assert.match(read(f), /dataUrls: __DATA_URL__ \? \[__DATA_URL__\] : \[\]/, f);
+  }
 });
 
 test('build: data.json is valid and every CZ rule is well formed', () => {
@@ -138,4 +173,32 @@ test('mergeData: a rule list overrides rules by name and unions everything else'
   assert.deepEqual(m.consent.rules.map((r) => `${r.name}${r.v ?? ''}`), ['r2', 'r12', 'r3']);
   assert.equal(m.generated, '2026-02-01');
   assert.equal(mergeData(base, null), base);
+});
+
+test('canary: baseline is the newest earlier day, never today (a rerun)', () => {
+  const files = ['2026-09-25.json', '2026-09-27.json', '2026-09-30.json', 'notes.txt'];
+  assert.equal(previousFile(files, '2026-09-30'), '2026-09-27.json');
+  assert.equal(previousFile(['2026-09-30.json'], '2026-09-30'), null);
+  assert.equal(missedDays('2026-09-27.json', '2026-09-30'), 2);
+  assert.equal(missedDays('2026-09-29.json', '2026-09-30'), 0);
+  assert.equal(missedDays(null, '2026-09-30'), 0);
+});
+
+test('canary: alert on change or missed days, stay quiet otherwise', () => {
+  assert.equal(alertText({ summary: 's', failing: ['a'], before: ['a'] }), null);
+  assert.match(alertText({ summary: 's', failing: ['a'], before: ['a'], missed: 2 }), /No canary result for 2 days/);
+  const t = alertText({ summary: 's', failing: ['b'], before: ['a'] });
+  assert.match(t, /Broke:\n- b/);
+  assert.match(t, /Fixed:\n- a/);
+  assert.match(alertText({ summary: 's', failing: ['a'], before: null }), /Broke/);
+  const long = alertText({ summary: 's', failing: Array.from({ length: 200 }, (_, i) => `consent site-${i}.example.cz: done`), before: [] });
+  assert.ok(long.length < 4096, 'fits a Telegram message');
+  assert.match(long, /more lines/);
+});
+
+test('canary: most sites not loading is an outage, not 90 broken rules', () => {
+  const r = (err) => ({ err });
+  assert.ok(looksOffline([r('x'), r('x'), r('x'), r(null)]));
+  assert.ok(!looksOffline([r('x'), r(null), r(null), r(null)]));
+  assert.ok(!looksOffline([r('x')]), 'a one-site rerun is not an outage');
 });

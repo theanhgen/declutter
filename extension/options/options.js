@@ -23,7 +23,8 @@ const CATEGORIES = [
 ];
 const DEFAULTS = {
   shorts: true, consent: true, walls: __WALLS_DEFAULT__, display: 'hide', debug: false, debugEvals: false, clickDelay: false,
-  exceptions: [], acceptSites: [], dataUrls: [], categories: Object.fromEntries(CATEGORIES.map(([k]) => [k, false])),
+  // Same default rule list as the background's (the build-time one), so adding or removing a list keeps it.
+  exceptions: [], acceptSites: [], dataUrls: __DATA_URL__ ? [__DATA_URL__] : [], categories: Object.fromEntries(CATEGORIES.map(([k]) => [k, false])),
 };
 
 const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
@@ -37,7 +38,13 @@ async function render() {
   const { settings = {}, remoteStatus = {}, stats = {}, reports = [] } =
     await api.storage.local.get(['settings', 'remoteStatus', 'stats', 'reports']);
   const s = { ...DEFAULTS, ...settings, categories: { ...DEFAULTS.categories, ...settings.categories } };
-  const save = (patch) => api.storage.local.set({ settings: { ...s, ...patch } }).then(render);
+  // Write only the changed keys over what is stored now: the page defaults must never be saved (they would pin
+  // a default for good), and the popup may have changed something since this page rendered.
+  const save = async (patch) => {
+    const { settings: current = {} } = await api.storage.local.get('settings');
+    await api.storage.local.set({ settings: { ...current, ...patch } });
+    render();
+  };
 
   for (const node of document.querySelectorAll('[data-choice]')) {
     const key = node.dataset.choice;

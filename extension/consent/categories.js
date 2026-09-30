@@ -9,15 +9,17 @@
 export async function applyCategories(c) {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   // Category of a purpose/group/category name, by keyword. Necessary/essential is always on and never asked.
+  // English and Czech (with and without diacritics) stems; ads before content so "personalizace reklam" is an ad.
+  // "ad" only as a whole word, or it matches "load", "read", "shadow".
   const classify = (name) => {
     const n = String(name).toLowerCase();
-    if (/necess|essential|strict|required|technical|technick|nezbyt/.test(n)) return 'necessary';
-    if (/social/.test(n)) return 'X';
-    if (/analy|perform|statist|measure|audience|market_research|improve/.test(n)) return 'B';
-    if (/funct|prefer|comfort|convenien|personaliz(ation)?$/.test(n)) return 'A';
-    if (/content/.test(n)) return 'E';
-    if (/ad|market|target|advert|remarket/.test(n)) return 'F';
-    if (/cookies|storage|device/.test(n)) return 'D';
+    if (/necess|essential|strict|required|technical|technick|nezbyt|nutn/.test(n)) return 'necessary';
+    if (/social|sociáln|socialn/.test(n)) return 'X';
+    if (/analy|perform|statist|measure|audience|market_research|improve|měřen|mereni|výkon|vykon/.test(n)) return 'B';
+    if (/(^|[^a-z])ads?([^a-z]|$)|advert|market|target|remarket|reklam|cílen|cilen/.test(n)) return 'F';
+    if (/funct|funkč|funkc|prefer|comfort|convenien|pohodl|personaliz(ation)?$/.test(n)) return 'A';
+    if (/content|obsah/.test(n)) return 'E';
+    if (/cookies|storage|device|úložiš|ulozis|zaříz|zariz/.test(n)) return 'D';
     return 'X';
   };
   const want = (name) => { const k = classify(name); return k === 'necessary' || !!c[k]; };
