@@ -124,7 +124,9 @@ test('build: wall list and CZ rules never overlap (wall rules only accept)', () 
 test('build: shorts.css gates every selector on the module switch', () => {
   const css = read('build/chrome/shorts/shorts.css');
   const { hide } = JSON.parse(read('data/shorts.json'));
-  for (const s of hide) assert.ok(css.includes(`html:not([data-declutter-shorts="off"]) ${s}`), s);
+  for (const s of hide) assert.ok(css.includes(`html:not([data-declutter-shorts="off"]) ${s} {`), s);
+  // One rule per selector: in a list, one selector a browser can't parse would drop all of them.
+  assert.equal(css.match(/\{ display: none !important; \}/g).length, hide.length);
 });
 
 test('build: per-browser manifests', () => {

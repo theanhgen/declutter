@@ -70,10 +70,10 @@ function buildData() {
 }
 
 // Every selector is gated on the <html> attribute the content script sets when the module is off,
-// so the stylesheet can stay static (no flash on load) and still be switched off.
+// so the stylesheet can stay static (no flash on load) and still be switched off. One rule per selector: in a
+// selector list, one selector a browser can't parse drops the whole rule, i.e. all the hiding.
 function shortsCss(selectors) {
-  return selectors.map((s) => `html:not([data-declutter-shorts="off"]) ${s}`).join(',\n') +
-    ' {\n  display: none !important;\n}\n';
+  return selectors.map((s) => `html:not([data-declutter-shorts="off"]) ${s} { display: none !important; }\n`).join('');
 }
 
 // ---- icons: a bold rose lowercase "d", drawn on a 16-unit grid without an image library ----

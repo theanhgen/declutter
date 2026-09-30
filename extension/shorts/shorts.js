@@ -11,12 +11,14 @@ const html = document.documentElement;
 let enabled = true;
 let cards = bundled.cards;
 
-const countRedirect = () => api.runtime.sendMessage({ type: 'shortsRedirect' }).catch(() => {});
+// After an extension update, tabs opened before it keep this script but lose the extension: sendMessage then
+// throws at once instead of rejecting. Never let that stop a redirect.
+const send = (msg) => { try { api.runtime.sendMessage(msg).catch(() => {}); } catch { /* extension gone */ } };
 
 function redirectIfShort() {
   if (!enabled) return false;
   const to = redirectTarget(location.href);
-  if (to) { countRedirect(); location.replace(to); }
+  if (to) { location.replace(to); send({ type: 'shortsRedirect' }); }
   return !!to;
 }
 
@@ -29,8 +31,8 @@ function onClick(e) {
   if (!to) return;
   e.preventDefault();
   e.stopImmediatePropagation();
-  countRedirect();
   location.assign(to);
+  send({ type: 'shortsRedirect' });
 }
 
 const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
@@ -40,12 +42,13 @@ function selfCheck() {
   if (!enabled) return;
   const leaked = [...document.querySelectorAll('a[href*="/shorts/"]')].filter(visible);
   for (const a of leaked) {
-    const card = a.closest(cards.join(',')) ?? a;
+    let card = a;
+    try { card = a.closest(cards.join(',')) ?? a; } catch { /* a bad selector: hide the link itself */ }
     card.setAttribute('data-declutter-hidden', '');
     card.style.setProperty('display', 'none', 'important');
   }
   if (leaked.length !== lastReported && (leaked.length > 0 || lastReported > 0)) {
-    api.runtime.sendMessage({ type: 'shortsLeak', count: leaked.length, path: location.pathname }).catch(() => {});
+    send({ type: 'shortsLeak', count: leaked.length, path: location.pathname });
   }
   lastReported = leaked.length;
 }
@@ -62,12 +65,16 @@ const scheduleCheck = () => {
   timer = setTimeout(selfCheck, 700);
 };
 
+// A remote selector is used only if it parses and adds no rule of its own ("{", "}"); one bad entry is skipped
+// instead of dropping the rest. Each is its own rule for the same reason as the bundled CSS.
+const parses = (s) => { try { document.createDocumentFragment().querySelector(s); return !/[{}]/.test(s); } catch { return false; } };
+
 function injectRemoteSelectors(selectors) {
-  if (!selectors?.length) return;
+  const ok = (selectors ?? []).filter((s) => typeof s === 'string' && parses(s));
+  if (!ok.length) return;
   const style = document.createElement('style');
   style.id = 'declutter-shorts-remote';
-  style.textContent = selectors.map((s) => `html:not([data-declutter-shorts="off"]) ${s}`).join(',\n') +
-    ' { display: none !important; }';
+  style.textContent = ok.map((s) => `html:not([data-declutter-shorts="off"]) ${s} { display: none !important; }`).join('\n');
   document.getElementById(style.id)?.remove();
   (document.head ?? html).append(style);
 }
@@ -82,13 +89,13 @@ async function init() {
   if (redirectIfShort()) return;
   if (remoteData?.schema === 1 && Array.isArray(remoteData.shorts?.hide)) {
     injectRemoteSelectors(remoteData.shorts.hide.filter((s) => !bundled.hide.includes(s)));
-    cards = [...new Set([...cards, ...(remoteData.shorts.cards ?? [])])];
+    cards = [...new Set([...cards, ...(remoteData.shorts.cards ?? []).filter((s) => typeof s === 'string' && parses(s))])];
   }
   document.addEventListener('click', onClick, true);
   // YouTube navigates inside the page; these fire on every in-app page change.
   document.addEventListener('yt-navigate-finish', () => {
     lastReported = -1;
-    api.runtime.sendMessage({ type: 'shortsNav' }).catch(() => {});
+    send({ type: 'shortsNav' });
     if (!redirectIfShort()) scheduleCheck();
   });
   window.addEventListener('popstate', redirectIfShort);
