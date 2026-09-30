@@ -45,8 +45,12 @@ test('currencyFor: country domain, euro otherwise', () => {
   assert.equal(currencyFor(undefined), '€');
 });
 
-test('reportUrl drops the query string and fragment', () => {
-  assert.equal(reportUrl('https://www.idnes.cz/zpravy/a?utm=x&email=a@b.c#top'), 'https://www.idnes.cz/zpravy/a');
+test('reportUrl sends the site only: no path, query, fragment or credentials', () => {
+  assert.equal(reportUrl('https://www.idnes.cz/zpravy/a?utm=x&email=a@b.c#top'), 'https://www.idnes.cz');
+  assert.equal(reportUrl('https://user:pw@shop.cz:8443/reset/9f8e7d'), 'https://shop.cz:8443');
+  assert.equal(reportUrl('file:///Users/x/a.html'), null);
+  assert.equal(reportUrl('chrome-extension://abc/options.html'), null);
+  assert.equal(reportUrl(''), null);
 });
 
 test('validData rejects malformed remote payloads', () => {

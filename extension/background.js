@@ -297,13 +297,15 @@ async function acceptWall(tabId) {
 // insert-only Supabase table (supabase/migrations); the publishable key can add rows, never read them.
 const REPORTS_URL = 'https://wpsmgzihqgdmsrvzpcca.supabase.co/rest/v1/reports';
 const REPORTS_KEY = 'sb_publishable_TxwGZ6G_q388MjPCCrFs6w_s9nu8hvC';
-async function sendReport(tabId) {
+// url: the address the popup showed. If the tab has moved to another site since, send nothing.
+async function sendReport(tabId, { url }) {
   const tab = await api.tabs.get(tabId);
+  if (!url || reportUrl(tab.url) !== url) return false;
   const state = await getTab(tabId);
   const res = await fetch(REPORTS_URL, {
     method: 'POST',
     headers: { apikey: REPORTS_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-    body: JSON.stringify({ url: reportUrl(tab.url), consent: state.consent ?? 'none', cmp: (state.cmp ?? '').slice(0, 60),
+    body: JSON.stringify({ url, consent: state.consent ?? 'none', cmp: (state.cmp ?? '').slice(0, 60),
       version: api.runtime.getManifest().version, browser: __TARGET__ }),
   });
   return res.ok;
@@ -316,7 +318,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   const fromExtension = sender.url ? sender.url.startsWith(api.runtime.getURL('')) : !sender.tab;
   const popupRequest = { acceptWall, report, sendReport }[msg.type];
   if (fromExtension && popupRequest) {
-    popupRequest(msg.tabId).then(sendResponse, () => sendResponse(false));
+    popupRequest(msg.tabId, msg).then(sendResponse, () => sendResponse(false));
     return true;
   }
   if (fromExtension && msg.type === 'updateData') {

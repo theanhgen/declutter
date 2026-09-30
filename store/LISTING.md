@@ -59,7 +59,7 @@ settings, and elsewhere a mix is answered by refusing.
 PRIVACY
 No account, no analytics, no tracking. Settings, counters and your reported-sites list stay in the
 browser's extension storage. declutter sends something only when you ask: a site you choose to send to the
-developer (its address without query string, what declutter saw, the version), and rule lists you add
+developer (the site's address only, not the page; what declutter saw; the version), and rule lists you add
 yourself in settings.
 
 Open source (MIT): https://github.com/theanhgen/declutter
@@ -87,7 +87,7 @@ Reduce page clutter: hide YouTube Shorts and answer cookie-consent banners accor
 steps); they can reference bundled functions by name but cannot add code.
 
 **Data usage** (Chrome disclosure checkboxes): "Web history", only the address of a page the user explicitly
-chooses to send as a report (query string removed). Nothing else. Not sold, not used
+chooses to send as a report, reduced to the site (e.g. https://www.idnes.cz). Nothing else. Not sold, not used
 for anything unrelated to the single purpose, not used for creditworthiness.
 
 **Firefox** `data_collection_permissions`: `required: ['none']`, `optional: ['browsingActivity']`; the popup asks for it before the first send.

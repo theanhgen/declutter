@@ -38,8 +38,14 @@ export function badgeFor(state, now = Date.now()) {
   return { text: '', color: '#777', title: 'declutter' };
 }
 
-// What a sent report carries of the page address: no query string or fragment (they can hold tokens or emails).
-export const reportUrl = (url) => { const u = new URL(url); return `${u.origin}${u.pathname}`.slice(0, 500); };
+// What a sent report carries of the page address: the site only (scheme, host, port). Paths, query strings and
+// fragments can hold tokens, emails or account names. null for anything that is not a web page.
+export function reportUrl(url) {
+  try {
+    const u = new URL(url);
+    return /^https?:$/.test(u.protocol) ? u.origin : null;
+  } catch { return null; }
+}
 
 const SHORT = /^\/shorts\/([A-Za-z0-9_-]+)/;
 const CHANNEL_SHORTS = /^(\/(?:@[^/]+|channel\/[^/]+|c\/[^/]+|user\/[^/]+))\/shorts\/?$/;

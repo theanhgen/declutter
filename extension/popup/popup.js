@@ -83,13 +83,15 @@ async function main() {
   $('siteSection').hidden = false;
 
   $('report').hidden = false;
+  const sendUrl = reportUrl(tab.url);
   $('report').onclick = async () => {
     await api.runtime.sendMessage({ type: 'report', tabId: tab.id });
     $('report').querySelector('.label').textContent = 'reported, thanks';
     $('report').disabled = true;
     $('reported').hidden = false;
     // Offer to send it, showing exactly what goes out. Nothing is sent without this second press.
-    $('sendNote').textContent = `sends ${reportUrl(tab.url)}, what declutter saw here, and its version. nothing else.`;
+    if (!sendUrl) return;
+    $('sendNote').textContent = `sends ${sendUrl} (the site, not the page), what declutter saw here, and its version. nothing else.`;
     $('sendNote').hidden = false;
     $('send').hidden = false;
   };
@@ -97,7 +99,8 @@ async function main() {
     // Firefox: sending a page address is optional data collection, granted in its own prompt (from this click).
     if (__TARGET__ === 'firefox' && !(await api.permissions.request({ data_collection: ['browsingActivity'] }))) return;
     $('send').disabled = true;
-    const ok = await api.runtime.sendMessage({ type: 'sendReport', tabId: tab.id });
+    // The background sends this exact address, and nothing if the tab has moved to another site since.
+    const ok = await api.runtime.sendMessage({ type: 'sendReport', tabId: tab.id, url: sendUrl });
     $('send').querySelector('.label').textContent = ok ? 'sent, thanks' : 'could not send, try later';
     if (!ok) $('send').disabled = false;
   };
