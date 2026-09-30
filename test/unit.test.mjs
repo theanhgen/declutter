@@ -83,7 +83,7 @@ test('applyCategories: Czech category names map to the right category', async ()
   try {
     // "other" on, ads off: Czech ad categories must stay off (they used to fall through to "other"), and
     // download_stats is "other", not an ad (the old /ad/ matched "load").
-    assert.equal(await applyCategories({ A: true, B: false, D: false, E: false, F: false, X: true }), 'cookieconsent-v3');
+    assert.equal(await applyCategories({ A: true, B: false, D: false, E: false, F: false, X: true }, 'cookieconsent3'), 'cookieconsent-v3');
     assert.deepEqual(accepted, ['necessary', 'Funkční', 'Sociální sítě', 'download_stats']);
   } finally { delete globalThis.window; }
 });
@@ -177,6 +177,32 @@ test('mergeData: a rule list overrides rules by name and unions everything else'
   assert.deepEqual(m.consent.rules.map((r) => `${r.name}${r.v ?? ''}`), ['r2', 'r12', 'r3']);
   assert.equal(m.generated, '2026-02-01');
   assert.equal(mergeData(base, null), base);
+});
+
+test('mergeData: a rule list older than the bundled data cannot override a bundled rule, but adds new ones', () => {
+  const base = { schema: 1, generated: '2026-03-01', shorts: { hide: [], cards: [] },
+    consent: { walls: [], disabledCmps: [], rules: [{ name: 'r1', v: 'fixed' }] } };
+  const old = { schema: 1, generated: '2026-02-01', shorts: { hide: [], cards: [] },
+    consent: { walls: [], disabledCmps: [], rules: [{ name: 'r1', v: 'broken' }, { name: 'r9' }] } };
+  const m = mergeData(base, old);
+  assert.deepEqual(m.consent.rules.map((r) => `${r.name}${r.v ?? ''}`), ['r1fixed', 'r9']);
+  assert.equal(m.generated, '2026-03-01');
+});
+
+test('applyCategories: only the adapter of the CMP autoconsent detected runs', async () => {
+  const calls = [];
+  globalThis.window = {
+    Didomi: { setUserStatus: () => calls.push('didomi'), getPurposes: () => [] },
+    Cookiebot: { submitCustomConsent: (...a) => calls.push(['cookiebot', ...a]) },
+  };
+  try {
+    // A stray Didomi global on a page whose banner is Cookiebot: answer Cookiebot, leave Didomi alone.
+    assert.equal(await applyCategories({ A: true, E: true }, 'Cybotcookiebot'), 'cookiebot');
+    assert.deepEqual(calls, [['cookiebot', true, false, false]], 'content (E) alone is not marketing');
+    // A CMP with no adapter: nothing is touched, the background refuses instead.
+    assert.equal(await applyCategories({ A: true }, 'Sourcepoint-frame'), '');
+    assert.equal(calls.length, 1);
+  } finally { delete globalThis.window; }
 });
 
 test('canary: baseline is the newest earlier day, never today (a rerun)', () => {

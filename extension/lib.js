@@ -67,12 +67,15 @@ export function choiceMode(categories = {}) {
   return on === 0 ? 'refuse' : on === CATEGORY_KEYS.length ? 'accept' : 'mix';
 }
 
-// Merge a rule list over a base: rules by name (the list wins), walls / selectors / disabled CMPs as unions.
+// Merge a rule list over a base: rules by name, walls / selectors / disabled CMPs as unions. On a name clash the
+// newer side wins: a rule list built before this extension version must not undo a rule fixed in it, but its
+// new rules still apply.
 export function mergeData(base, extra) {
   if (!base) return extra;
   if (!extra) return base;
   const union = (a = [], b = []) => [...new Set([...a, ...b])];
-  const names = new Set(extra.consent.rules.map((r) => r.name));
+  const extraWins = extra.generated >= base.generated;
+  const names = new Set((extraWins ? extra : base).consent.rules.map((r) => r.name));
   return {
     schema: 1,
     generated: extra.generated > base.generated ? extra.generated : base.generated,
@@ -80,7 +83,9 @@ export function mergeData(base, extra) {
     consent: {
       walls: union(base.consent.walls, extra.consent.walls),
       disabledCmps: union(base.consent.disabledCmps, extra.consent.disabledCmps),
-      rules: [...base.consent.rules.filter((r) => !names.has(r.name)), ...extra.consent.rules],
+      rules: extraWins
+        ? [...base.consent.rules.filter((r) => !names.has(r.name)), ...extra.consent.rules]
+        : [...base.consent.rules, ...extra.consent.rules.filter((r) => !names.has(r.name))],
     },
   };
 }

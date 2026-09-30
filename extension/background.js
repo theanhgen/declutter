@@ -269,7 +269,7 @@ async function onConsentMessage(msg, sender) {
 async function applyChoice(tabId, frameId, cmp, categories) {
   let adapter = '';
   try {
-    const [r] = await api.scripting.executeScript({ target: { tabId, frameIds: [frameId] }, world: 'MAIN', func: applyCategories, args: [categories] });
+    const [r] = await api.scripting.executeScript({ target: { tabId, frameIds: [frameId] }, world: 'MAIN', func: applyCategories, args: [categories, cmp] });
     adapter = r?.result ?? '';
   } catch (e) {
     console.warn('declutter: category adapter failed', cmp, e);
