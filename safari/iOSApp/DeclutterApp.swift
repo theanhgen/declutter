@@ -2,6 +2,10 @@ import SwiftUI
 
 @main
 struct DeclutterApp: App {
+    // Start listening for StoreKit transactions at launch, not when the tip jar view appears: an Ask to Buy
+    // approval can arrive while no window is open.
+    init() { TipJar.shared.listen() }
+
     var body: some Scene {
         WindowGroup {
             ContentView()

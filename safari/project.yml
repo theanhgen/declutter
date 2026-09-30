@@ -1,9 +1,11 @@
 name: Declutter
 options:
   bundleIdPrefix: com.theanhgen
+  # Safari 18: the manifest's "world": "MAIN" content script (consent/open-shadow.js) needs it; on Safari 17
+  # it silently runs in the isolated world and closed shadow-root banners (Seznam, mapy, dpgmedia) stay up.
   deploymentTarget:
-    macOS: "14.0"
-    iOS: "17.0"
+    macOS: "15.0"
+    iOS: "18.0"
   # Must be >= the Xcode the project is opened with, or Xcode offers "Update to recommended
   # settings". Never accept it: it edits the generated pbxproj, which xcodegen discards.
   xcodeVersion: "27.0"
@@ -54,6 +56,9 @@ targets:
     info:
       path: Extension/Info.plist
       properties:
+        # xcodegen writes this plist and would put a fixed 1.0 (1) here; follow the app's version instead.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.Safari.web-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
@@ -120,6 +125,9 @@ targets:
     info:
       path: Extension/Info-iOS.plist
       properties:
+        # xcodegen writes this plist and would put a fixed 1.0 (1) here; follow the app's version instead.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.Safari.web-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
