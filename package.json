@@ -13,6 +13,7 @@
     "test:mobile": "node test/mobile.mjs",
     "test:features": "node test/features.mjs",
     "test:categories": "node test/categories.mjs",
+    "test:posts": "node test/posts.mjs",
     "store": "node build.mjs --store && node store/screenshots.mjs"
   },
   "license": "MIT",

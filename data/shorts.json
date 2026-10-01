@@ -21,6 +21,19 @@
     "ytm-video-with-context-renderer:has(a[href*=\"/shorts/\"])",
     "ytm-rich-section-renderer:has(a[href*=\"/shorts/\"])"
   ],
+  "posts": [
+    "ytd-rich-item-renderer:has(a[href^=\"/post/\"])",
+    "ytd-rich-item-renderer:has(ytd-post-renderer)",
+    "ytd-rich-section-renderer:has(a[href^=\"/post/\"])",
+    "ytd-rich-section-renderer:has(ytd-post-renderer)",
+    "ytd-rich-grid-renderer ytd-post-renderer",
+    "ytm-rich-item-renderer:has(a[href*=\"/post/\"])",
+    "ytm-rich-item-renderer:has(ytm-backstage-post-renderer)",
+    "ytm-rich-section-renderer:has(a[href*=\"/post/\"])",
+    "ytm-rich-section-renderer:has(ytm-backstage-post-renderer)",
+    "ytm-rich-grid-renderer ytm-backstage-post-thread-renderer",
+    "ytm-rich-grid-renderer ytm-backstage-post-renderer"
+  ],
   "cards": [
     "ytd-rich-item-renderer",
     "ytd-rich-section-renderer",

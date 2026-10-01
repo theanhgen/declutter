@@ -12,6 +12,7 @@ const validRule = (r) => !!r && typeof r.name === 'string' && compiles(r.runCont
 export function validData(d) {
   return !!d && d.schema === 1 && typeof d.generated === 'string' &&
     Array.isArray(d.shorts?.hide) && Array.isArray(d.shorts?.cards) &&
+    (d.shorts.posts === undefined || Array.isArray(d.shorts.posts)) && // lists built before posts existed have none
     Array.isArray(d.consent?.walls) && Array.isArray(d.consent?.rules) &&
     Array.isArray(d.consent?.disabledCmps) && d.consent.rules.every(validRule);
 }
@@ -79,7 +80,8 @@ export function mergeData(base, extra) {
   return {
     schema: 1,
     generated: extra.generated > base.generated ? extra.generated : base.generated,
-    shorts: { hide: union(base.shorts.hide, extra.shorts.hide), cards: union(base.shorts.cards, extra.shorts.cards) },
+    shorts: { hide: union(base.shorts.hide, extra.shorts.hide), cards: union(base.shorts.cards, extra.shorts.cards),
+      posts: union(base.shorts.posts, extra.shorts.posts) },
     consent: {
       walls: union(base.consent.walls, extra.consent.walls),
       disabledCmps: union(base.consent.disabledCmps, extra.consent.disabledCmps),

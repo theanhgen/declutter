@@ -43,6 +43,8 @@ declutter does two things, both entirely inside your browser.
 YOUTUBE SHORTS
 Removes the Shorts shelf, the Shorts tab and Shorts in search and subscriptions, on desktop and mobile
 YouTube. A Shorts link opens in the normal video player instead.
+Community posts (pictures, polls, text) between the videos in your feeds can be hidden too; a channel's own
+Posts tab stays.
 
 COOKIE BANNERS
 Answers cookie-consent banners for you. By default it refuses everything that is not strictly necessary.

@@ -72,8 +72,8 @@ function buildData() {
 // Every selector is gated on the <html> attribute the content script sets when the module is off,
 // so the stylesheet can stay static (no flash on load) and still be switched off. One rule per selector: in a
 // selector list, one selector a browser can't parse drops the whole rule, i.e. all the hiding.
-function shortsCss(selectors) {
-  return selectors.map((s) => `html:not([data-declutter-shorts="off"]) ${s} { display: none !important; }\n`).join('');
+function shortsCss(selectors, module = 'shorts') {
+  return selectors.map((s) => `html:not([data-declutter-${module}="off"]) ${s} { display: none !important; }\n`).join('');
 }
 
 // ---- icons: a bold rose lowercase "d", drawn on a 16-unit grid without an image library ----
@@ -212,7 +212,7 @@ async function buildTarget(name, data) {
   copy('node_modules/@duckduckgo/autoconsent/rules/compact-rules.json', 'consent/compact-rules.json');
   copy('LICENSE', 'LICENSE');
   copy('node_modules/@duckduckgo/autoconsent/LICENSE', 'licenses/autoconsent-MPL-2.0.txt');
-  fs.writeFileSync(path.join(out, 'shorts/shorts.css'), shortsCss(data.shorts.hide));
+  fs.writeFileSync(path.join(out, 'shorts/shorts.css'), shortsCss(data.shorts.hide) + shortsCss(data.shorts.posts, 'posts'));
   fs.writeFileSync(path.join(out, 'data.json'), JSON.stringify(data));
   fs.mkdirSync(path.join(out, 'icons'));
   // Toolbar sizes get a margin like other toolbar icons; the glyph alone at full size looks oversized.

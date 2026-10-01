@@ -123,10 +123,13 @@ test('build: wall list and CZ rules never overlap (wall rules only accept)', () 
 
 test('build: shorts.css gates every selector on the module switch', () => {
   const css = read('build/chrome/shorts/shorts.css');
-  const { hide } = JSON.parse(read('data/shorts.json'));
+  const { hide, posts } = JSON.parse(read('data/shorts.json'));
   for (const s of hide) assert.ok(css.includes(`html:not([data-declutter-shorts="off"]) ${s} {`), s);
+  for (const s of posts) assert.ok(css.includes(`html:not([data-declutter-posts="off"]) ${s} {`), s);
   // One rule per selector: in a list, one selector a browser can't parse would drop all of them.
-  assert.equal(css.match(/\{ display: none !important; \}/g).length, hide.length);
+  assert.equal(css.match(/\{ display: none !important; \}/g).length, hide.length + posts.length);
+  // Posts are hidden in feeds only: every selector is tied to a feed container, so a channel's Posts tab stays.
+  for (const s of posts) assert.match(s, /^yt[dm]-rich-(item|section|grid)-renderer/, s);
 });
 
 test('build: per-browser manifests', () => {
@@ -175,6 +178,8 @@ test('mergeData: a rule list overrides rules by name and unions everything else'
     consent: { walls: ['y.cz'], disabledCmps: ['z'], rules: [{ name: 'r1', v: 2 }, { name: 'r3' }] } };
   const m = mergeData(base, extra);
   assert.deepEqual(m.shorts.hide, ['a', 'b']);
+  assert.deepEqual(m.shorts.posts, []); // lists built before posts existed
+  assert.deepEqual(mergeData({ ...base, shorts: { ...base.shorts, posts: ['p'] } }, extra).shorts.posts, ['p']);
   assert.deepEqual(m.consent.walls, ['x.cz', 'y.cz']);
   assert.deepEqual(m.consent.rules.map((r) => `${r.name}${r.v ?? ''}`), ['r2', 'r12', 'r3']);
   assert.equal(m.generated, '2026-02-01');

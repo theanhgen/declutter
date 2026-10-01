@@ -9,6 +9,7 @@ Object.assign(evalSnippets, declutterSnippets);
 
 const DEFAULT_SETTINGS = {
   shorts: true,
+  posts: true,
   consent: true,
   // Rule lists (Consent-O-Matic's "Rule Lists"): extra data.json URLs merged over the bundled data. The one baked
   // in at build time (DECLUTTER_DATA_URL) comes first; dataUrl is the older single-URL setting.

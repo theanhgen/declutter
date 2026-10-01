@@ -2,6 +2,7 @@
 //  - sends /shorts/<id> to /watch?v=<id>, and a channel's /shorts tab to /videos
 //  - adds selectors from the remote data copy (D6)
 //  - self-check: any /shorts/ link still visible gets hidden by its card and reported (red badge)
+// The same stylesheet hides community posts in the feeds (its own switch, CSS only).
 import bundled from '../../data/shorts.json';
 import { redirectTarget } from '../lib.js';
 
@@ -69,12 +70,12 @@ const scheduleCheck = () => {
 // instead of dropping the rest. Each is its own rule for the same reason as the bundled CSS.
 const parses = (s) => { try { document.createDocumentFragment().querySelector(s); return !/[{}]/.test(s); } catch { return false; } };
 
-function injectRemoteSelectors(selectors) {
+function injectRemoteSelectors(selectors, module = 'shorts') {
   const ok = (selectors ?? []).filter((s) => typeof s === 'string' && parses(s));
   if (!ok.length) return;
   const style = document.createElement('style');
-  style.id = 'declutter-shorts-remote';
-  style.textContent = ok.map((s) => `html:not([data-declutter-shorts="off"]) ${s} { display: none !important; }`).join('\n');
+  style.id = `declutter-${module}-remote`;
+  style.textContent = ok.map((s) => `html:not([data-declutter-${module}="off"]) ${s} { display: none !important; }`).join('\n');
   document.getElementById(style.id)?.remove();
   (document.head ?? html).append(style);
 }
@@ -82,6 +83,9 @@ function injectRemoteSelectors(selectors) {
 async function init() {
   const { settings, remoteData } = await api.storage.local.get(['settings', 'remoteData']);
   enabled = settings?.shorts !== false;
+  const remote = remoteData?.schema === 1 ? remoteData.shorts : null;
+  if (settings?.posts === false) html.setAttribute('data-declutter-posts', 'off');
+  else if (Array.isArray(remote?.posts)) injectRemoteSelectors(remote.posts.filter((s) => !bundled.posts.includes(s)), 'posts');
   if (!enabled) {
     html.setAttribute('data-declutter-shorts', 'off');
     return;
@@ -105,7 +109,8 @@ async function init() {
 
 api.storage.onChanged.addListener((changes, area) => {
   const c = changes.settings;
-  if (area === 'local' && c && (c.oldValue?.shorts !== false) !== (c.newValue?.shorts !== false)) location.reload();
+  const flipped = (k) => (c.oldValue?.[k] !== false) !== (c.newValue?.[k] !== false);
+  if (area === 'local' && c && (flipped('shorts') || flipped('posts'))) location.reload();
 });
 
 init();

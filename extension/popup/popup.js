@@ -22,14 +22,14 @@ async function main() {
   $('settings').onclick = () => { api.runtime.openOptionsPage(); window.close(); };
 
   const { settings = {} } = await api.storage.local.get('settings');
-  const s = { shorts: true, consent: true, exceptions: [], acceptSites: [], ...settings };
+  const s = { shorts: true, posts: true, consent: true, exceptions: [], acceptSites: [], ...settings };
   // Only the changed keys over what is stored now (never the defaults above, and Settings may be open too).
   const save = async (patch) => {
     const { settings: current = {} } = await api.storage.local.get('settings');
     await api.storage.local.set({ settings: { ...current, ...patch } });
     Object.assign(s, patch);
   };
-  for (const k of ['shorts', 'consent']) {
+  for (const k of ['shorts', 'posts', 'consent']) {
     $(k).checked = s[k];
     $(k).onchange = () => save({ [k]: $(k).checked });
   }
