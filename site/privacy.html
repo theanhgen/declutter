@@ -18,7 +18,7 @@
 <body>
 <h1>declutter: privacy</h1>
 <p class="muted">Applies to the declutter browser extension for Chrome, Edge, Firefox and Safari. Last updated
-  29 September 2026.</p>
+  3 October 2026.</p>
 
 <h2>short version</h2>
 <p>declutter collects nothing on its own. It has no account, no analytics and no tracking. The one exception is a
@@ -38,9 +38,17 @@
   "report".</p>
 
 <h2>network requests</h2>
-<p>declutter makes no requests of its own, except fetching rule lists (JSON files) at URLs you add yourself in
-  settings. Those requests carry no information about you beyond what any download does (your IP address is
-  visible to that server).</p>
+<p>declutter makes no requests of its own, except fetching rule lists (JSON files). Versions from the stores
+  fetch declutter's own list from theanhgen.github.io (GitHub Pages) every 12 hours, so fixes for sites arrive
+  without an update; you can remove it in settings → rule lists, and add others. Those requests carry no
+  information about you beyond what any download does (your IP address is visible to that server; GitHub keeps
+  its own logs).</p>
+<p>If you switch on "send Global Privacy Control" (off by default), your browser adds the standard
+  <code>Sec-GPC: 1</code> header to its requests and tells pages <code>navigator.globalPrivacyControl</code>, asking
+  sites not to sell or share your data. It is not sent to sites you set to accept or leave alone. declutter learns
+  nothing from it.</p>
+<p>When you remove declutter from Chrome, Edge or Firefox, the browser opens a page on theanhgen.github.io with
+  links for reporting what went wrong. That page has no script and records nothing.</p>
 
 <h2>reports you send</h2>
 <p>After you press "not handled right", the menu offers "send to developer" and shows what it sends. Only if you
@@ -53,7 +61,8 @@
   briefly; declutter does not store it. To have a report deleted, open an issue or email via the link below.</p>
 
 <h2>third parties</h2>
-<p>Supabase stores reports you choose to send, and nothing else. declutter includes DuckDuckGo's open-source autoconsent library, which runs locally and sends
+<p>Supabase stores reports you choose to send, and nothing else. GitHub Pages serves the rule list and the
+  pages above. declutter includes DuckDuckGo's open-source autoconsent library, which runs locally and sends
   nothing.</p>
 
 <h2>contact</h2>

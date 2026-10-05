@@ -2,10 +2,12 @@
 // the payload the extension also fetches remotely (D6).
 //   node build.mjs            -> all targets
 //   node build.mjs chrome     -> one target
-//   DECLUTTER_DATA_URL=https://… node build.mjs   -> bake in the remote data URL
+//   DECLUTTER_DATA_URL=https://… node build.mjs   -> bake in the remote data URL (store builds: GitHub Pages)
 //   DECLUTTER_TIP_URL=https://… node build.mjs    -> tip link in settings (not in Safari)
 //   node build.mjs --store    -> store build: walls default to manual (strangers opt in to accepting
-//                                 tracking), plus upload zips in dist/ for chrome (+ Edge) and firefox
+//                                 tracking), declutter's own rule list and an uninstall page on GitHub Pages,
+//                                 plus upload zips in dist/ for chrome (+ Edge) and firefox
+//   node build.mjs --data-only -> build/data.json only (the Pages workflow publishes it as the rule list)
 import * as esbuild from 'esbuild';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,6 +18,9 @@ const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
 const readJson = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
 
 const STORE = process.argv.includes('--store');
+// Published from data/ by .github/workflows/pages.yml on every push that changes it.
+const SITE = 'https://theanhgen.github.io/declutter';
+const DATA_URL = process.env.DECLUTTER_DATA_URL ?? (STORE ? `${SITE}/data.json` : '');
 
 const TARGETS = {
   chrome: {
@@ -192,7 +197,9 @@ async function buildTarget(name, data) {
     legalComments: 'none',
     // Where the extension fetches newer data from (D6). Empty = bundled data only.
     define: {
-      __DATA_URL__: JSON.stringify(process.env.DECLUTTER_DATA_URL ?? ''),
+      __DATA_URL__: JSON.stringify(DATA_URL),
+      // Opened when the extension is removed (Chrome, Firefox): a static page asking what went wrong, no tracking.
+      __UNINSTALL_URL__: JSON.stringify(STORE && name !== 'safari' ? `${SITE}/bye.html` : ''),
       __WALLS_DEFAULT__: JSON.stringify(STORE ? 'manual' : 'auto'),
       __TARGET__: JSON.stringify(name),
       // Tip link in settings. Never in Safari: App Store tips must be in-app purchases (the container app has them).
@@ -208,6 +215,8 @@ async function buildTarget(name, data) {
   copy('extension/popup/popup.html', 'popup/popup.html');
   copy('extension/popup/d.svg', 'popup/d.svg');
   copy('extension/options/options.html', 'options/options.html');
+  copy('extension/welcome/welcome.html', 'welcome/welcome.html');
+  copy('extension/consent/gpc.js', 'consent/gpc.js');
   copy('extension/shorts/dnr-rules.json', 'shorts/dnr-rules.json');
   copy('node_modules/@duckduckgo/autoconsent/rules/compact-rules.json', 'consent/compact-rules.json');
   copy('LICENSE', 'LICENSE');
@@ -217,6 +226,8 @@ async function buildTarget(name, data) {
   fs.mkdirSync(path.join(out, 'icons'));
   // Toolbar sizes get a margin like other toolbar icons; the glyph alone at full size looks oversized.
   for (const s of [16, 32, 48, 128]) fs.writeFileSync(path.join(out, `icons/${s}.png`), png(s, { scale: s <= 32 ? 0.5625 : 0.75 }));
+  // Safari draws the toolbar button larger than 16pt and on 2x/3x screens; from 32px alone it upscales and blurs.
+  for (const s of [48, 64, 96]) fs.writeFileSync(path.join(out, `icons/toolbar-${s}.png`), png(s, { scale: 0.5625 }));
 
   const manifest = t.manifest({ ...readJson('extension/manifest.base.json'), version: pkg.version });
   fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2));
@@ -253,6 +264,7 @@ for (const n of names) if (!TARGETS[n]) throw new Error(`unknown target ${n}`);
 const data = buildData();
 fs.mkdirSync(path.join(root, 'build'), { recursive: true });
 fs.writeFileSync(path.join(root, 'build/data.json'), JSON.stringify(data, null, 2));
+if (process.argv.includes('--data-only')) process.exit(0);
 for (const n of names) await buildTarget(n, data);
 
 // Store zips (manifest at the zip root). Chrome's zip also goes to Edge Add-ons unchanged; Safari ships

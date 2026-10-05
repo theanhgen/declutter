@@ -10,14 +10,16 @@ app generated with xcodegen (team `28DMV2MR8T`). Tests and canary: Playwright's 
 - `data/`: everything that changes when a site changes — `shorts.json` (selectors), `consent.json` (walls),
   `rules-cz/*.json` (autoconsent rules). Bundled into the extension and fetched remotely (D6).
 - `extension/shorts/`: generated CSS + content script on `www.youtube.com`; redirect + self-check.
-- `extension/consent/`: unmodified autoconsent in every frame; `snippets.js` holds our page-world snippets.
+- `extension/consent/`: unmodified autoconsent in every frame; `snippets.js` holds our page-world snippets;
+  `chip.js` is the note on the page saying what was done (text chosen by `chipFor` in `lib.js`).
 - `extension/background.js`: settings, data merge, autoconsent `init`/`eval`, per-tab status, badge.
 - `safari/project.yml`: container app + extension; a run-script copies `build/safari` into the appex.
 - `canary/`: daily full run (`sites.json` holds per-site expectations), launchd job on the home Mac.
 
 ## Commands
 
-- Build: `npm run build` (both targets) · `node build.mjs chrome`
+- Build: `npm run build` (both targets) · `node build.mjs chrome` · `node build.mjs --data-only` (just `build/data.json`, the
+  rule list GitHub Pages publishes; store builds fetch it)
 - Unit: `npm test` (builds first)
 - E2E smoke (live sites): `npm run test:e2e` · walls: `npm run test:walls` · features: `npm run test:features` · posts: `npm run test:posts` · remote data: `node test/remote-data.mjs`
 - Canary: `npm run canary` (all) · `node canary/run.mjs <host> …` (subset, no alert)

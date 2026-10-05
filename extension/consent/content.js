@@ -1,5 +1,6 @@
 // Every frame. autoconsent asks the background for config + rules (initResp), then refuses the banner.
 import AutoConsent, { evalSnippets } from '@duckduckgo/autoconsent';
+import { showChip } from './chip.js';
 import { declutterSnippets } from './snippets.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
@@ -13,5 +14,6 @@ const send = (msg, retries = msg.type === 'init' ? 2 : 0) => api.runtime.sendMes
 });
 const consent = new AutoConsent((msg) => send(msg));
 api.runtime.onMessage.addListener((msg) => {
+  if (msg.type === 'chip') return showChip(msg);
   consent.receiveMessageCallback(msg);
 });

@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
-import { badgeFor, currencyFor, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -36,6 +36,29 @@ test('badgeFor: problems are red, everything else is quiet', () => {
   assert.equal(badgeFor({ consent: 'wall', host: 'www.seznam.cz' }).text, 'Kč');
   assert.equal(badgeFor({ consent: 'wall', host: 'www.spiegel.de' }).text, '€');
   assert.equal(badgeFor({ consent: 'accepted', cmp: 'x' }).text, '');
+});
+
+test('chipFor: once per outcome, not on a reload of the same site', () => {
+  assert.deepEqual(chipFor({ consent: 'working' }, { consent: 'done', host: 'a.cz' }), { text: 'cookies refused', tone: 'ok' });
+  assert.equal(chipFor({}, { consent: 'acceptedSite' }).text, 'cookies accepted');
+  assert.equal(chipFor({}, { consent: 'choice' }).text, 'your choice applied');
+  assert.equal(chipFor({}, { consent: 'wall' }).tone, 'wait');
+  // a cosmetic rule answers nothing: say hidden, never refused or accepted
+  assert.equal(chipFor({}, { consent: 'done', cosmetic: true }).text, 'banner hidden');
+  assert.equal(chipFor({}, { consent: 'acceptedSite', cosmetic: true }).text, 'banner hidden');
+  assert.equal(chipFor({}, { consent: 'failed', cosmetic: true }).text, 'banner not answered');
+  assert.equal(chipFor({}, { consent: 'failed' }).tone, 'bad');
+  for (const consent of ['working', 'paused', 'accepting', undefined]) assert.equal(chipFor({}, { consent }), null);
+  assert.equal(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }), null);
+  const last = { host: 'a.cz', consent: 'done', at: 1000 };
+  assert.equal(chipFor({ consent: 'working' }, { consent: 'done', host: 'a.cz' }, last, 30000), null);
+  assert.ok(chipFor({ consent: 'working' }, { consent: 'done', host: 'a.cz' }, last, 70000));
+  assert.ok(chipFor({ consent: 'working' }, { consent: 'done', host: 'b.cz' }, last, 30000));
+  assert.ok(chipFor({ consent: 'working' }, { consent: 'failed', host: 'a.cz' }, last, 30000));
+  // the site reloaded itself while the chip was up: show it again on the new page, but not after it is gone
+  assert.ok(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }, last, 2000, true));
+  assert.equal(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }, last, 2000, false), null);
+  assert.equal(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }, last, 9000, true), null);
 });
 
 test('currencyFor: country domain, euro otherwise', () => {
@@ -210,6 +233,25 @@ test('applyCategories: only the adapter of the CMP autoconsent detected runs', a
     assert.equal(await applyCategories({ A: true }, 'Sourcepoint-frame'), '');
     assert.equal(calls.length, 1);
   } finally { delete globalThis.window; }
+});
+
+test('GPC: one header rule, skipped sites excluded both ways', () => {
+  const r = gpcRule(['o2.cz', 'seznam.cz']);
+  assert.deepEqual(r.action.requestHeaders, [{ header: 'Sec-GPC', operation: 'set', value: '1' }]);
+  assert.ok(r.condition.resourceTypes.includes('main_frame') && r.condition.resourceTypes.includes('sub_frame'));
+  assert.deepEqual(r.condition.excludedRequestDomains, ['o2.cz', 'seznam.cz']);
+  assert.deepEqual(r.condition.excludedInitiatorDomains, ['o2.cz', 'seznam.cz']);
+  // An empty exclusion list is left out, not sent as [] (Chrome rejects an empty domain list).
+  assert.ok(!('excludedRequestDomains' in gpcRule([]).condition));
+  assert.deepEqual(gpcExcludeMatches(['o2.cz']), ['*://o2.cz/*', '*://*.o2.cz/*']);
+});
+
+test('build: welcome page, GPC script and store-only URLs', () => {
+  const bg = read('build/chrome/background.js');
+  assert.ok(fs.existsSync(path.join(root, 'build/chrome/welcome/welcome.html')));
+  assert.ok(fs.existsSync(path.join(root, 'build/chrome/consent/gpc.js')));
+  // npm test builds without --store: no baked-in rule list, no uninstall page.
+  assert.ok(!bg.includes('theanhgen.github.io/declutter/data.json') && !bg.includes('bye.html'));
 });
 
 test('canary: baseline is the newest earlier day, never today (a rerun)', () => {

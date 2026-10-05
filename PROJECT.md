@@ -25,6 +25,9 @@ Built and passing in Chrome; Safari app built, signed and registered, **waiting 
 Research behind every claim here: `research/` (three reports + the scripts and raw results from the
 2026-09-21 runs). Anything marked **unverified** has not been tested yet and is a milestone gate.
 
+Brand and UI/UX references (2026-10-04): board https://claude.ai/artifact/HLAonFUjg8iZ9a2SW3H1Up (private, 16 images
+from Are.na), findings and ranked recommendations in `research/arena-brand-ux-2026-10-04.md`.
+
 ## Why
 
 - Shorts are the distraction. Mostly desktop; the YouTube iOS app is already deleted.
@@ -229,9 +232,10 @@ certificate; the team already has one for App Store work).
   (`codesign --verify --deep --strict`), registration verified (`pluginkit`); restart survival is checklist step 5.
 - **autoconsent in Safari** (`scripting.executeScript({world:'MAIN'})`) and the manifest `world: MAIN`
   content script (Safari 18+): checklist step 3. Fallback: autoconsent's `isMainWorld: true` mode.
-- **Where remote data is hosted** (D6). Mechanism done: build with `DECLUTTER_DATA_URL=<url>` and publish
-  `build/data.json` there; the extension refetches every 12 h. Options: raw URL of a public GitHub repo/gist, or
-  an existing server over Tailscale Funnel. Not decided — it publishes the data file.
+- ~~**Where remote data is hosted** (D6).~~ **Decided 2026-10-03**: GitHub Pages,
+  `https://theanhgen.github.io/declutter/data.json`, built from `data/` by `.github/workflows/pages.yml` on every
+  push that changes it. Store builds (`--store`) bake it in; personal builds don't. Users can remove it in settings.
+  First store version with it: the one after 1.0.0.
 - **Which tip link** (`DECLUTTER_TIP_URL`). Parked 2026-09-24: fee research and leaning in
   `research/tip-fees.md` (Revolut Business or Stripe link + Czech QR). Not decided.
 - ~~Can autoconsent take extra rules at runtime from our background script (for D6)?~~ **Answered

@@ -2,7 +2,7 @@
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, choiceMode, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
+import { badgeFor, chipFor, choiceMode, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -20,6 +20,11 @@ const DEFAULT_SETTINGS = {
   categories: { A: false, B: false, D: false, E: false, F: false, X: false },
   // Display: 'hide' the banner while answering (prehide), or 'show' it.
   display: 'hide',
+  // The chip: a short note on the page when a banner was answered (consent/chip.js).
+  chip: true,
+  // Global Privacy Control: tell sites "do not sell or share" (header + navigator property). Off by default: few EU
+  // sites act on it today, and it makes the browser a little more distinguishable.
+  gpc: false,
   // Dev: autoconsent's eval log and a delay before each click (to watch it work).
   debugEvals: false,
   clickDelay: false,
@@ -134,10 +139,22 @@ async function getTab(tabId) {
   return (await api.storage.session.get(tabKey(tabId)))[tabKey(tabId)] ?? {};
 }
 async function setTab(tabId, patch, reset = false) {
-  const next = { ...(reset ? {} : await getTab(tabId)), ...patch };
+  const prev = await getTab(tabId);
+  const next = { ...(reset ? {} : prev), ...patch };
   await api.storage.session.set({ [tabKey(tabId)]: next });
   await paintBadge(tabId, next);
+  if ('consent' in patch) await showChip(tabId, prev, next, reset);
   return next;
+}
+
+const chipKey = (tabId) => `chip-${tabId}`;
+async function showChip(tabId, prev, next, reloaded) {
+  const last = (await api.storage.session.get(chipKey(tabId)))[chipKey(tabId)];
+  const chip = chipFor(prev, next, last, Date.now(), reloaded);
+  if (!chip || !next.host || !(await getSettings()).chip) return;
+  await api.storage.session.set({ [chipKey(tabId)]: { host: next.host, consent: next.consent, text: chip.text, at: Date.now() } });
+  // host: the tab may have moved on while this was awaited; the page shows the chip only if it is still that site.
+  api.tabs.sendMessage(tabId, { type: 'chip', host: next.host, ...chip }, { frameId: 0 }).catch(() => { /* page gone */ });
 }
 
 async function paintBadge(tabId, state) {
@@ -173,6 +190,30 @@ async function report(tabId) {
   return true;
 }
 
+// ---- Global Privacy Control (opt-in; see gpcRule in lib.js) ----
+// Re-applied when settings or rule lists change. Queued: overlapping runs would register the script twice.
+async function applyGpc() {
+  const [s, data] = await Promise.all([getSettings(), getData()]);
+  const on = s.gpc && s.consent;
+  const skip = [...new Set([...(s.acceptSites ?? []), ...s.exceptions, ...data.consent.walls])];
+  try {
+    await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds: [GPC_RULE_ID], ...(on && { addRules: [gpcRule(skip)] }) });
+  } catch (e) {
+    console.warn('declutter: GPC header rule', e);
+  }
+  try {
+    if ((await api.scripting.getRegisteredContentScripts({ ids: ['gpc'] })).length) await api.scripting.unregisterContentScripts({ ids: ['gpc'] });
+    if (on) {
+      await api.scripting.registerContentScripts([{ id: 'gpc', js: ['consent/gpc.js'], matches: ['<all_urls>'],
+        excludeMatches: gpcExcludeMatches(skip), runAt: 'document_start', allFrames: true, world: 'MAIN' }]);
+    }
+  } catch (e) {
+    console.warn('declutter: GPC script', e);
+  }
+}
+let gpcQueue = Promise.resolve();
+const queueGpc = () => (gpcQueue = gpcQueue.then(applyGpc, applyGpc));
+
 async function applyShortsRedirect() {
   const { shorts } = await getSettings();
   await api.declarativeNetRequest.updateEnabledRulesets(
@@ -204,8 +245,8 @@ async function onConsentMessage(msg, sender) {
       const acceptPending = prev.acceptUntil > Date.now() && !looping;
       if (frameId === 0) {
         // Many sites reload themselves after the choice is saved; keep showing that it was refused.
-        const kept = prev.consent === 'done' && prev.host === tabHost && Date.now() - prev.doneAt < 60000
-          ? { consent: 'done', cmp: prev.cmp, doneAt: prev.doneAt } : {};
+        const kept = ['done', 'acceptedSite', 'choice'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
+          ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter } : {};
         await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil }),
           ...(excepted ? { consent: 'paused' } : kept) }, true);
       }
@@ -270,12 +311,12 @@ async function onConsentMessage(msg, sender) {
       break;
     case 'autoconsentDone': {
       const siteAccepted = hostMatches(tabHost, (await getSettings()).acceptSites ?? []);
+      const mode = siteAccepted ? 'accept' : choiceMode((await getSettings()).categories);
+      // What is recorded is what was done: accepted (this site, or every category switched on), refused, or, for a
+      // cosmetic rule, only hidden.
       await setTab(tabId, isWallRule(msg.cmp)
         ? { consent: 'accepted', cmp: msg.cmp, acceptUntil: 0 }
-        : siteAccepted
-          ? { consent: 'acceptedSite', cmp: msg.cmp }
-          : { consent: 'done', cmp: msg.cmp, doneAt: Date.now() });
-      const mode = siteAccepted ? 'accept' : choiceMode((await getSettings()).categories);
+        : { consent: mode === 'accept' ? 'acceptedSite' : 'done', cmp: msg.cmp, doneAt: Date.now(), cosmetic: !!msg.isCosmetic });
       await bump({ clicks: msg.totalClicks ?? 0, ...(isWallRule(msg.cmp) ? { walls: 1 } : mode === 'accept' ? { accepted: 1 } : { refused: 1 }) },
         msg.cmp, msg.totalClicks ?? 0);
       break;
@@ -297,7 +338,7 @@ async function applyChoice(tabId, frameId, cmp, categories) {
     console.warn('declutter: category adapter failed', cmp, e);
   }
   if (adapter) {
-    await setTab(tabId, { consent: 'choice', cmp, adapter });
+    await setTab(tabId, { consent: 'choice', cmp, adapter, doneAt: Date.now() });
     await bump({ choice: 1 }, cmp);
   } else {
     await setTab(tabId, { choiceFallback: true });
@@ -359,10 +400,13 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
-api.tabs.onRemoved.addListener((tabId) => api.storage.session.remove([tabKey(tabId), wallLogKey(tabId)]));
+api.tabs.onRemoved.addListener((tabId) => api.storage.session.remove([tabKey(tabId), chipKey(tabId), wallLogKey(tabId)]));
 
 api.storage.onChanged.addListener((changes, area) => {
-  if (area !== 'local' || !changes.settings) return;
+  if (area !== 'local') return;
+  // After the cache listener above, so a new wall list from a rule list is what applyGpc reads.
+  if (changes.settings || changes.remoteData) queueGpc();
+  if (!changes.settings) return;
   applyShortsRedirect();
   const urls = (x) => JSON.stringify(ruleListUrls(x ?? {}));
   if (urls(changes.settings.newValue) !== urls(changes.settings.oldValue)) refreshRemoteData();
@@ -372,8 +416,15 @@ api.alarms.onAlarm.addListener((a) => { if (a.name === 'data') refreshRemoteData
 
 async function start() {
   await applyShortsRedirect();
+  await queueGpc();
+  // eslint-disable-next-line no-undef
+  if (__UNINSTALL_URL__) api.runtime.setUninstallURL?.(__UNINSTALL_URL__)?.catch?.(() => { /* not supported */ });
   if (!(await api.alarms.get('data'))) api.alarms.create('data', { periodInMinutes: DATA_REFRESH_MINUTES });
   await refreshRemoteData();
 }
-api.runtime.onInstalled.addListener(start);
+api.runtime.onInstalled.addListener(({ reason }) => {
+  start();
+  // Safari's container app already walks through setup; there a tab would open on every enable.
+  if (reason === 'install' && __TARGET__ !== 'safari') api.tabs.create({ url: api.runtime.getURL('welcome/welcome.html') });
+});
 api.runtime.onStartup.addListener(start);

@@ -35,7 +35,7 @@ export function badgeFor(state, now = Date.now()) {
   if (state.consent === 'wall') return { text: currencyFor(state.host), color: '#e37400', title: 'declutter: consent-or-pay wall — agree or pay; accept from this menu' };
   if (state.consent === 'choice') return { text: '', color: '#1e8e3e', title: `declutter: applied your choice (${state.adapter})` };
   if (state.consent === 'accepted') return { text: '', color: '#777', title: `declutter: accepted the pay wall (${state.cmp})` };
-  if (state.consent === 'done') return { text: '', color: '#1e8e3e', title: `declutter: refused ${state.cmp}` };
+  if (state.consent === 'done') return { text: '', color: '#1e8e3e', title: `declutter: ${state.cosmetic ? 'hid' : 'refused'} ${state.cmp}` };
   return { text: '', color: '#777', title: 'declutter' };
 }
 
@@ -47,6 +47,41 @@ export function reportUrl(url) {
     return /^https?:$/.test(u.protocol) ? u.origin : null;
   } catch { return null; }
 }
+
+// The chip (consent/chip.js) says what just happened to the banner: only when the outcome changes, and not again
+// for the same outcome on the same site within a minute (sites reload themselves after the choice is saved).
+// A page that reloads while the chip is still up (reloaded: the new page's init) gets it once more.
+export const CHIP_REPEAT_MS = 60000;
+export const CHIP_VISIBLE_MS = 2500;
+const CHIPS = {
+  done: ['cookies refused', 'ok'], acceptedSite: ['cookies accepted', 'ok'], choice: ['your choice applied', 'ok'],
+  accepted: ['pay wall accepted', 'ok'], wall: ['pay wall: your choice', 'wait'], failed: ['banner not answered', 'bad'],
+};
+export function chipFor(prev, next, last = {}, now = Date.now(), reloaded = false) {
+  const chip = next.cosmetic && CHIPS[next.consent]?.[1] === 'ok' ? ['banner hidden', 'ok'] : CHIPS[next.consent];
+  if (!chip) return null;
+  const same = last.host === next.host && last.consent === next.consent;
+  if (reloaded && same && now - last.at < CHIP_VISIBLE_MS) return { text: chip[0], tone: chip[1] };
+  if (prev.consent === next.consent) return null;
+  if (last.host === next.host && last.consent === next.consent && now - last.at < CHIP_REPEAT_MS) return null;
+  return { text: chip[0], tone: chip[1] };
+}
+
+// Global Privacy Control (opt-in): the Sec-GPC request header as one dynamic declarativeNetRequest rule. skip = sites
+// the user accepts or leaves alone, and pay walls: an automatic "no" there fights the user's own "yes" (the banner
+// comes back, the wall locks). Excluded both as the request's site and as the page making it (its third parties).
+export const GPC_RULE_ID = 1;
+const GPC_TYPES = ['main_frame', 'sub_frame', 'stylesheet', 'script', 'image', 'font', 'xmlhttprequest', 'ping', 'media', 'websocket', 'other'];
+export function gpcRule(skip = []) {
+  return {
+    id: GPC_RULE_ID,
+    priority: 1,
+    action: { type: 'modifyHeaders', requestHeaders: [{ header: 'Sec-GPC', operation: 'set', value: '1' }] },
+    condition: { resourceTypes: GPC_TYPES, ...(skip.length && { excludedRequestDomains: skip, excludedInitiatorDomains: skip }) },
+  };
+}
+// The same sites as match patterns, for the page-world script (consent/gpc.js).
+export const gpcExcludeMatches = (skip = []) => skip.flatMap((d) => [`*://${d}/*`, `*://*.${d}/*`]);
 
 const SHORT = /^\/shorts\/([A-Za-z0-9_-]+)/;
 const CHANNEL_SHORTS = /^(\/(?:@[^/]+|channel\/[^/]+|c\/[^/]+|user\/[^/]+))\/shorts\/?$/;

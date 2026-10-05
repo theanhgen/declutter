@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>declutter is on</title>
+<style>
+  /* Opened once after install (background.js, Chrome and Firefox; Safari's container app explains setup). Same
+     plain-text look as the settings page. */
+  :root { --fg: hsl(0, 0%, 10%); --bg: hsl(0, 0%, 97%); --muted: hsl(0, 0%, 45%); --link: black; }
+  @media (prefers-color-scheme: dark) { :root { --fg: hsl(0, 0%, 88%); --bg: hsl(0, 0%, 9%); --link: white; } }
+  body { color: var(--fg); background: var(--bg); font-family: ui-monospace, "SF Mono", Menlo, "Andale Mono", "Courier New", monospace;
+    -webkit-font-smoothing: antialiased; line-height: 1.5; margin: 0 auto; max-width: 40em; padding: 2em 16px; }
+  p { font-size: 14px; margin: 1em 0; }
+  h1 { font-weight: normal; margin: 0.25em 0 0; display: flex; align-items: center; gap: 0.35em; }
+  h1 .logo { width: 0.95em; height: 0.95em; flex: none; }
+  a:link, a:visited { color: var(--link); }
+  .bullet { position: relative; margin-left: 23px; }
+  .bullet::before { content: " "; position: absolute; left: -20px; top: 8px; width: 5px; height: 5px;
+    border-radius: 100%; background: var(--dot, currentColor); }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+  <h1><img src="../popup/d.svg" alt="" class="logo">declutter is on</h1>
+  <p>Nothing to set up. From now on:</p>
+  <p class="bullet" style="--dot:#e5484d">YouTube Shorts are hidden, and a Shorts link opens in the normal player.</p>
+  <p class="bullet" style="--dot:#3e63dd">cookie banners are answered with "refuse". A short note in the corner says what was done.</p>
+  <p class="bullet" style="--dot:#f76b15">"agree or pay" walls are left for you: the toolbar button shows a currency badge.</p>
+  <p class="bullet" style="--dot:#30a46c">to accept or leave a banner alone on one site, use the toolbar button there.</p>
+  <p>Pin the button so it stays in reach: <span class="muted">Chrome, Edge:</span> the puzzle-piece icon → pin next to
+    declutter. <span class="muted">Firefox:</span> the extensions button → declutter's gear → pin to toolbar.</p>
+  <p class="muted">To allow some kinds of cookies everywhere instead of refusing all, see
+    <a href="../options/options.html#choice">settings → your choice</a>. Nothing leaves your browser unless you send a report.</p>
+</body>
+</html>

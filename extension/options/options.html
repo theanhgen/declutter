@@ -84,6 +84,10 @@
   <p class="bullet" style="--dot:#30a46c">always accept on: <span id="acceptSites"></span></p>
   <p class="bullet" style="--dot:#8d8d8d">leave alone on: <span id="exceptions"></span></p>
   <p class="desc">set per site from the toolbar menu: refuse / accept / leave.</p>
+  <p class="bullet" style="--dot:#3e63dd">send Global Privacy Control: <span class="choice" data-choice="gpc"></span></p>
+  <p class="desc">tells every site "do not sell or share my data" (the Sec-GPC signal), before any banner. some
+    consent platforms then refuse on their own; most sites in Europe ignore it so far. not sent to sites you accept or
+    leave alone, nor to pay walls. it makes your browser a little easier to tell apart, so it is off by default.</p>
 
   </section>
 
@@ -101,13 +105,15 @@
   <h2>display</h2>
   <p class="bullet" style="--dot:#12a594">while a banner is being answered: <span class="choice" data-choice="display"></span></p>
   <p class="desc">hide: the banner is kept out of sight while declutter clicks through it. show: you see it happen.</p>
+  <p class="bullet" style="--dot:#12a594">say what was done: <span class="choice" data-choice="chip"></span></p>
+  <p class="desc">a small note in the corner of the page for a second or two: cookies refused, accepted, or a pay wall left for you to decide.</p>
 
   </section>
 
   <section data-tab="lists">
   <h2>rule lists</h2>
-  <p>declutter's own rules are built in. Add rule lists (a data.json URL) to get fixes without an update; they
-    are checked every 12 hours.</p>
+  <p>declutter's own rules are built in. Rule lists (a data.json URL) bring fixes without an update; they are
+    checked every 12 hours. Store versions start with declutter's own list; remove it to use only the built-in rules.</p>
   <div id="ruleLists"></div>
   <p class="bullet" style="--dot:#8d8d8d"><input type="url" id="newList" placeholder="https://…/data.json"> <a href="#" id="addList">add list</a></p>
   <p class="bullet" style="--dot:#12a594" id="data"></p>

@@ -1,9 +1,10 @@
-# Publishes site/ (landing page + privacy policy) to GitHub Pages on every push to main that touches it.
+# Publishes site/ (landing page, privacy policy, uninstall page) to GitHub Pages on every push to main that touches
+# it, plus data.json: declutter's own rule list, built from data/, which store builds fetch every 12 hours (D6).
 name: pages
 on:
   push:
     branches: [main]
-    paths: [site/**, .github/workflows/pages.yml]
+    paths: [site/**, data/**, build.mjs, .github/workflows/pages.yml]
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,6 +17,10 @@ jobs:
     environment: { name: github-pages, url: '${{ steps.deploy.outputs.page_url }}' }
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: node build.mjs --data-only && cp build/data.json site/data.json
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }
       - id: deploy

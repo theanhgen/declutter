@@ -44,7 +44,16 @@ async function main() {
 
   const rows = [];
   const stuck = state.consent === 'working' && Date.now() - state.since > 15000;
-  if (state.consent === 'done') rows.push(statusRow('ok', 'cookies refused', state.choiceFallback ? `${state.cmp} — your mix isn't supported by this banner, so everything was refused` : state.cmp));
+  // Safari runs nothing on a site until the user allows it there ("Always Allow on Every Website"), and Chrome can
+  // restrict site access too. Say so instead of "no cookie banner here".
+  const allowed = await api.permissions.contains({ origins: [`${new URL(tab.url).origin}/*`] }).catch(() => true);
+  if (!allowed && !state.consent) {
+    rows.push(statusRow('bad', 'not allowed on this site', {
+      safari: 'allow it on every website: Safari → Settings → Extensions (iPhone: Settings → Apps → Safari → Extensions) → declutter',
+      firefox: 'the extensions button → declutter → always allow on all sites',
+      chrome: 'right-click the declutter button → "This can read and change site data" → on all sites',
+    }[__TARGET__]));
+  } else if (state.consent === 'done') rows.push(statusRow('ok', state.cosmetic ? 'banner hidden' : 'cookies refused', state.choiceFallback ? `${state.cmp} — your mix isn't supported by this banner, so everything was refused` : state.cmp));
   else if (state.consent === 'choice') rows.push(statusRow('ok', 'your choice applied', `${state.cmp} via ${state.adapter}`));
   else if (state.consent === 'failed' || stuck) rows.push(statusRow('bad', 'banner not answered', state.cmp));
   else if (state.consent === 'wall') {
