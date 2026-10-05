@@ -395,6 +395,16 @@
    "host": "www.sundhed.dk",
    "expect": "done",
    "note": "from Consent-O-Matic's rule list"
+  },
+  {
+   "host": "www.dockhouse.cz",
+   "expect": "done",
+   "note": "user report 2026-10-04; WordPress Cookie Notice plugin (cookie-notice-wp)"
+  },
+  {
+   "host": "eu.louisvuitton.com",
+   "expect": "done",
+   "note": "user report 2026-10-04; own consent manager (louisvuitton)"
   }
  ]
 }

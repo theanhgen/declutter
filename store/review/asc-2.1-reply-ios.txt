@@ -1,30 +1,31 @@
 Hello, here is the information you asked for.
 
 1. Screen recording
-Attached. Recorded on a physical Mac running the current macOS. It starts with launching declutter, then shows: the
-container app with the steps to turn the extension on; Safari → Settings → Extensions → declutter enabled with "Always
-Allow on Every Website"; youtube.com search results without the Shorts shelf and a /shorts/ link opening in the normal
-player; a cookie banner refused on a website, with the toolbar popup showing what was done; the per-site choice and
-the settings page; the optional tip jar in the app. The app has no account registration, login or account deletion, and
-no user-generated content. The only paid items are three optional consumable tips, which unlock nothing.
+Attached. Recorded on a physical iPhone running the current iOS. It starts with launching declutter, then shows: the
+container app with the steps to turn the extension on; Settings → Apps → Safari → Extensions → declutter with the
+extension allowed and All Websites set to Allow; youtube.com search results in Safari without the Shorts shelf and a
+/shorts/ link opening in the normal player; a cookie banner refused on a website, with the declutter popup (from the
+page menu in Safari's address bar) showing what was done; the per-site choice and the settings page; the optional tip
+jar in the app. The app has no account registration, login or account deletion, and no user-generated content. The
+only paid items are three optional consumable tips, which unlock nothing.
 
 2. Purpose and target audience
 declutter is a Safari web extension with a small container app. It does two things: it hides YouTube Shorts (the
 Shorts shelf, tab and search entries; a Shorts link opens in the normal video player), and it answers cookie-consent
 banners the way the user chose (refuse by default; accept, or leave alone, per site; optionally per category). It is
 for anyone who browses the web in Safari and wants fewer interruptions: people who do not want short-form video on
-YouTube, and people who are tired of clicking through consent banners on every site.
+YouTube, and people who are tired of tapping through consent banners on every site.
 
 3. Setup and access
 No account, login, credentials or sample files are needed.
 - Open the declutter app once (it shows the steps below).
-- Safari → Settings → Extensions → tick "declutter" → "Always Allow on Every Website". All-websites access is needed
-  because cookie banners can appear on any site.
-- YouTube: open youtube.com and search for anything; the Shorts shelf and Shorts tab are gone. Open a link of the form
-  youtube.com/shorts/<id>; it plays in the normal player (/watch).
+- Settings → Apps → Safari → Extensions → declutter → turn on Allow Extension, and set All Websites to Allow.
+  All-websites access is needed because cookie banners can appear on any site.
+- YouTube: open youtube.com in Safari and search for anything; the Shorts shelf and Shorts tab are gone. Open a link of
+  the form youtube.com/shorts/<id>; it plays in the normal player (/watch).
 - Cookie banners: open a site with a consent banner, for example alza.cz, o2.cz or bbc.com. The banner is answered with
-  "refuse" and disappears; the declutter toolbar button shows what was done and lets you set this site to refuse,
-  accept or leave alone.
+  "refuse" and disappears; open the page menu in Safari's address bar and tap declutter to see what was done and to set
+  this site to refuse, accept or leave alone.
 - "Agree to tracking or subscribe" walls (for example blesk.cz) are never answered automatically in this build; the
   popup shows the wall and an "Accept this wall" button.
 - Tips: in the container app under "tip jar".

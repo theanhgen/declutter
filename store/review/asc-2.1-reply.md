@@ -45,6 +45,9 @@ No account, login, credentials or sample files are needed.
 - Supabase (database hosted in the EU): receives a report only when the user presses "send to developer" in the popup
   for a site that was not handled right. The report holds the site's address (not the page), what the extension
   detected and the extension version.
+- GitHub Pages: the extension downloads declutter's public rule list (JSON data: page selectors and click steps, no
+  code) from theanhgen.github.io/declutter about every 12 hours, so fixes for websites arrive without an app update.
+  Nothing about the user is sent.
 - DuckDuckGo's open-source autoconsent library (MPL-2.0) is bundled in the extension and runs on the device; it
   contacts no service.
 There is no account or authentication service, no analytics, no advertising and no AI service. The extension executes
@@ -72,6 +75,23 @@ thế anh
    refuse / accept / leave control.
 5. The extension's settings page (popup → settings).
 6. Back in the app: the tip jar. If the three price buttons do not show, see the note below.
+
+## iOS (submission `41d8448e-342e-4e84-b3c5-3fcd8f60b720`, 2026-10-03)
+
+Same request. Reply text: `asc-2.1-reply-ios.txt` (sections 2, 4, 5, 6 as above; 1 and 3 describe the iPhone).
+
+Both replies assume build 4 is attached to the version (2026-10-05: build 3 has no hosted rule list and no "posts"
+switch). Record both screens on build 4 from TestFlight or the App Store build, not a dev build.
+
+Screen recording on the iPhone (Control Center → Screen Recording, about 90 seconds):
+
+1. Launch declutter from the Home Screen; pause on the window (steps + tip jar).
+2. Settings → Apps → Safari → Extensions → declutter: Allow Extension on, All Websites set to Allow.
+3. Safari → youtube.com → search "minecraft": no Shorts shelf. Open a `youtube.com/shorts/<id>` link: it opens as `/watch`.
+4. alza.cz (or bbc.com): the banner goes away; page menu in the address bar → declutter: "cookies refused" and the
+   refuse / accept / leave control.
+5. The extension's settings page (popup → settings).
+6. Back in the app: the tip jar.
 
 ## Check before replying
 

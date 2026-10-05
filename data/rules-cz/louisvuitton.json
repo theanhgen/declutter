@@ -1,0 +1,39 @@
+{
+  "name": "louisvuitton",
+  "_comment": "Louis Vuitton's own consent manager (ucm-*): modal with 'Set cookie preferences' / 'Accept and Continue'; refuse is the 'Continue without accepting' link (.ucm-popin-close).",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*louisvuitton\\.com/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#ucm-wrapper .ucm-choice__yes"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#ucm-details .ucm-popin--active"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#ucm-details .ucm-choice__yes"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#ucm-details .ucm-popin-close"
+    },
+    {
+      "waitForVisible": "#ucm-details .ucm-popin--active",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#ucm-details .ucm-popin--active",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}
