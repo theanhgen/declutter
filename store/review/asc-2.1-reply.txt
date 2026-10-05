@@ -1,0 +1,51 @@
+Hello, here is the information you asked for.
+
+1. Screen recording
+Attached. Recorded on a physical Mac running the current macOS. It starts with launching declutter, then shows: the
+container app with the steps to turn the extension on; Safari → Settings → Extensions → declutter enabled with "Always
+Allow on Every Website"; youtube.com search results without the Shorts shelf and a /shorts/ link opening in the normal
+player; a cookie banner refused on a website, with the toolbar popup showing what was done; the per-site choice and
+the settings page; the optional tip jar in the app. The app has no account registration, login or account deletion, and
+no user-generated content. The only paid items are three optional consumable tips, which unlock nothing. The recording was made with a slightly newer development build, so the popup shows one extra switch ("hide posts in feeds") that is not in the build under review.
+
+2. Purpose and target audience
+declutter is a Safari web extension with a small container app. It does two things: it hides YouTube Shorts (the
+Shorts shelf, tab and search entries; a Shorts link opens in the normal video player), and it answers cookie-consent
+banners the way the user chose (refuse by default; accept, or leave alone, per site; optionally per category). It is
+for anyone who browses the web in Safari and wants fewer interruptions: people who do not want short-form video on
+YouTube, and people who are tired of clicking through consent banners on every site.
+
+3. Setup and access
+No account, login, credentials or sample files are needed.
+- Open the declutter app once (it shows the steps below).
+- Safari → Settings → Extensions → tick "declutter" → "Always Allow on Every Website". All-websites access is needed
+  because cookie banners can appear on any site.
+- YouTube: open youtube.com and search for anything; the Shorts shelf and Shorts tab are gone. Open a link of the form
+  youtube.com/shorts/<id>; it plays in the normal player (/watch).
+- Cookie banners: open a site with a consent banner, for example alza.cz, o2.cz or bbc.com. The banner is answered with
+  "refuse" and disappears; the declutter toolbar button shows what was done and lets you set this site to refuse,
+  accept or leave alone.
+- "Agree to tracking or subscribe" walls (for example blesk.cz) are never answered automatically in this build; the
+  popup shows the wall and an "Accept this wall" button.
+- Tips: in the container app under "tip jar".
+
+4. External services
+- Apple StoreKit (In-App Purchase) for the optional tips. No other payment processor.
+- Supabase (database hosted in the EU): receives a report only when the user presses "send to developer" in the popup
+  for a site that was not handled right. The report holds the site's address (not the page), what the extension
+  detected and the extension version.
+- DuckDuckGo's open-source autoconsent library (MPL-2.0) is bundled in the extension and runs on the device; it
+  contacts no service.
+No account or authentication service, no analytics, no advertising, no AI service, no remote code.
+
+5. Regional differences
+The app works the same in all regions and has no region-specific features or content. What differs is the websites:
+cookie-consent banners appear mainly for visitors in the EU, EEA and UK, so outside those regions that part often has
+nothing to do. The extra rule pack covers Czech sites in more detail; the general rules cover sites worldwide.
+
+6. Regulated industry or third-party material
+Not applicable. The app does not operate in a regulated industry and contains no protected third-party content. YouTube is not modified or
+redistributed; the extension only changes how pages are displayed in the user's own browser, at the user's request.
+
+Best regards,
+thế anh
