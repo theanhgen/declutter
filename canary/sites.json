@@ -405,6 +405,11 @@
    "host": "eu.louisvuitton.com",
    "expect": "done",
    "note": "user report 2026-10-04; own consent manager (louisvuitton)"
+  },
+  {
+   "host": "alfabet.coffee",
+   "expect": "done",
+   "note": "user report 2026-09-27; Shopify app Tiny Cookie (tinycookie)"
   }
  ]
 }

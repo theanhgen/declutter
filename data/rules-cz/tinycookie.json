@@ -1,0 +1,36 @@
+{
+  "name": "tinycookie",
+  "_comment": "Shopify app 'Tiny Cookie' (#tinycookie-wrapper; alfabet.coffee). Buttons carry no class except accept-all; the refuse button is the other one in .tinycookie-main-buttons ('ODMÍTNOUT VOLITELNÉ COOKIES'), the third one opens preferences. Only when that refuse button exists.",
+  "detectCmp": [
+    {
+      "exists": "#tinycookie-wrapper .tinycookie-main-buttons > button:not(.tinycookie-accept-all)"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#tinycookie-wrapper .tinycookie-main-buttons"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#tinycookie-wrapper .tinycookie-accept-all"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#tinycookie-wrapper .tinycookie-main-buttons > button:not(.tinycookie-accept-all)"
+    },
+    {
+      "waitForVisible": "#tinycookie-wrapper .tinycookie-main-buttons",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#tinycookie-wrapper .tinycookie-main-buttons",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}
