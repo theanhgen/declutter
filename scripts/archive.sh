@@ -13,6 +13,20 @@ set -euo pipefail
 if [ "${XCODE:-}" = beta ]; then export DEVELOPER_DIR=/Applications/Xcode-27.2-beta.app/Contents/Developer
 else export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"; fi
 cd "$(dirname "$0")/.."
+# An upload must say how far HEAD was verified (device, simulator, tests or none), the same record the
+# iOS apps' upload.sh requires: ~/.agents/skills/custom/testflight-beta/scripts/testflight.py verify.
+if [ "${UPLOAD:-}" = 1 ]; then
+  if ! VERIFIED=$("$HOME/.agents/skills/custom/testflight-beta/scripts/testflight.py" verified); then
+    echo "!! Not uploading without a verification record. Run without UPLOAD=1 to only archive." >&2
+    exit 1
+  fi
+  case "${VERIFIED%%:*}" in
+    device)    echo "==> verified on device — ${VERIFIED#*: }" ;;
+    simulator) echo "==> verified in the simulator only — ${VERIFIED#*: }" ;;
+    tests)     echo "==> verified by tests only — ${VERIFIED#*: }" ;;
+    *)         echo "==> NOT verified — ${VERIFIED#*: }" ;;
+  esac
+fi
 # Sign with the App Store Connect API key (~/.appstoreconnect/asc.env), not the Xcode account session,
 # which xcodebuild does not always see ("No Accounts").
 source "$HOME/.appstoreconnect/asc.env"
