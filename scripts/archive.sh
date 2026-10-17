@@ -13,6 +13,13 @@ set -euo pipefail
 if [ "${XCODE:-}" = beta ]; then export DEVELOPER_DIR=/Applications/Xcode-27.2-beta.app/Contents/Developer
 else export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"; fi
 cd "$(dirname "$0")/.."
+# User reports ("send to developer") are checked before every store build, upload or not: each needs a fix plus a
+# canary entry, or a line in canary/reports-skip.json. REPORTS_OK=1 builds anyway.
+echo "==> open user reports (last 90 days)"
+if ! node scripts/reports.mjs --open 90; then
+  if [ "${REPORTS_OK:-}" = 1 ]; then echo "==> REPORTS_OK=1: building with open reports"
+  else echo "!! Open user reports. Fix them (rule + canary/sites.json) or list them in canary/reports-skip.json; REPORTS_OK=1 overrides." >&2; exit 1; fi
+fi
 # An upload must say how far HEAD was verified (device, simulator, tests or none), the same record the
 # iOS apps' upload.sh requires: ~/.agents/skills/custom/testflight-beta/scripts/testflight.py verify.
 if [ "${UPLOAD:-}" = 1 ]; then
@@ -26,13 +33,6 @@ if [ "${UPLOAD:-}" = 1 ]; then
     tests)     echo "==> verified by tests only — ${VERIFIED#*: }" ;;
     *)         echo "==> NOT verified — ${VERIFIED#*: }" ;;
   esac
-  # User reports ("send to developer") must be handled before a build goes out: a fix plus a canary entry, or a
-  # line in canary/reports-skip.json. REPORTS_OK=1 uploads anyway.
-  echo "==> open user reports (last 90 days)"
-  if ! node scripts/reports.mjs --open 90; then
-    if [ "${REPORTS_OK:-}" = 1 ]; then echo "==> REPORTS_OK=1: uploading with open reports"
-    else echo "!! Open user reports. Fix them (rule + canary/sites.json) or list them in canary/reports-skip.json; REPORTS_OK=1 overrides." >&2; exit 1; fi
-  fi
 fi
 # Sign with the App Store Connect API key (~/.appstoreconnect/asc.env), not the Xcode account session,
 # which xcodebuild does not always see ("No Accounts").

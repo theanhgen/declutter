@@ -30,8 +30,8 @@ app generated with xcodegen (team `28DMV2MR8T`). Tests and canary: Playwright's 
 - Store: `npm run store` (store build: walls default manual; zips + 1280x800 screenshots in `dist/`); listing, permission justifications, checklist: `store/LISTING.md`
 - Canary job: `scripts/canary-agent.sh install|remove`; log `/tmp/declutter-canary.log`
 - User reports: `node scripts/reports.mjs [days]` (all) · `--open` (unhandled only, exit 1). Check them at the start of
-  every declutter session and before every build; `UPLOAD=1 scripts/archive.sh` refuses to upload while any are open
-  (`REPORTS_OK=1` overrides). Handled = rule + host in `canary/sites.json`, or host → reason in `canary/reports-skip.json`.
+  every declutter session and before every build; `scripts/archive.sh` checks first and refuses to build while any are
+  open (`REPORTS_OK=1` overrides). Handled = rule + host in `canary/sites.json`, or host → reason in `canary/reports-skip.json`.
 
 ## Conventions
 
