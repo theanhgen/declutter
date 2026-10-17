@@ -410,6 +410,34 @@
    "host": "alfabet.coffee",
    "expect": "done",
    "note": "user report 2026-09-27; Shopify app Tiny Cookie (tinycookie)"
+  },
+  {
+   "host": "www.supermesteri.ro",
+   "expect": "done"
+  },
+  {
+   "host": "kudykvolbam.iprpraha.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.skyscanner.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.vueling.com",
+   "expect": "done"
+  },
+  {
+   "host": "www.perplexity.ai",
+   "expect": "done"
+  },
+  {
+   "host": "www.interactivebrokers.com",
+   "expect": "clear"
+  },
+  {
+   "host": "www.interactivebrokers.ie",
+   "expect": "clear"
   }
  ]
 }

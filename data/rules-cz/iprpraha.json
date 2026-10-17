@@ -1,0 +1,46 @@
+{
+  "name": "iprpraha",
+  "_comment": "IPR Praha apps (kudykvolbam.iprpraha.cz; user report 2026-10-09). The banner has only 'settings' and 'allow all'; refuse = settings, then 'Povolit vybrané Cookies' with analytics left unticked (the default). Class names are generic, so only on iprpraha.cz.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*iprpraha\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".cookie-banner .cookie-btn.allow"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".cookie-banner.active"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".cookie-banner .cookie-btn.allow"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".cookie-banner .cookie-btn:not(.allow)"
+    },
+    {
+      "waitForVisible": ".cookie-modal.active",
+      "timeout": 3000
+    },
+    {
+      "waitForThenClick": ".cookie-modal.active .cookie-btn:not(.allow)"
+    },
+    {
+      "waitForVisible": ".cookie-banner.active",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".cookie-banner.active",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

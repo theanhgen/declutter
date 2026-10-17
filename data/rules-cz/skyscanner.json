@@ -1,0 +1,39 @@
+{
+  "name": "skyscanner-2026",
+  "_comment": "Skyscanner's banner since 2026 (#consentBannerContent; user report skyscanner.cz 2026-10-09). autoconsent's own 'skyscanner' rule still looks for #cookieBannerContent and no longer matches. Refuse is 'Accept only essential' (data-testid consentBannerRejectAll).",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*skyscanner\\.[a-z.]+/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#consentBannerContent [data-testid=consentBannerRejectAll]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#consentBannerContent"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#consentBannerContent [data-testid=consentBannerAcceptAll]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#consentBannerContent [data-testid=consentBannerRejectAll]"
+    },
+    {
+      "waitForVisible": "#consentBannerContent",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#consentBannerContent",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

@@ -26,6 +26,13 @@ if [ "${UPLOAD:-}" = 1 ]; then
     tests)     echo "==> verified by tests only — ${VERIFIED#*: }" ;;
     *)         echo "==> NOT verified — ${VERIFIED#*: }" ;;
   esac
+  # User reports ("send to developer") must be handled before a build goes out: a fix plus a canary entry, or a
+  # line in canary/reports-skip.json. REPORTS_OK=1 uploads anyway.
+  echo "==> open user reports (last 90 days)"
+  if ! node scripts/reports.mjs --open 90; then
+    if [ "${REPORTS_OK:-}" = 1 ]; then echo "==> REPORTS_OK=1: uploading with open reports"
+    else echo "!! Open user reports. Fix them (rule + canary/sites.json) or list them in canary/reports-skip.json; REPORTS_OK=1 overrides." >&2; exit 1; fi
+  fi
 fi
 # Sign with the App Store Connect API key (~/.appstoreconnect/asc.env), not the Xcode account session,
 # which xcodebuild does not always see ("No Accounts").

@@ -1,0 +1,39 @@
+{
+  "name": "perplexity",
+  "_comment": "Perplexity's own consent dialog ([data-testid=consent-dialog]; user report perplexity.ai 2026-10-10). Two unlabelled buttons in the last row: accept all first ('Povolit vše'), 'necessary only' second ('Jen nezbytné').",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*perplexity\\.ai/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-testid=consent-dialog] > div:last-child > button:nth-child(2)"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[data-testid=consent-dialog]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-testid=consent-dialog] > div:last-child > button:nth-child(1)"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-testid=consent-dialog] > div:last-child > button:nth-child(2)"
+    },
+    {
+      "waitForVisible": "[data-testid=consent-dialog]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "[data-testid=consent-dialog]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

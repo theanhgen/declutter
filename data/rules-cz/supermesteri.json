@@ -1,0 +1,39 @@
+{
+  "name": "supermesteri",
+  "_comment": "supermesteri.ro's own Rails/Stimulus banner (turbo-frame#cookie_consent_popup; user report 2026-10-08). Refuse is 'Doar câmpurile obligatorii' (data-action cookie-consent#grantEssentials), directly in the form.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*supermesteri\\.ro/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookie_consent_popup form > button[data-action~='cookie-consent#grantEssentials']"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookie_consent_popup form"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookie_consent_popup form > div > button[data-action~='cookie-consent#grantAll']"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookie_consent_popup form > button[data-action~='cookie-consent#grantEssentials']"
+    },
+    {
+      "waitForVisible": "#cookie_consent_popup form",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookie_consent_popup form",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

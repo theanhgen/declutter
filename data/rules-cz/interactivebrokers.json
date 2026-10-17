@@ -1,0 +1,39 @@
+{
+  "name": "interactivebrokers",
+  "_comment": "Interactive Brokers' own Bootstrap modal (#cookie-modal; user reports interactivebrokers.com and .ie 2026-10-14). Refuse is #gdpr-reject-all ('Reject All Cookies'). Both buttons POST the choice and reload the page, so the extension's 'done' is lost with the reload; the canary checks 'clear'. Verified 2026-10-17 on .ie: the POST carries perf/func/targ=false. The .com banner did not show from a Czech IP.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*interactivebrokers\\.[a-z.]+/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookie-modal #gdpr-reject-all"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookie-modal"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookie-modal #btn_accept_cookies"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookie-modal #gdpr-reject-all"
+    },
+    {
+      "waitForVisible": "#cookie-modal",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookie-modal",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}
