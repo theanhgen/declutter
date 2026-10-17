@@ -26,7 +26,7 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("to turn it on:")
                 Text("1. Settings → Apps → Safari → Extensions → declutter")
-                Text("2. Allow Extension, and set All Websites to Allow")
+                Text("2. Allow Extension, and set Other Websites to Allow")
                 Text("3. In Safari, tap the page menu (the icon at the left of the address bar) to see what it did on a page")
             }
             .font(.system(.callout, design: .monospaced))

@@ -1,13 +1,14 @@
 Hello, here is the information you asked for.
 
 1. Screen recording
-Attached. Recorded on a physical iPhone running the current iOS. It starts with launching declutter, then shows: the
-container app with the steps to turn the extension on; Settings → Apps → Safari → Extensions → declutter with the
-extension allowed and All Websites set to Allow; youtube.com search results in Safari without the Shorts shelf and a
-/shorts/ link opening in the normal player; a cookie banner refused on a website, with the declutter popup (from the
-page menu in Safari's address bar) showing what was done; the per-site choice and the settings page; the optional tip
-jar in the app. The app has no account registration, login or account deletion, and no user-generated content. The
-only paid items are three optional consumable tips, which unlock nothing.
+Attached. Recorded on a physical iPhone 13 running iOS 27.0.1, the latest iOS for that model. It starts with
+launching declutter from the App Library (the app shows the steps to turn the extension on), then shows: Settings →
+Apps → Safari → Extensions → declutter, turning on Allow Extension and setting Other Websites to Allow; the
+extension's settings page; youtube.com search results in Safari without the Shorts shelf or the Shorts tab; a
+youtube.com/shorts/ link opening in the normal player (the address bar shows /watch); a cookie banner refused on
+o2.cz, with the declutter popup (page menu in Safari's address bar) showing "cookies refused" and the per-site choice
+(refuse / accept / leave). The app has no account registration, login or account deletion, no user-generated content,
+and no paid content or in-app purchases in this version.
 
 2. Purpose and target audience
 declutter is a Safari web extension with a small container app. It does two things: it hides YouTube Shorts (the
@@ -19,8 +20,9 @@ YouTube, and people who are tired of tapping through consent banners on every si
 3. Setup and access
 No account, login, credentials or sample files are needed.
 - Open the declutter app once (it shows the steps below).
-- Settings → Apps → Safari → Extensions → declutter → turn on Allow Extension, and set All Websites to Allow.
-  All-websites access is needed because cookie banners can appear on any site.
+- Settings → Apps → Safari → Extensions → declutter → turn on Allow Extension. Under Permissions, set Other
+  Websites (and the listed sites, such as youtube.com and m.youtube.com) to Allow. Access to all websites is needed
+  because cookie banners can appear on any site.
 - YouTube: open youtube.com in Safari and search for anything; the Shorts shelf and Shorts tab are gone. Open a link of
   the form youtube.com/shorts/<id>; it plays in the normal player (/watch).
 - Cookie banners: open a site with a consent banner, for example alza.cz, o2.cz or bbc.com. The banner is answered with
@@ -28,10 +30,10 @@ No account, login, credentials or sample files are needed.
   this site to refuse, accept or leave alone.
 - "Agree to tracking or subscribe" walls (for example blesk.cz) are never answered automatically in this build; the
   popup shows the wall and an "Accept this wall" button.
-- Tips: in the container app under "tip jar".
 
 4. External services
-- Apple StoreKit (In-App Purchase) for the optional tips. No other payment processor.
+- Apple StoreKit: the container app only asks whether optional tips are offered; none are in this version, so the
+  tip section stays hidden. No payment processor.
 - Supabase (database hosted in the EU): receives a report only when the user presses "send to developer" in the popup
   for a site that was not handled right. The report holds the site's address (not the page), what the extension
   detected and the extension version.
