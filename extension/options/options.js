@@ -100,13 +100,14 @@ async function render() {
     el('p', { className: 'bullet', style: '--dot:#8d8d8d' }, link('clear counters', () => api.storage.local.set({ stats: {} }).then(render))),
   ] : []));
 
-  // reported sites
-  const lines = reports.map((r) => `${new Date(r.at).toISOString().slice(0, 16).replace('T', ' ')}  ${r.url}  [${r.consent}${r.cmp ? ' ' + r.cmp : ''}]`);
+  // reported sites; fixedAt: a later rule list added a rule or wall entry for the site (markFixed in lib.js)
+  const lines = reports.map((r) => `${new Date(r.at).toISOString().slice(0, 16).replace('T', ' ')}  ${r.url}  [${r.consent}${r.cmp ? ' ' + r.cmp : ''}]` +
+    (r.fixedAt ? `  fixed in rule list ${new Date(r.fixedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` : ''));
   const actions = el('p', { className: 'bullet', style: '--dot:#8d8d8d' });
   actions.append(link('copy list', async () => { await navigator.clipboard.writeText(lines.join('\n')); actions.firstChild.textContent = 'copied'; }), ' / ',
     link('clear', () => api.storage.local.set({ reports: [] }).then(render)));
   $('reports').replaceChildren(...(reports.length
-    ? [...lines.map((t) => el('p', { className: 'bullet', style: '--dot:#e5484d', textContent: t })), actions]
+    ? [...lines.map((t, i) => el('p', { className: 'bullet', style: `--dot:${reports[i].fixedAt ? '#30a46c' : '#e5484d'}`, textContent: t })), actions]
     : [el('p', { className: 'muted', textContent: 'none.' })]));
 }
 render();

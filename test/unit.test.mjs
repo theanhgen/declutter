@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, markFixed, mergeData, redirectTarget, siteRules, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -74,6 +74,25 @@ test('reportUrl sends the site only: no path, query, fragment or credentials', (
   assert.equal(reportUrl('file:///Users/x/a.html'), null);
   assert.equal(reportUrl('chrome-extension://abc/options.html'), null);
   assert.equal(reportUrl(''), null);
+});
+
+test('markFixed: a reported site is fixed once a later rule list adds a rule or wall entry for it', () => {
+  const list = (rules, walls = []) => ({ consent: { walls, rules: rules.map(([name, urlPattern]) => ({ name, ...(urlPattern && { runContext: { urlPattern } }) })) } });
+  const a = list([['cz-shop-old', '^https?://([a-z0-9-]+\\.)*shop\\.cz/'], ['cz-other', '^https?://other\\.cz/'], ['generic']]);
+  const url = 'https://www.shop.cz/kosik';
+  const report = { url, host: 'www.shop.cz', at: 1, rulesAtReport: siteRules(a, url) };
+  assert.deepEqual(report.rulesAtReport, { names: ['cz-shop-old'], wall: false }, 'a rule without a urlPattern does not count');
+  // list B adds a rule for the site
+  const b = list([...a.consent.rules.map((r) => [r.name, r.runContext?.urlPattern]), ['cz-shop', '^https?://www\\.shop\\.cz/']]);
+  assert.equal(markFixed([report], b, 50)[0].fixedAt, 50);
+  // a wall entry for the site counts too
+  assert.equal(markFixed([report], list([], ['shop.cz']), 50)[0].fixedAt, 50);
+  // no new matching rule: still just reported (same list, a rule for another site, a new generic rule)
+  const c = list([...a.consent.rules.map((r) => [r.name, r.runContext?.urlPattern]), ['cz-elsewhere', '^https?://elsewhere\\.cz/'], ['generic-2']], ['other.cz']);
+  for (const d of [a, c]) assert.equal(markFixed([report], d, 50)[0], report);
+  // set once, and never on a report saved before rulesAtReport existed
+  assert.equal(markFixed([{ ...report, fixedAt: 9 }], b, 50)[0].fixedAt, 9);
+  assert.equal(markFixed([{ url, host: 'www.shop.cz', at: 1 }], b, 50)[0].fixedAt, undefined);
 });
 
 test('validData rejects malformed remote payloads', () => {

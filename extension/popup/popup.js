@@ -21,7 +21,7 @@ function statusRow(kind, text, sub) {
 async function main() {
   $('settings').onclick = () => { api.runtime.openOptionsPage(); window.close(); };
 
-  const { settings = {} } = await api.storage.local.get('settings');
+  const { settings = {}, reports = [] } = await api.storage.local.get(['settings', 'reports']);
   const s = { shorts: true, posts: true, consent: true, exceptions: [], acceptSites: [], ...settings };
   // Only the changed keys over what is stored now (never the defaults above, and Settings may be open too).
   const save = async (patch) => {
@@ -72,6 +72,9 @@ async function main() {
   else if (state.consent === 'working') rows.push(statusRow('', `answering ${state.cmp}…`));
   else rows.push(statusRow('', 'no cookie banner here'));
   if (state.shortsLeak > 0) rows.push(statusRow('bad', `${state.shortsLeak} shorts got through`, `on ${state.leakPath}`));
+  // A site the user reported that a later rule list now covers (markFixed in lib.js).
+  const reported = reports.find((r) => r.host === host);
+  if (reported?.fixedAt) rows.push(statusRow('ok', `fixed since you reported it on ${new Date(reported.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`));
   $('status').replaceChildren(...rows);
   $('pageSection').hidden = false;
 
