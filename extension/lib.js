@@ -96,14 +96,22 @@ export function redirectTarget(url) {
   return null;
 }
 
-// Shorts the stylesheet hides, counted for the popup and Settings: each element once (seen), so YouTube
-// re-rendering around it never counts it again. A selector this browser can't parse counts nothing.
+// Shorts the stylesheet hides, counted for the popup and Settings: each Short once (seen holds video ids), so a
+// shelf matched by several selectors, a card nested in a hidden shelf, or YouTube re-rendering never counts it
+// again. Hidden nav entries (sidebar, tabs, chips) link to /shorts/ with no id and count nothing.
+// A selector this browser can't parse counts nothing.
+const SHORT_ID = /\/shorts\/([^/?#]+)/;
 export function countNewlyHidden(root, selectors, seen) {
   let added = 0;
   for (const s of selectors) {
     let found = [];
     try { found = root.querySelectorAll(s); } catch { /* unparsable here: the CSS skips it too */ }
-    for (const el of found) if (!seen.has(el)) { seen.add(el); added++; }
+    for (const el of found) {
+      for (const a of el.querySelectorAll('a[href*="/shorts/"]')) {
+        const id = a.getAttribute('href')?.match(SHORT_ID)?.[1];
+        if (id && !seen.has(id)) { seen.add(id); added++; }
+      }
+    }
   }
   return added;
 }

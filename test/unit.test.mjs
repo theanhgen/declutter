@@ -20,18 +20,22 @@ test('redirectTarget: Shorts and channel Shorts tabs', () => {
   assert.equal(redirectTarget('https://www.youtube.com/results?search_query=shorts'), null);
 });
 
-test('shorts hidden: each element counted once, however often YouTube re-renders', () => {
-  const shelf = {}, a = {}, b = {}, c = {};
-  let dom = { 'ytd-reel-shelf-renderer': [shelf], 'yt-lockup-view-model:has(a[href^="/shorts/"])': [a, b] };
+test('shorts hidden: each element counted once (by video id), however often YouTube re-renders; nav entries never', () => {
+  const link = (href) => ({ getAttribute: () => href });
+  const node = (...hrefs) => ({ querySelectorAll: () => hrefs.map(link) });
+  const a = node('/shorts/AAA', '/shorts/AAA'), b = node('/shorts/BBB?feature=x'), c = node('/shorts/CCC');
+  const shelf = node('/shorts/AAA', '/shorts/AAA', '/shorts/BBB?feature=x'); // a shelf holding cards a and b
+  const guide = node('/shorts/'), tab = node('/@chan/shorts');
+  const S = { shelf: 'ytd-reel-shelf-renderer', card: 'yt-lockup-view-model:has(a[href^="/shorts/"])', guide: 'ytd-guide-entry-renderer', tab: 'yt-tab-shape' };
+  let dom = { [S.shelf]: [shelf], [S.card]: [a, b], [S.guide]: [guide], [S.tab]: [tab] };
   const root = { querySelectorAll: (s) => { if (s === 'bad(') throw new SyntaxError(s); return dom[s] ?? []; } };
-  const selectors = ['ytd-reel-shelf-renderer', 'yt-lockup-view-model:has(a[href^="/shorts/"])', 'bad('];
+  const selectors = [...Object.values(S), 'bad('];
   const seen = new Set();
-  assert.equal(countNewlyHidden(root, selectors, seen), 3);
+  assert.equal(countNewlyHidden(root, selectors, seen), 2, 'two Shorts: nested shelf and cards, two links per card, nav entries');
   assert.equal(countNewlyHidden(root, selectors, seen), 0, 're-render of the same elements');
-  dom = { ...dom, 'yt-lockup-view-model:has(a[href^="/shorts/"])': [a, b, c] };
+  dom = { ...dom, [S.card]: [a, b, c] };
   assert.equal(countNewlyHidden(root, selectors, seen), 1, 'only the new one (more results scrolled in)');
-  // two selectors matching one element: still one
-  assert.equal(countNewlyHidden({ querySelectorAll: () => [c] }, ['x', 'y'], new Set()), 1);
+  assert.equal(countNewlyHidden({ querySelectorAll: () => [guide, tab] }, ['x'], new Set()), 0, 'a page with no Shorts counts none');
 });
 
 test('shorts popup row and Settings line say what was hidden and redirected', () => {

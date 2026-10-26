@@ -2,7 +2,7 @@
 //  - sends /shorts/<id> to /watch?v=<id>, and a channel's /shorts tab to /videos
 //  - adds selectors from the remote data copy (D6)
 //  - self-check: any /shorts/ link still visible gets hidden by its card and reported (red badge)
-//  - counts what the stylesheet hid (each element once) and the shorts it opened in the normal player (popup, Settings)
+//  - counts the Shorts the stylesheet hid (each once per page) and the ones it opened in the normal player (popup, Settings)
 // The same stylesheet hides community posts in the feeds (its own switch, CSS only).
 import bundled from '../../data/shorts.json';
 import { countNewlyHidden, redirectTarget } from '../lib.js';
@@ -40,9 +40,16 @@ function onClick(e) {
 
 const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
 
-// Elements already counted, for the tab's lifetime; pageHidden is this page's total (reset on in-app navigation).
-const seen = new WeakSet();
+// Shorts already counted on this page (video ids) and their total; both reset on in-app navigation.
+const seen = new Set();
 let pageHidden = 0;
+// A new page inside the app (www: yt-navigate-finish; m.youtube.com: noticed as a URL change).
+function onNav() {
+  lastReported = -1;
+  pageHidden = 0;
+  seen.clear();
+  send({ type: 'shortsNav' });
+}
 
 let lastReported = -1;
 function selfCheck() {
@@ -72,6 +79,8 @@ const scheduleCheck = () => {
   if (location.href !== lastUrl) {
     lastUrl = location.href;
     if (redirectIfShort()) return;
+    // www has yt-navigate-finish for this; a second reset there could count one page twice.
+    if (location.hostname === 'm.youtube.com') onNav();
   }
   clearTimeout(timer);
   timer = setTimeout(selfCheck, 700);
@@ -111,9 +120,7 @@ async function init() {
   document.addEventListener('click', onClick, true);
   // YouTube navigates inside the page; these fire on every in-app page change.
   document.addEventListener('yt-navigate-finish', () => {
-    lastReported = -1;
-    pageHidden = 0;
-    send({ type: 'shortsNav' });
+    onNav();
     if (!redirectIfShort()) scheduleCheck();
   });
   window.addEventListener('popstate', redirectIfShort);
