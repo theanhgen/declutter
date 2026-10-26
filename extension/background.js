@@ -138,8 +138,20 @@ const tabKey = (tabId) => `tab-${tabId}`;
 async function getTab(tabId) {
   return (await api.storage.session.get(tabKey(tabId)))[tabKey(tabId)] ?? {};
 }
-async function setTab(tabId, patch, reset = false) {
+// Queued per tab: each read/merge/write runs alone, or a slower one would overwrite a newer state with its stale copy.
+// patch may be a function of the current record (null = no change), to decide on the state it is merged into.
+const tabQueues = new Map();
+function setTab(tabId, patch, reset = false) {
+  const run = (tabQueues.get(tabId) ?? Promise.resolve()).then(() => writeTab(tabId, patch, reset));
+  const tail = run.catch(() => { /* reported to the caller */ });
+  tabQueues.set(tabId, tail);
+  tail.then(() => { if (tabQueues.get(tabId) === tail) tabQueues.delete(tabId); });
+  return run;
+}
+async function writeTab(tabId, patchOrFn, reset) {
   const prev = await getTab(tabId);
+  const patch = typeof patchOrFn === 'function' ? patchOrFn(prev) : patchOrFn;
+  if (!patch) return prev;
   const next = { ...(reset ? {} : prev), ...patch };
   await api.storage.session.set({ [tabKey(tabId)]: next });
   await paintBadge(tabId, next);
@@ -326,8 +338,7 @@ async function onConsentMessage(msg, sender) {
     }
     case 'report': {
       // Kept in session storage for the popup; nothing leaves the browser.
-      const tab = await getTab(tabId);
-      if (!tab.banner && bannerSuspected(tab, msg, frameId === 0)) await setTab(tabId, { banner: 'suspected' });
+      await setTab(tabId, (tab) => !tab.banner && bannerSuspected(tab, msg, frameId === 0) ? { banner: 'suspected' } : null);
       break;
     }
     case 'autoconsentError':
