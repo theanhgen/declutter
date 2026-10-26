@@ -2,7 +2,7 @@
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
+import { badgeFor, chipFor, choiceMode, fetchRuleList, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, ruleListStatus, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -103,20 +103,23 @@ const pattern = (source = '') => {
 
 const ruleListUrls = (s) => [...new Set([...(s.dataUrls ?? []), s.dataUrl].filter(Boolean))];
 
-async function refreshRemoteData() {
+// One refresh at a time, so two runs never race on remoteLists/remoteStatus. A call made while one runs (alarm,
+// settings change, "update rules now") gets one more run after it, which reads the settings as they are by then.
+let refreshing, queued;
+function refreshRemoteData() {
+  if (refreshing) return (queued ??= refreshing.catch(() => {}).then(() => { queued = undefined; return refreshRemoteData(); }));
+  refreshing = doRefreshRemoteData().finally(() => { refreshing = undefined; });
+  return refreshing;
+}
+
+async function doRefreshRemoteData() {
   const urls = ruleListUrls(await getSettings());
   const { remoteStatus = {}, remoteLists: previous } = await api.storage.local.get(['remoteStatus', 'remoteLists']);
   const fetched = {};
   for (const url of urls) {
-    try {
-      const res = await fetch(url, { cache: 'no-store' });
-      const d = await res.json();
-      if (!res.ok || !validData(d)) throw new Error(`invalid payload (${res.status})`);
-      fetched[url] = d;
-      remoteStatus[url] = { ok: true, at: Date.now(), generated: d.generated, rules: d.consent.rules.length };
-    } catch (e) {
-      remoteStatus[url] = { ok: false, at: Date.now(), error: String(e.message || e) };
-    }
+    const result = await fetchRuleList(url);
+    if (result.data) fetched[url] = result.data;
+    remoteStatus[url] = ruleListStatus(remoteStatus[url], result);
   }
   for (const url of Object.keys(remoteStatus)) if (!urls.includes(url)) delete remoteStatus[url];
   const remoteLists = keepRemoteLists(urls, previous, fetched);
@@ -385,7 +388,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
   if (fromExtension && msg.type === 'updateData') {
-    refreshRemoteData().then(() => sendResponse(true));
+    refreshRemoteData().then(() => sendResponse(true), () => sendResponse(false));
     return true;
   }
   if (!sender.tab) return;
