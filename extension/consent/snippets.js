@@ -31,17 +31,21 @@ export const declutterSnippets = {
   // autoconsent (now set to optIn) has nothing to answer. Open the banner of a CMP that holds an answer again, and
   // autoconsent answers it. Waits up to `ms` for the CMP to load; returns the CMP it opened, or false.
   // Didomi: the notice, not preferences.show(), whose screen has no agree button for autoconsent's optIn.
+  // Not OneTrust: its only reopen (ToggleInfoDisplay) is the preference centre, which can have no accept-all button
+  // and would stay open over the page. A CMP with no stored answer ends the wait: its own banner is up, and once
+  // autoconsent answers it, it must not be reopened.
   DECLUTTER_REOPEN: async (ms = 10000) => {
     const end = Date.now() + ms;
     for (;;) {
-      const { Cookiebot, Didomi, OneTrust } = window;
+      const { Cookiebot, Didomi } = window;
       if (Cookiebot?.renew && Cookiebot.hasResponse) { Cookiebot.renew(); return 'cookiebot'; }
       if (Didomi?.notice?.show && Didomi.shouldConsentBeCollected?.() === false) { Didomi.notice.show(); return 'didomi'; }
-      if (OneTrust?.ToggleInfoDisplay && OneTrust.IsAlertBoxClosed?.()) { OneTrust.ToggleInfoDisplay(); return 'onetrust'; }
+      if (Cookiebot?.renew && Cookiebot.hasResponse === false) return false;
+      if (Didomi?.notice?.show && Didomi.shouldConsentBeCollected?.() === true) return false;
       if (Date.now() >= end) return false;
       await new Promise((r) => setTimeout(r, 250));
     }
   },
   // Popup: is this a CMP DECLUTTER_REOPEN can ask again? If not, the popup says the old answer stays.
-  DECLUTTER_CAN_REOPEN: () => !!(window.Cookiebot?.renew || window.Didomi?.notice?.show || window.OneTrust?.ToggleInfoDisplay),
+  DECLUTTER_CAN_REOPEN: () => !!(window.Cookiebot?.renew || window.Didomi?.notice?.show),
 };
