@@ -243,12 +243,13 @@ async function onConsentMessage(msg, sender) {
       const families = wallRules.filter((r) => pattern(r.runContext?.urlPattern).test(senderUrl)).map((r) => wallFamily(r.name));
       const looping = wall && await isLooping(tabId, families);
       const acceptPending = prev.acceptUntil > Date.now() && !looping;
+      const reopenPending = prev.reopenUntil > Date.now();
       if (frameId === 0) {
         // Many sites reload themselves after the choice is saved; keep showing that it was refused.
         const kept = ['done', 'acceptedSite', 'choice'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
           ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter } : {};
         await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil }),
-          ...(excepted ? { consent: 'paused' } : kept) }, true);
+          ...(reopenPending && { reopenUntil: prev.reopenUntil }), ...(excepted ? { consent: 'paused' } : kept) }, true);
       }
       const logs = { lifecycle: settings.debug, rulesteps: settings.debug, detectionsteps: settings.debug, evals: settings.debugEvals, errors: true };
       // refuse (all categories off) / accept (all on) / mix (applied per CMP on popupFound, else refused).
@@ -271,6 +272,8 @@ async function onConsentMessage(msg, sender) {
           compact: filterCompactRules(await getCompactRules(), { url: senderUrl, mainFrame: frameId === 0 }),
         };
       await api.tabs.sendMessage(tabId, { type: 'initResp', rules, config }, { frameId });
+      // Just switched to accept in the popup: ask the CMP's stored answer again, so autoconsent can accept it. Once.
+      if (frameId === 0 && reopenPending && accepting && !wall && config.enabled) reopenBanner(tabId);
       break;
     }
     case 'eval': {
@@ -356,6 +359,20 @@ async function acceptWall(tabId) {
   return true;
 }
 
+// Popup: this site was just switched to accept. The reload that follows reopens the CMP's banner (DECLUTTER_REOPEN).
+async function reopen(tabId) {
+  await setTab(tabId, { reopenUntil: Date.now() + 30000 });
+  return true;
+}
+async function reopenBanner(tabId) {
+  try {
+    await setTab(tabId, { reopenUntil: 0 });
+    await api.scripting.executeScript({ target: { tabId, frameIds: [0] }, world: 'MAIN', func: declutterSnippets.DECLUTTER_REOPEN });
+  } catch (e) {
+    console.warn('declutter: reopen failed', e);
+  }
+}
+
 // "send to developer": only when the user presses it in the popup, after seeing the address. Goes to an
 // insert-only Supabase table (supabase/migrations); the publishable key can add rows, never read them.
 const REPORTS_URL = 'https://wpsmgzihqgdmsrvzpcca.supabase.co/rest/v1/reports';
@@ -379,7 +396,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // (on every state update), which must not reach the popup's handler. Extension pages can be in a tab (tests), so
   // check the sender's URL, not sender.tab (falling back to it if a browser leaves sender.url out).
   const fromExtension = sender.url ? sender.url.startsWith(api.runtime.getURL('')) : !sender.tab;
-  const popupRequest = { acceptWall, report, sendReport }[msg.type];
+  const popupRequest = { acceptWall, reopen, report, sendReport }[msg.type];
   if (fromExtension && popupRequest) {
     popupRequest(msg.tabId, msg).then(sendResponse, () => sendResponse(false));
     return true;

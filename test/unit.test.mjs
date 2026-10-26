@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
+import { declutterSnippets } from '../extension/consent/snippets.js';
 import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -232,6 +233,36 @@ test('applyCategories: only the adapter of the CMP autoconsent detected runs', a
     // A CMP with no adapter: nothing is touched, the background refuses instead.
     assert.equal(await applyCategories({ A: true }, 'Sourcepoint-frame'), '');
     assert.equal(calls.length, 1);
+  } finally { delete globalThis.window; }
+});
+
+test('DECLUTTER_REOPEN: a refused Cookiebot/Didomi/OneTrust banner is opened again for the accept', async () => {
+  const { DECLUTTER_REOPEN: reopen, DECLUTTER_CAN_REOPEN: canReopen } = declutterSnippets;
+  const calls = [];
+  try {
+    // Stored answers, as the live CMPs report them after a refuse and a reload.
+    globalThis.window = { Cookiebot: { hasResponse: true, renew: () => calls.push('cookiebot') } };
+    assert.equal(await reopen(0), 'cookiebot');
+    // Didomi's notice, not preferences.show(): autoconsent's optIn clicks the notice's agree button.
+    globalThis.window = { Didomi: { shouldConsentBeCollected: () => false, notice: { show: () => calls.push('didomi') },
+      preferences: { show: () => calls.push('didomi-preferences') } } };
+    assert.equal(await reopen(0), 'didomi');
+    globalThis.window = { OneTrust: { IsAlertBoxClosed: () => true, ToggleInfoDisplay: () => calls.push('onetrust') } };
+    assert.equal(await reopen(0), 'onetrust');
+    assert.deepEqual(calls, ['cookiebot', 'didomi', 'onetrust']);
+    assert.ok(canReopen());
+    // No stored answer yet: the banner shows by itself, nothing is reopened.
+    globalThis.window = { Cookiebot: { hasResponse: false, renew: () => calls.push('again') } };
+    assert.equal(await reopen(0), false);
+    // A CMP that loads late is waited for.
+    globalThis.window = {};
+    setTimeout(() => { globalThis.window.Cookiebot = { hasResponse: true, renew: () => calls.push('late') }; }, 100);
+    assert.equal(await reopen(2000), 'cookiebot');
+    // Any other CMP: nothing to reopen, the popup explains instead.
+    globalThis.window = { __tcfapi: () => {} };
+    assert.equal(await reopen(0), false);
+    assert.equal(canReopen(), false);
+    assert.deepEqual(calls, ['cookiebot', 'didomi', 'onetrust', 'late']);
   } finally { delete globalThis.window; }
 });
 
