@@ -2,7 +2,7 @@
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
+import { afterSend, badgeFor, chipFor, choiceMode, expireSends, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, sendsDue, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -186,6 +186,9 @@ async function report(tabId) {
   const state = await getTab(tabId);
   const { reports = [] } = await api.storage.local.get('reports');
   const entry = { url: tab.url, host: new URL(tab.url).hostname, at: Date.now(), consent: state.consent ?? 'none', cmp: state.cmp ?? '' };
+  // Reporting the site again must not drop a send the user already approved that is still waiting to go out.
+  const waiting = reports.find((r) => r.host === entry.host)?.sendPending;
+  if (waiting) entry.sendPending = waiting;
   await api.storage.local.set({ reports: [entry, ...reports.filter((r) => r.host !== entry.host)].slice(0, 100) });
   return true;
 }
@@ -360,18 +363,54 @@ async function acceptWall(tabId) {
 // insert-only Supabase table (supabase/migrations); the publishable key can add rows, never read them.
 const REPORTS_URL = 'https://wpsmgzihqgdmsrvzpcca.supabase.co/rest/v1/reports';
 const REPORTS_KEY = 'sb_publishable_TxwGZ6G_q388MjPCCrFs6w_s9nu8hvC';
-// url: the address the popup showed. If the tab has moved to another site since, send nothing.
+// url: the address the popup showed. If the tab has moved to another site since, send nothing (false).
+// Otherwise the send is kept on the local report first (sendPending, see lib.js), then tried: true once it went
+// out, 'pending' if it could not (offline, server down) and will be retried.
 async function sendReport(tabId, { url }) {
   const tab = await api.tabs.get(tabId);
   if (!url || reportUrl(tab.url) !== url) return false;
   const state = await getTab(tabId);
-  const res = await fetch(REPORTS_URL, {
-    method: 'POST',
-    headers: { apikey: REPORTS_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-    body: JSON.stringify({ url, consent: state.consent ?? 'none', cmp: (state.cmp ?? '').slice(0, 60),
-      version: api.runtime.getManifest().version, browser: __TARGET__ }),
-  });
-  return res.ok;
+  const host = new URL(tab.url).hostname;
+  const pending = { url, at: Date.now(), body: { url, consent: state.consent ?? 'none', cmp: (state.cmp ?? '').slice(0, 60),
+    version: api.runtime.getManifest().version, browser: __TARGET__ } };
+  const { reports = [] } = await api.storage.local.get('reports');
+  const entry = reports.find((r) => r.host === host) ?? { url: tab.url, host, at: pending.at, consent: pending.body.consent, cmp: state.cmp ?? '' };
+  await api.storage.local.set({ reports: [{ ...entry, sendPending: pending }, ...reports.filter((r) => r.host !== host)].slice(0, 100) });
+  return (await trySend(host, pending)) ? true : 'pending';
+}
+
+async function trySend(host, pending) {
+  let result;
+  try {
+    const res = await fetch(REPORTS_URL, {
+      method: 'POST',
+      headers: { apikey: REPORTS_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify(pending.body),
+    });
+    result = { ok: res.ok, reason: res.ok ? '' : `server answered ${res.status}` };
+  } catch (e) {
+    result = { ok: false, reason: `offline? ${e.message || e}` };
+  }
+  const { reports = [] } = await api.storage.local.get('reports');
+  await api.storage.local.set({ reports: afterSend(reports, host, pending, result, Date.now()) });
+  return result.ok;
+}
+
+// The 12 h data alarm and every popup open: try each send still waiting, give up on those a week old. One run at a
+// time, so the alarm and a popup never send the same report twice.
+let retrying = null;
+function retrySends() {
+  retrying ??= (async () => {
+    const { reports = [] } = await api.storage.local.get('reports');
+    const now = Date.now();
+    const due = sendsDue(reports, now);
+    if (due.length !== reports.filter((r) => r.sendPending).length) await api.storage.local.set({ reports: expireSends(reports, now) });
+    // Firefox: sending a page address needs the optional data-collection permission; if it was taken back, wait.
+    if (__TARGET__ === 'firefox' && !(await api.permissions.contains({ data_collection: ['browsingActivity'] }).catch(() => false))) return true;
+    for (const r of due) await trySend(r.host, r.sendPending);
+    return true;
+  })().finally(() => { retrying = null; });
+  return retrying;
 }
 
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -379,7 +418,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // (on every state update), which must not reach the popup's handler. Extension pages can be in a tab (tests), so
   // check the sender's URL, not sender.tab (falling back to it if a browser leaves sender.url out).
   const fromExtension = sender.url ? sender.url.startsWith(api.runtime.getURL('')) : !sender.tab;
-  const popupRequest = { acceptWall, report, sendReport }[msg.type];
+  const popupRequest = { acceptWall, report, sendReport, retrySends }[msg.type];
   if (fromExtension && popupRequest) {
     popupRequest(msg.tabId, msg).then(sendResponse, () => sendResponse(false));
     return true;
@@ -412,7 +451,11 @@ api.storage.onChanged.addListener((changes, area) => {
   if (urls(changes.settings.newValue) !== urls(changes.settings.oldValue)) refreshRemoteData();
 });
 
-api.alarms.onAlarm.addListener((a) => { if (a.name === 'data') refreshRemoteData(); });
+api.alarms.onAlarm.addListener((a) => {
+  if (a.name !== 'data') return;
+  refreshRemoteData();
+  retrySends().catch((e) => console.warn('declutter: retrying sends', e));
+});
 
 async function start() {
   await applyShortsRedirect();

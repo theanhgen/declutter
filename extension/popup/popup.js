@@ -20,6 +20,8 @@ function statusRow(kind, text, sub) {
 
 async function main() {
   $('settings').onclick = () => { api.runtime.openOptionsPage(); window.close(); };
+  // A report that could not be sent earlier goes out now if it can (the background keeps it, see sendReport).
+  api.runtime.sendMessage({ type: 'retrySends' }).catch(() => { /* worker busy starting; the alarm retries too */ });
 
   const { settings = {} } = await api.storage.local.get('settings');
   const s = { shorts: true, posts: true, consent: true, exceptions: [], acceptSites: [], ...settings };
@@ -109,8 +111,10 @@ async function main() {
     if (__TARGET__ === 'firefox' && !(await api.permissions.request({ data_collection: ['browsingActivity'] }))) return;
     $('send').disabled = true;
     // The background sends this exact address, and nothing if the tab has moved to another site since.
+    // true: sent. 'pending': kept on the report, and the background tries again (alarm, next popup open). false: nothing sent.
     const ok = await api.runtime.sendMessage({ type: 'sendReport', tabId: tab.id, url: sendUrl });
-    $('send').querySelector('.label').textContent = ok ? 'sent, thanks' : 'could not send, try later';
+    $('send').querySelector('.label').textContent = ok === 'pending' ? "couldn't send (offline?). saved; declutter will try again."
+      : ok ? 'sent, thanks' : 'could not send, try later';
     if (!ok) $('send').disabled = false;
   };
 }
