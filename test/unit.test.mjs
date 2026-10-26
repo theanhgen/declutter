@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, fetchRuleList, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, ruleListLine, ruleListStatus, updateOutcome, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -95,6 +95,38 @@ test('keepRemoteLists: a failed fetch keeps the last good copy, removed URLs dro
   assert.deepEqual(keepRemoteLists(['a', 'b'], prev, { a: d('2') }), { a: d('2'), b: d('1') });
   assert.deepEqual(keepRemoteLists(['a'], undefined, {}), {}, 'offline on first run: nothing, not an error');
   assert.deepEqual(keepRemoteLists(['a'], { a: { schema: 2 } }, {}), {}, 'an invalid stored copy is not kept');
+});
+
+test('rule lists: a failed refresh keeps the last-good status and says what went wrong', async () => {
+  const d = { schema: 1, generated: '2026-10-26T12:00:00Z', shorts: { hide: [], cards: [] }, consent: { walls: [], rules: [{ name: 'r' }, { name: 's' }], disabledCmps: [] } };
+  const res = (status, body) => ({ ok: status < 400, status, json: async () => (typeof body === 'string' ? JSON.parse(body) : body) });
+  assert.deepEqual(await fetchRuleList('u', async () => { throw new TypeError('Failed to fetch'); }), { error: 'offline' });
+  // a 404 page is HTML: the status is checked before the body is parsed
+  assert.deepEqual(await fetchRuleList('u', async () => res(404, '<!doctype html>')), { error: 'server error 404' });
+  assert.deepEqual(await fetchRuleList('u', async () => res(200, '<!doctype html>')), { error: 'not a rule list' });
+  assert.deepEqual(await fetchRuleList('u', async () => res(200, { schema: 2 })), { error: 'not a rule list' });
+  assert.deepEqual(await fetchRuleList('u', async () => res(200, d)), { data: d });
+
+  const oct24 = Date.UTC(2026, 9, 24, 12), oct25 = Date.UTC(2026, 9, 25, 12), nov5 = Date.UTC(2026, 10, 5, 12);
+  const good = ruleListStatus(undefined, { data: d }, oct24);
+  assert.deepEqual(good, { ok: true, at: oct24, lastOkAt: oct24, generated: d.generated, rules: 2 });
+  const offline = ruleListStatus(good, { error: 'offline' }, oct25);
+  assert.deepEqual(offline, { ok: false, at: oct25, error: 'offline', lastOkAt: oct24, generated: d.generated, rules: 2 });
+  assert.deepEqual(ruleListStatus(offline, { error: 'server error 404' }, nov5).lastOkAt, oct24, 'kept across repeated failures');
+  assert.equal(ruleListStatus({ ok: true, at: oct24, rules: 2 }, { error: 'offline' }, oct25).lastOkAt, oct24, 'a status saved before lastOkAt');
+  assert.deepEqual(ruleListStatus(undefined, { error: 'offline' }, oct25), { ok: false, at: oct25, error: 'offline' });
+
+  assert.deepEqual(ruleListLine(offline, oct25), { text: "(couldn't reach it (offline); still using 2 rules from Oct 24)", dot: '#30a46c' });
+  assert.equal(ruleListLine(offline, nov5).dot, '#f76b15', 'amber once the rules in use are over a week old');
+  assert.equal(ruleListLine(good, nov5).dot, '#f76b15');
+  assert.equal(ruleListLine({ ok: false, at: oct25, error: 'offline' }, oct25).text, "(couldn't reach it (offline); no rules from it yet)");
+  assert.equal(ruleListLine({ ok: false, at: oct25, error: 'offline' }, oct25).dot, '#e5484d');
+  assert.equal(ruleListLine(undefined).text, '(not checked yet)');
+
+  assert.equal(updateOutcome(['u'], { u: good }, { u: { ...good, at: oct25 } }), 'up to date (Oct 26)');
+  assert.equal(updateOutcome(['u'], { u: { ...good, rules: 1 } }, { u: good }), '1 new rule');
+  assert.equal(updateOutcome(['u'], {}, { u: { ...good, rules: 3 } }), '3 new rules');
+  assert.equal(updateOutcome(['u'], { u: good }, { u: ruleListStatus(good, { error: 'server error 404' }, oct25) }), "couldn't reach it (server error 404)");
 });
 
 test('applyCategories: Czech category names map to the right category', async () => {

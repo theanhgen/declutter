@@ -23,6 +23,49 @@ export function keepRemoteLists(urls, previous = {}, fetched = {}) {
   return Object.fromEntries(urls.map((u) => [u, fetched[u] ?? (validData(previous[u]) ? previous[u] : null)]).filter(([, d]) => d));
 }
 
+// Fetches one rule list; never throws: { data } or { error } in words a person can act on. res.ok is checked before
+// the body is parsed, so a 404 page says "server error 404", not "Unexpected token '<'".
+export async function fetchRuleList(url, fetchFn = fetch) {
+  let res;
+  try { res = await fetchFn(url, { cache: 'no-store' }); } catch { return { error: 'offline' }; }
+  if (!res.ok) return { error: `server error ${res.status}` };
+  try {
+    const d = await res.json();
+    if (validData(d)) return { data: d };
+  } catch { /* not JSON */ }
+  return { error: 'not a rule list' };
+}
+
+// A rule list's status after a refresh. A failed fetch keeps the last good date, version and rule count: those
+// rules still apply (keepRemoteLists), so settings says so instead of only the error. Statuses saved before
+// lastOkAt existed count their last ok check as it.
+export function ruleListStatus(prev, result, now = Date.now()) {
+  if (result.data) return { ok: true, at: now, lastOkAt: now, generated: result.data.generated, rules: result.data.consent.rules.length };
+  const lastOkAt = prev?.lastOkAt ?? (prev?.ok ? prev.at : undefined);
+  return { ok: false, at: now, error: result.error, ...(lastOkAt && { lastOkAt, generated: prev.generated, rules: prev.rules }) };
+}
+
+// Settings' line for one rule list: its text and dot. Amber once the rules in use are more than a week old.
+export const RULES_STALE_MS = 7 * 24 * 60 * 60 * 1000;
+const shortDate = (t) => new Date(t).toLocaleDateString('en', { month: 'short', day: 'numeric' });
+export function ruleListLine(st, now = Date.now()) {
+  if (!st) return { text: '(not checked yet)', dot: '#8d8d8d' };
+  const lastOkAt = st.lastOkAt ?? (st.ok ? st.at : undefined);
+  const dot = !lastOkAt ? '#e5484d' : now - lastOkAt > RULES_STALE_MS ? '#f76b15' : '#30a46c';
+  if (st.ok) return { text: `(${st.rules} rules, checked ${new Date(st.at).toLocaleString()})`, dot };
+  return { text: `(couldn't reach it (${st.error}); ${lastOkAt ? `still using ${st.rules} rules from ${shortDate(lastOkAt)}` : 'no rules from it yet'})`, dot };
+}
+
+// What "update rules now" ended in, from the statuses before and after: the error, the new rules, or up to date.
+export function updateOutcome(urls, before = {}, after = {}) {
+  const errors = [...new Set(urls.filter((u) => after[u] && !after[u].ok).map((u) => after[u].error))];
+  if (errors.length) return `couldn't reach it (${errors.join(' / ')})`;
+  const added = urls.reduce((n, u) => n + Math.max(0, (after[u]?.rules ?? 0) - (before[u]?.rules ?? 0)), 0);
+  if (added) return `${added} new rule${added === 1 ? '' : 's'}`;
+  const latest = urls.map((u) => after[u]?.generated).filter(Boolean).sort().pop();
+  return latest ? `up to date (${shortDate(latest)})` : 'up to date';
+}
+
 // The pay-wall badge shows the site's own currency, read from its country domain. Consent-or-pay walls are a
 // GDPR-era European pattern, so a .com or unknown domain falls back to the euro.
 const CURRENCY = { cz: 'Kč', uk: '£', pl: 'zł', ch: 'CHF', hu: 'Ft', se: 'kr', dk: 'kr', no: 'kr', ro: 'lei', bg: 'лв', us: '$', ca: '$', au: '$' };

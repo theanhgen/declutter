@@ -1,3 +1,5 @@
+import { ruleListLine, updateOutcome } from '../lib.js';
+
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 
@@ -37,6 +39,9 @@ const choiceLine = (options, current, onPick) => options.flatMap(([value, label]
   value === current ? el('span', { className: 'current', textContent: `[${label}]` }) : link(label, () => onPick(value)),
 ]);
 
+// What the last "update rules now" ended in (checking…, up to date, new rules or the error), kept across renders.
+let updateNote = '';
+
 async function render() {
   const { settings = {}, remoteStatus = {}, stats = {}, reports = [] } =
     await api.storage.local.get(['settings', 'remoteStatus', 'stats', 'reports']);
@@ -70,20 +75,29 @@ async function render() {
   const urls = [...new Set([...s.dataUrls, s.dataUrl].filter(Boolean))];
   const when = (t) => new Date(t).toLocaleString();
   $('ruleLists').replaceChildren(...urls.map((url) => {
-    const st = remoteStatus[url];
-    return el('p', { className: 'bullet', style: `--dot:${st?.ok ? '#30a46c' : st ? '#e5484d' : '#8d8d8d'}` },
-      `${url} `, el('span', { className: 'muted', textContent: st ? (st.ok ? `(${st.rules} rules, checked ${when(st.at)}) ` : `(failed: ${st.error}) `) : '(not checked yet) ' }),
+    const line = ruleListLine(remoteStatus[url]);
+    return el('p', { className: 'bullet', style: `--dot:${line.dot}` },
+      `${url} `, el('span', { className: 'muted', textContent: `${line.text} ` }),
       link('remove', () => save({ dataUrls: s.dataUrls.filter((u) => u !== url), ...(s.dataUrl === url && { dataUrl: '' }) })));
   }));
+  $('newList').oninput = () => { $('newListError').hidden = true; };
   $('addList').onclick = (e) => {
     e.preventDefault();
     const url = $('newList').value.trim();
-    if (!/^https:\/\//.test(url)) { $('newList').focus(); return; }
+    if (!/^https:\/\//.test(url)) { $('newListError').hidden = false; $('newList').focus(); return; }
+    $('newListError').hidden = true;
     save({ dataUrls: [...new Set([...s.dataUrls, url])] });
   };
   const bundled = await (await fetch(api.runtime.getURL('data.json'))).json();
   $('data').replaceChildren(`built in: ${bundled.consent.rules.length} rules, ${bundled.shorts.hide.length} shorts selectors (${when(bundled.generated)}). `,
-    ...(urls.length ? [link('update rules now', async () => { await api.runtime.sendMessage({ type: 'updateData' }); render(); })] : []));
+    ...(urls.length ? [link('update rules now', async () => {
+      updateNote = 'checking…';
+      render();
+      await api.runtime.sendMessage({ type: 'updateData' });
+      const { remoteStatus: after = {} } = await api.storage.local.get('remoteStatus');
+      updateNote = updateOutcome(urls, remoteStatus, after);
+      render();
+    }), ...(updateNote ? [' ', el('span', { className: 'muted', textContent: updateNote })] : [])] : []));
   $('wallSites').textContent = bundled.consent.walls.join(', ');
 
   // about
