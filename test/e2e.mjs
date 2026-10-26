@@ -1,7 +1,7 @@
 // Quick smoke test: build/chrome in Playwright's Chromium against live YouTube + 4 Czech sites.
 //   npm run build && npm run test:e2e            (HEADED=1 to watch)
 // The full daily run over every site is canary/run.mjs.
-import { launch, reporter, setSettings, shortsChecks, consentCheck } from './lib.mjs';
+import { launch, reporter, setSettings, shortsChecks, consentCheck, tabState } from './lib.mjs';
 
 const { results, check } = reporter();
 const { ctx, sw, close } = await launch();
@@ -16,6 +16,7 @@ await page.goto('https://www.youtube.com/results?search_query=minecraft', { wait
 await page.waitForTimeout(6000);
 const visible = await page.evaluate(() => [...document.querySelectorAll('a[href^="/shorts/"]')].filter((e) => e.getClientRects().length).length);
 check('Shorts module off: Shorts visible again', visible > 0, `${visible} visible`);
+check('Shorts module off: nothing counted as hidden', !((await tabState(sw, page.url()))?.shortsHidden > 0));
 await setSettings(sw, { shorts: true });
 await page.waitForTimeout(2000);
 

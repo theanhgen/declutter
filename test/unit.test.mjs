@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, chipFor, countNewlyHidden, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, shortsStatsText, shortsSummary, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -18,6 +18,30 @@ test('redirectTarget: Shorts and channel Shorts tabs', () => {
   assert.equal(redirectTarget('https://www.youtube.com/watch?v=abc'), null);
   assert.equal(redirectTarget('https://www.youtube.com/@shorts'), null);
   assert.equal(redirectTarget('https://www.youtube.com/results?search_query=shorts'), null);
+});
+
+test('shorts hidden: each element counted once, however often YouTube re-renders', () => {
+  const shelf = {}, a = {}, b = {}, c = {};
+  let dom = { 'ytd-reel-shelf-renderer': [shelf], 'yt-lockup-view-model:has(a[href^="/shorts/"])': [a, b] };
+  const root = { querySelectorAll: (s) => { if (s === 'bad(') throw new SyntaxError(s); return dom[s] ?? []; } };
+  const selectors = ['ytd-reel-shelf-renderer', 'yt-lockup-view-model:has(a[href^="/shorts/"])', 'bad('];
+  const seen = new Set();
+  assert.equal(countNewlyHidden(root, selectors, seen), 3);
+  assert.equal(countNewlyHidden(root, selectors, seen), 0, 're-render of the same elements');
+  dom = { ...dom, 'yt-lockup-view-model:has(a[href^="/shorts/"])': [a, b, c] };
+  assert.equal(countNewlyHidden(root, selectors, seen), 1, 'only the new one (more results scrolled in)');
+  // two selectors matching one element: still one
+  assert.equal(countNewlyHidden({ querySelectorAll: () => [c] }, ['x', 'y'], new Set()), 1);
+});
+
+test('shorts popup row and Settings line say what was hidden and redirected', () => {
+  assert.equal(shortsSummary({ shortsHidden: 12, shortsRedirects: 2 }), '12 shorts hidden on this page · 2 opened in the normal player');
+  assert.equal(shortsSummary({ shortsHidden: 1 }), '1 short hidden on this page');
+  assert.equal(shortsSummary({ shortsRedirects: 1 }), 'no shorts on this page · 1 opened in the normal player');
+  assert.equal(shortsSummary({}), 'no shorts on this page');
+  assert.equal(shortsStatsText({ shortsHidden: 1204, shortsPages: 57 }), '1,204 shorts hidden on 57 youtube pages');
+  assert.equal(shortsStatsText({ shortsHidden: 1, shortsPages: 1 }), '1 short hidden on 1 youtube page');
+  assert.equal(shortsStatsText({}), 'no shorts hidden yet.');
 });
 
 test('hostMatches: exact host and subdomains only', () => {

@@ -247,8 +247,10 @@ async function onConsentMessage(msg, sender) {
         // Many sites reload themselves after the choice is saved; keep showing that it was refused.
         const kept = ['done', 'acceptedSite', 'choice'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
           ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter } : {};
+        // A Short opened in the normal player is a new page load: keep the tab's count of those on the same site.
+        const redirects = prev.host === tabHost && prev.shortsRedirects ? { shortsRedirects: prev.shortsRedirects } : {};
         await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil }),
-          ...(excepted ? { consent: 'paused' } : kept) }, true);
+          ...(excepted ? { consent: 'paused' } : kept), ...redirects }, true);
       }
       const logs = { lifecycle: settings.debug, rulesteps: settings.debug, detectionsteps: settings.debug, evals: settings.debugEvals, errors: true };
       // refuse (all categories off) / accept (all on) / mix (applied per CMP on popupFound, else refused).
@@ -391,10 +393,15 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!sender.tab) return;
   if (msg.type === 'shortsLeak') {
     setTab(sender.tab.id, { shortsLeak: msg.count, leakPath: msg.path });
+  } else if (msg.type === 'shortsHidden') {
+    // count: this page's total so far; added: new since the last message; first: the page's first hidden short.
+    setTab(sender.tab.id, { shortsHidden: msg.count });
+    bump({ shortsHidden: msg.added, ...(msg.first && { shortsPages: 1 }) });
   } else if (msg.type === 'shortsRedirect') {
     bump({ shorts: 1 });
+    getTab(sender.tab.id).then((t) => setTab(sender.tab.id, { shortsRedirects: (t.shortsRedirects ?? 0) + 1 }));
   } else if (msg.type === 'shortsNav') {
-    setTab(sender.tab.id, { shortsLeak: 0 });
+    setTab(sender.tab.id, { shortsLeak: 0, shortsHidden: 0 });
   } else {
     onConsentMessage(msg, sender).catch((e) => console.warn('declutter:', msg.type, e));
   }

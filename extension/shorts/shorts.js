@@ -2,15 +2,17 @@
 //  - sends /shorts/<id> to /watch?v=<id>, and a channel's /shorts tab to /videos
 //  - adds selectors from the remote data copy (D6)
 //  - self-check: any /shorts/ link still visible gets hidden by its card and reported (red badge)
+//  - counts what the stylesheet hid (each element once) and the shorts it opened in the normal player (popup, Settings)
 // The same stylesheet hides community posts in the feeds (its own switch, CSS only).
 import bundled from '../../data/shorts.json';
-import { redirectTarget } from '../lib.js';
+import { countNewlyHidden, redirectTarget } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const html = document.documentElement;
 
 let enabled = true;
 let cards = bundled.cards;
+let hide = bundled.hide;
 
 // After an extension update, tabs opened before it keep this script but lose the extension: sendMessage then
 // throws at once instead of rejecting. Never let that stop a redirect.
@@ -38,9 +40,18 @@ function onClick(e) {
 
 const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
 
+// Elements already counted, for the tab's lifetime; pageHidden is this page's total (reset on in-app navigation).
+const seen = new WeakSet();
+let pageHidden = 0;
+
 let lastReported = -1;
 function selfCheck() {
   if (!enabled) return;
+  const added = countNewlyHidden(document, hide, seen);
+  if (added) {
+    pageHidden += added;
+    send({ type: 'shortsHidden', count: pageHidden, added, first: pageHidden === added });
+  }
   const leaked = [...document.querySelectorAll('a[href*="/shorts/"]')].filter(visible);
   for (const a of leaked) {
     let card = a;
@@ -92,13 +103,16 @@ async function init() {
   }
   if (redirectIfShort()) return;
   if (remoteData?.schema === 1 && Array.isArray(remoteData.shorts?.hide)) {
-    injectRemoteSelectors(remoteData.shorts.hide.filter((s) => !bundled.hide.includes(s)));
+    const extra = remoteData.shorts.hide.filter((s) => !bundled.hide.includes(s));
+    injectRemoteSelectors(extra);
+    hide = [...hide, ...extra.filter((s) => typeof s === 'string' && parses(s))];
     cards = [...new Set([...cards, ...(remoteData.shorts.cards ?? []).filter((s) => typeof s === 'string' && parses(s))])];
   }
   document.addEventListener('click', onClick, true);
   // YouTube navigates inside the page; these fire on every in-app page change.
   document.addEventListener('yt-navigate-finish', () => {
     lastReported = -1;
+    pageHidden = 0;
     send({ type: 'shortsNav' });
     if (!redirectIfShort()) scheduleCheck();
   });
