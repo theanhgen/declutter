@@ -48,6 +48,26 @@ export function reportUrl(url) {
   } catch { return null; }
 }
 
+// Reported sites: what the rules knew about a site when it was reported, so a later rule list that adds a rule or a
+// wall entry for it can say "fixed" (computed here, from the rule list already fetched; nothing is asked of a server).
+// A rule counts only if its urlPattern names the site: one without a pattern runs everywhere and says nothing.
+export function siteRules(data, url) {
+  return {
+    names: data.consent.rules.filter((r) => r.runContext?.urlPattern && new RegExp(r.runContext.urlPattern).test(url)).map((r) => r.name),
+    wall: hostMatches(new URL(url).hostname, data.consent.walls),
+  };
+}
+// fixedAt is set once, when a rule or wall entry the report did not see first matches. Reports saved before
+// rulesAtReport existed have nothing to compare against and stay reported.
+export function markFixed(reports, data, now = Date.now()) {
+  return reports.map((r) => {
+    if (r.fixedAt || !r.rulesAtReport) return r;
+    const { names, wall } = siteRules(data, r.url);
+    const fixed = names.some((n) => !r.rulesAtReport.names.includes(n)) || (wall && !r.rulesAtReport.wall);
+    return fixed ? { ...r, fixedAt: now } : r;
+  });
+}
+
 // The chip (consent/chip.js) says what just happened to the banner: only when the outcome changes, and not again
 // for the same outcome on the same site within a minute (sites reload themselves after the choice is saved).
 // A page that reloads while the chip is still up (reloaded: the new page's init) gets it once more.
