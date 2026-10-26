@@ -103,7 +103,16 @@ const pattern = (source = '') => {
 
 const ruleListUrls = (s) => [...new Set([...(s.dataUrls ?? []), s.dataUrl].filter(Boolean))];
 
-async function refreshRemoteData() {
+// One refresh at a time, so two runs never race on remoteLists/remoteStatus. A call made while one runs (alarm,
+// settings change, "update rules now") gets one more run after it, which reads the settings as they are by then.
+let refreshing, queued;
+function refreshRemoteData() {
+  if (refreshing) return (queued ??= refreshing.catch(() => {}).then(() => { queued = undefined; return refreshRemoteData(); }));
+  refreshing = doRefreshRemoteData().finally(() => { refreshing = undefined; });
+  return refreshing;
+}
+
+async function doRefreshRemoteData() {
   const urls = ruleListUrls(await getSettings());
   const { remoteStatus = {}, remoteLists: previous } = await api.storage.local.get(['remoteStatus', 'remoteLists']);
   const fetched = {};
@@ -379,7 +388,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
   if (fromExtension && msg.type === 'updateData') {
-    refreshRemoteData().then(() => sendResponse(true));
+    refreshRemoteData().then(() => sendResponse(true), () => sendResponse(false));
     return true;
   }
   if (!sender.tab) return;

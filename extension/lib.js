@@ -25,14 +25,17 @@ export function keepRemoteLists(urls, previous = {}, fetched = {}) {
 
 // Fetches one rule list; never throws: { data } or { error } in words a person can act on. res.ok is checked before
 // the body is parsed, so a 404 page says "server error 404", not "Unexpected token '<'".
-export async function fetchRuleList(url, fetchFn = fetch) {
+// A stalled server times out instead of holding up the other lists and leaving settings on "checking…".
+export const RULE_LIST_TIMEOUT_MS = 15000;
+export async function fetchRuleList(url, fetchFn = fetch, timeoutMs = RULE_LIST_TIMEOUT_MS) {
+  const signal = AbortSignal.timeout(timeoutMs);
   let res;
-  try { res = await fetchFn(url, { cache: 'no-store' }); } catch { return { error: 'offline' }; }
+  try { res = await fetchFn(url, { cache: 'no-store', signal }); } catch { return { error: signal.aborted ? 'timed out' : 'offline' }; }
   if (!res.ok) return { error: `server error ${res.status}` };
   try {
     const d = await res.json();
     if (validData(d)) return { data: d };
-  } catch { /* not JSON */ }
+  } catch { if (signal.aborted) return { error: 'timed out' }; /* not JSON */ }
   return { error: 'not a rule list' };
 }
 

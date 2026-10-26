@@ -41,6 +41,7 @@ const choiceLine = (options, current, onPick) => options.flatMap(([value, label]
 
 // What the last "update rules now" ended in (checking…, up to date, new rules or the error), kept across renders.
 let updateNote = '';
+let updating = false;
 
 async function render() {
   const { settings = {}, remoteStatus = {}, stats = {}, reports = [] } =
@@ -91,12 +92,20 @@ async function render() {
   const bundled = await (await fetch(api.runtime.getURL('data.json'))).json();
   $('data').replaceChildren(`built in: ${bundled.consent.rules.length} rules, ${bundled.shorts.hide.length} shorts selectors (${when(bundled.generated)}). `,
     ...(urls.length ? [link('update rules now', async () => {
+      if (updating) return;
+      updating = true;
       updateNote = 'checking…';
       render();
-      await api.runtime.sendMessage({ type: 'updateData' });
-      const { remoteStatus: after = {} } = await api.storage.local.get('remoteStatus');
-      updateNote = updateOutcome(urls, remoteStatus, after);
-      render();
+      try {
+        await api.runtime.sendMessage({ type: 'updateData' });
+        const { remoteStatus: after = {} } = await api.storage.local.get('remoteStatus');
+        updateNote = updateOutcome(urls, remoteStatus, after);
+      } catch (e) {
+        updateNote = `couldn't update (${e?.message || e})`;
+      } finally {
+        updating = false;
+        render();
+      }
     }), ...(updateNote ? [' ', el('span', { className: 'muted', textContent: updateNote })] : [])] : []));
   $('wallSites').textContent = bundled.consent.walls.join(', ');
 

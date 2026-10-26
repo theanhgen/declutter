@@ -106,6 +106,9 @@ test('rule lists: a failed refresh keeps the last-good status and says what went
   assert.deepEqual(await fetchRuleList('u', async () => res(200, '<!doctype html>')), { error: 'not a rule list' });
   assert.deepEqual(await fetchRuleList('u', async () => res(200, { schema: 2 })), { error: 'not a rule list' });
   assert.deepEqual(await fetchRuleList('u', async () => res(200, d)), { data: d });
+  // a stalled server times out instead of hanging the refresh
+  const stall = (u, { signal }) => new Promise((_, reject) => signal.addEventListener('abort', () => reject(signal.reason)));
+  assert.deepEqual(await fetchRuleList('u', stall, 20), { error: 'timed out' });
 
   const oct24 = Date.UTC(2026, 9, 24, 12), oct25 = Date.UTC(2026, 9, 25, 12), nov5 = Date.UTC(2026, 10, 5, 12);
   const good = ruleListStatus(undefined, { data: d }, oct24);
