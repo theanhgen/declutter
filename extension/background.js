@@ -2,7 +2,7 @@
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
+import { badgeFor, chipFor, choiceMode, FRESH_OUTCOME, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -244,9 +244,11 @@ async function onConsentMessage(msg, sender) {
       const looping = wall && await isLooping(tabId, families);
       const acceptPending = prev.acceptUntil > Date.now() && !looping;
       if (frameId === 0) {
-        // Many sites reload themselves after the choice is saved; keep showing that it was refused.
-        const kept = ['done', 'acceptedSite', 'choice'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
-          ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter } : {};
+        // Many sites reload themselves after the choice is saved; keep showing that it was refused, marked as kept
+        // (the popup says it happened before the reload).
+        const kept = ['done', 'acceptedSite', 'choice', 'accepted'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
+          ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter,
+            clicks: prev.clicks, choiceFallback: prev.choiceFallback, kept: true } : {};
         await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil }),
           ...(excepted ? { consent: 'paused' } : kept) }, true);
       }
@@ -296,10 +298,11 @@ async function onConsentMessage(msg, sender) {
         const accepting = (walls === 'auto' && !looping) || (await getTab(tabId)).acceptUntil > Date.now();
         if (accepting) await logAutoAccept(tabId, msg.cmp);
         await setTab(tabId, accepting
-          ? { consent: 'accepting', cmp: msg.cmp, wallFrame: frameId }
-          : { consent: 'wall', cmp: msg.cmp, wallFrame: frameId, looping });
+          ? { ...FRESH_OUTCOME, consent: 'accepting', cmp: msg.cmp, wallFrame: frameId }
+          : { ...FRESH_OUTCOME, consent: 'wall', cmp: msg.cmp, wallFrame: frameId, looping });
       } else {
-        await setTab(tabId, { consent: 'working', cmp: msg.cmp, since: Date.now() });
+        // A new banner: nothing of the previous answer (its time, clicks, adapter, kept mark) carries over.
+        await setTab(tabId, { ...FRESH_OUTCOME, consent: 'working', cmp: msg.cmp, since: Date.now() });
         const settings = await getSettings();
         const siteAccepted = hostMatches(tabHost, settings.acceptSites ?? []);
         if (!siteAccepted && choiceMode(settings.categories) === 'mix') await applyChoice(tabId, frameId, msg.cmp, settings.categories);
@@ -314,11 +317,12 @@ async function onConsentMessage(msg, sender) {
       const mode = siteAccepted ? 'accept' : choiceMode((await getSettings()).categories);
       // What is recorded is what was done: accepted (this site, or every category switched on), refused, or, for a
       // cosmetic rule, only hidden.
+      const clicks = msg.totalClicks ?? 0;
       await setTab(tabId, isWallRule(msg.cmp)
-        ? { consent: 'accepted', cmp: msg.cmp, acceptUntil: 0 }
-        : { consent: mode === 'accept' ? 'acceptedSite' : 'done', cmp: msg.cmp, doneAt: Date.now(), cosmetic: !!msg.isCosmetic });
-      await bump({ clicks: msg.totalClicks ?? 0, ...(isWallRule(msg.cmp) ? { walls: 1 } : mode === 'accept' ? { accepted: 1 } : { refused: 1 }) },
-        msg.cmp, msg.totalClicks ?? 0);
+        ? { consent: 'accepted', cmp: msg.cmp, acceptUntil: 0, doneAt: Date.now(), clicks }
+        : { consent: mode === 'accept' ? 'acceptedSite' : 'done', cmp: msg.cmp, doneAt: Date.now(), clicks, cosmetic: !!msg.isCosmetic });
+      await bump({ clicks, ...(isWallRule(msg.cmp) ? { walls: 1 } : mode === 'accept' ? { accepted: 1 } : { refused: 1 }) },
+        msg.cmp, clicks);
       break;
     }
     case 'autoconsentError':

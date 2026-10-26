@@ -57,14 +57,30 @@ const CHIPS = {
   done: ['cookies refused', 'ok'], acceptedSite: ['cookies accepted', 'ok'], choice: ['your choice applied', 'ok'],
   accepted: ['pay wall accepted', 'ok'], wall: ['pay wall: your choice', 'wait'], failed: ['banner not answered', 'bad'],
 };
+// A mix with no adapter for the banner (choiceFallback) was refused outright: the chip says so, not just "refused".
+const FALLBACK_CHIP = ["refused all: your mix isn't supported here", 'ok'];
 export function chipFor(prev, next, last = {}, now = Date.now(), reloaded = false) {
-  const chip = next.cosmetic && CHIPS[next.consent]?.[1] === 'ok' ? ['banner hidden', 'ok'] : CHIPS[next.consent];
+  const chip = next.cosmetic && CHIPS[next.consent]?.[1] === 'ok' ? ['banner hidden', 'ok']
+    : next.consent === 'done' && next.choiceFallback ? FALLBACK_CHIP : CHIPS[next.consent];
   if (!chip) return null;
   const same = last.host === next.host && last.consent === next.consent;
   if (reloaded && same && now - last.at < CHIP_VISIBLE_MS) return { text: chip[0], tone: chip[1] };
   if (prev.consent === next.consent) return null;
   if (last.host === next.host && last.consent === next.consent && now - last.at < CHIP_REPEAT_MS) return null;
   return { text: chip[0], tone: chip[1] };
+}
+
+// The popup's line under an answered banner: which banner (and adapter, for your choice), the local time it was
+// answered and how many clicks it took ("Cookiebot · 14:02 · 3 clicks"). kept: the state carried over a reload the
+// site did itself (background init), so the line says it happened before that. time formats a timestamp.
+// What a newly found banner resets in the tab state (setTab merges, so the previous answer would otherwise show).
+export const FRESH_OUTCOME = { kept: false, choiceFallback: false, clicks: 0, doneAt: 0, adapter: '', cosmetic: false };
+const localTime = (t) => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+export function outcomeDetail(state, time = localTime) {
+  const parts = [state.consent === 'choice' && state.adapter ? `${state.cmp} via ${state.adapter}` : state.cmp];
+  if (state.doneAt) parts.push(time(state.doneAt));
+  if (state.clicks > 0) parts.push(`${state.clicks} ${state.clicks === 1 ? 'click' : 'clicks'}`);
+  return parts.filter(Boolean).join(' · ') + (state.kept ? ' (before the page reloaded)' : '');
 }
 
 // Global Privacy Control (opt-in): the Sec-GPC request header as one dynamic declarativeNetRequest rule. skip = sites
