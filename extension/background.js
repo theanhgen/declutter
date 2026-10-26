@@ -173,9 +173,12 @@ const tabKey = (tabId) => `tab-${tabId}`;
 async function getTab(tabId) {
   return (await api.storage.session.get(tabKey(tabId)))[tabKey(tabId)] ?? {};
 }
-function setTab(tabId, patch, reset = false) {
+// patch may be a function of the current record (null = no change), to decide on the state it is merged into.
+function setTab(tabId, patchOrFn, reset = false) {
   return serial(tabKey(tabId), async () => {
     const prev = await getTab(tabId);
+    const patch = typeof patchOrFn === 'function' ? patchOrFn(prev) : patchOrFn;
+    if (!patch) return prev;
     const next = { ...(reset ? {} : prev), ...patch };
     await api.storage.session.set({ [tabKey(tabId)]: next });
     await paintBadge(tabId, next);
@@ -387,8 +390,7 @@ async function onConsentMessage(msg, sender) {
     }
     case 'report': {
       // Kept in session storage for the popup; nothing leaves the browser.
-      const tab = await getTab(tabId);
-      if (!tab.banner && bannerSuspected(tab, msg, frameId === 0)) await setTab(tabId, { banner: 'suspected' });
+      await setTab(tabId, (tab) => !tab.banner && bannerSuspected(tab, msg, frameId === 0) ? { banner: 'suspected' } : null);
       break;
     }
     case 'autoconsentError':
