@@ -306,9 +306,10 @@ async function onConsentMessage(msg, sender) {
           ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter,
             clicks: prev.clicks, choiceFallback: prev.choiceFallback, kept: true } : {};
         // A Short opened in the normal player is a new page load: keep the tab's count of those on the same site.
-        const redirects = prev.host === tabHost && prev.shortsRedirects ? { shortsRedirects: prev.shortsRedirects } : {};
-        await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil, acceptFamily: prev.acceptFamily }),
-          ...(reopenPending && { reopenUntil: prev.reopenUntil }), ...(excepted ? { consent: 'paused' } : reopenPending ? {} : kept), ...redirects }, true);
+        // Read at write time (cur), so a redirect counted while this message was being handled is not lost.
+        await setTab(tabId, (cur) => ({ host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil, acceptFamily: prev.acceptFamily }),
+          ...(reopenPending && { reopenUntil: prev.reopenUntil }), ...(excepted ? { consent: 'paused' } : reopenPending ? {} : kept),
+          ...(cur.host === tabHost && cur.shortsRedirects && { shortsRedirects: cur.shortsRedirects }) }), true);
       }
       const logs = { lifecycle: settings.debug, rulesteps: settings.debug, detectionsteps: settings.debug, evals: settings.debugEvals, errors: true };
       // refuse (all categories off) / accept (all on) / mix (applied per CMP on popupFound, else refused).
@@ -573,7 +574,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     bump({ shortsHidden: msg.added, ...(msg.first && { shortsPages: 1 }) });
   } else if (msg.type === 'shortsRedirect') {
     bump({ shorts: 1 });
-    getTab(sender.tab.id).then((t) => setTab(sender.tab.id, { shortsRedirects: (t.shortsRedirects ?? 0) + 1 }));
+    setTab(sender.tab.id, (t) => ({ shortsRedirects: (t.shortsRedirects ?? 0) + 1 }));
   } else if (msg.type === 'shortsNav') {
     setTab(sender.tab.id, { shortsLeak: 0, shortsHidden: 0 });
   } else {

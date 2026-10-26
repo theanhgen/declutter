@@ -2,7 +2,7 @@
 //  - sends /shorts/<id> to /watch?v=<id>, and a channel's /shorts tab to /videos
 //  - adds selectors from the remote data copy (D6)
 //  - self-check: any /shorts/ link still visible gets hidden by its card and counted (popup: "caught by the backup check")
-//  - counts what the stylesheet hid (each element once) and the shorts it opened in the normal player (popup, Settings)
+//  - counts the Shorts the stylesheet hid (each once per page) and the shorts it opened in the normal player (popup, Settings)
 // The same stylesheet hides community posts in the feeds and the Playables (games) shelf and menu entry, each with
 // its own switch, CSS only. The /playables page itself stays, like a channel's Posts tab.
 import bundled from '../../data/shorts.json';
@@ -44,9 +44,16 @@ const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).v
 // Cards the backup check hid on this page. It only grows until the next navigation: the leftovers are hidden at
 // once, so counting what is still visible would report them and then clear the report a moment later.
 let caught = 0;
-// Elements already counted, for the tab's lifetime; pageHidden is this page's total (reset on in-app navigation).
-const seen = new WeakSet();
+// Shorts already counted on this page (video ids) and their total; both reset on in-app navigation.
+const seen = new Set();
 let pageHidden = 0;
+// A new page inside the app (www: yt-navigate-finish; m.youtube.com: noticed as a URL change).
+function onNav() {
+  caught = 0;
+  pageHidden = 0;
+  seen.clear();
+  send({ type: 'shortsNav' });
+}
 function selfCheck() {
   if (!enabled) return;
   const newlyHidden = countNewlyHidden(document, hide, seen);
@@ -77,6 +84,8 @@ const scheduleCheck = () => {
     lastUrl = location.href;
     caught = 0;
     if (redirectIfShort()) return;
+    // www has yt-navigate-finish for this; a second reset there could count one page twice.
+    if (location.hostname === 'm.youtube.com') onNav();
   }
   clearTimeout(timer);
   timer = setTimeout(selfCheck, 700);
@@ -118,9 +127,7 @@ async function init() {
   document.addEventListener('click', onClick, true);
   // YouTube navigates inside the page; these fire on every in-app page change.
   document.addEventListener('yt-navigate-finish', () => {
-    caught = 0;
-    pageHidden = 0;
-    send({ type: 'shortsNav' });
+    onNav();
     if (!redirectIfShort()) scheduleCheck();
   });
   window.addEventListener('popstate', redirectIfShort);
