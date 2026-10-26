@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, outcomeDetail, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -59,6 +59,23 @@ test('chipFor: once per outcome, not on a reload of the same site', () => {
   assert.ok(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }, last, 2000, true));
   assert.equal(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }, last, 2000, false), null);
   assert.equal(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }, last, 9000, true), null);
+});
+
+test('when and how the choice was made: popup line and fallback chip', () => {
+  const time = (t) => `t${t}`;
+  assert.equal(outcomeDetail({ consent: 'done', cmp: 'Cookiebot', doneAt: 5, clicks: 3 }, time), 'Cookiebot · t5 · 3 clicks');
+  assert.equal(outcomeDetail({ consent: 'acceptedSite', cmp: 'Onetrust', doneAt: 5, clicks: 1 }, time), 'Onetrust · t5 · 1 click');
+  assert.equal(outcomeDetail({ consent: 'accepted', cmp: 'cz-wall-seznam', doneAt: 5, clicks: 0 }, time), 'cz-wall-seznam · t5');
+  assert.equal(outcomeDetail({ consent: 'choice', cmp: 'Cookiebot', adapter: 'Cookiebot API', doneAt: 5 }, time), 'Cookiebot via Cookiebot API · t5');
+  // kept over a reload the site did itself
+  assert.equal(outcomeDetail({ consent: 'done', cmp: 'Cookiebot', doneAt: 5, clicks: 3, kept: true }, time), 'Cookiebot · t5 · 3 clicks (before the page reloaded)');
+  // a state from before doneAt/clicks were stored: just the banner
+  assert.equal(outcomeDetail({ consent: 'done', cmp: 'Cookiebot' }), 'Cookiebot');
+  assert.match(outcomeDetail({ consent: 'done', cmp: 'x', doneAt: Date.UTC(2026, 0, 1, 14, 2) }), /^x · \S/);
+  // a mix the banner can't take was refused outright: the chip says so
+  assert.equal(chipFor({ consent: 'working' }, { consent: 'done', choiceFallback: true }).text, "refused all: your mix isn't supported here");
+  assert.equal(chipFor({ consent: 'working' }, { consent: 'done', choiceFallback: true, cosmetic: true }).text, 'banner hidden');
+  assert.equal(chipFor({ consent: 'working' }, { consent: 'choice', choiceFallback: false }).text, 'your choice applied');
 });
 
 test('currencyFor: country domain, euro otherwise', () => {

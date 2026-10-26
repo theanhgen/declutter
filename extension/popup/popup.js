@@ -1,4 +1,4 @@
-import { reportUrl } from '../lib.js';
+import { outcomeDetail, reportUrl } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -53,8 +53,8 @@ async function main() {
       firefox: 'the extensions button → declutter → always allow on all sites',
       chrome: 'right-click the declutter button → "This can read and change site data" → on all sites',
     }[__TARGET__]));
-  } else if (state.consent === 'done') rows.push(statusRow('ok', state.cosmetic ? 'banner hidden' : 'cookies refused', state.choiceFallback ? `${state.cmp} — your mix isn't supported by this banner, so everything was refused` : state.cmp));
-  else if (state.consent === 'choice') rows.push(statusRow('ok', 'your choice applied', `${state.cmp} via ${state.adapter}`));
+  } else if (state.consent === 'done') rows.push(statusRow('ok', state.cosmetic ? 'banner hidden' : 'cookies refused', state.choiceFallback ? `${outcomeDetail(state)} — your mix isn't supported by this banner, so everything was refused` : outcomeDetail(state)));
+  else if (state.consent === 'choice') rows.push(statusRow('ok', 'your choice applied', outcomeDetail(state)));
   else if (state.consent === 'failed' || stuck) rows.push(statusRow('bad', 'banner not answered', state.cmp));
   else if (state.consent === 'wall') {
     rows.push(statusRow('wall', 'pay wall: agree or pay', state.looping
@@ -66,9 +66,9 @@ async function main() {
       window.close();
     };
   } else if (state.consent === 'accepting') rows.push(statusRow('wall', 'accepting the wall…', state.cmp));
-  else if (state.consent === 'accepted') rows.push(statusRow('wall', 'pay wall accepted', state.cmp));
+  else if (state.consent === 'accepted') rows.push(statusRow('wall', 'pay wall accepted', outcomeDetail(state)));
   else if (state.consent === 'paused') rows.push(statusRow('', 'banners left alone here'));
-  else if (state.consent === 'acceptedSite') rows.push(statusRow('ok', 'cookies accepted (your choice)', state.cmp));
+  else if (state.consent === 'acceptedSite') rows.push(statusRow('ok', 'cookies accepted (your choice)', outcomeDetail(state)));
   else if (state.consent === 'working') rows.push(statusRow('', `answering ${state.cmp}…`));
   else rows.push(statusRow('', 'no cookie banner here'));
   if (state.shortsLeak > 0) rows.push(statusRow('bad', `${state.shortsLeak} shorts got through`, `on ${state.leakPath}`));
