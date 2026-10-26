@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, outcomeDetail, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, FRESH_OUTCOME, mergeData, outcomeDetail, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -76,6 +76,17 @@ test('when and how the choice was made: popup line and fallback chip', () => {
   assert.equal(chipFor({ consent: 'working' }, { consent: 'done', choiceFallback: true }).text, "refused all: your mix isn't supported here");
   assert.equal(chipFor({ consent: 'working' }, { consent: 'done', choiceFallback: true, cosmetic: true }).text, 'banner hidden');
   assert.equal(chipFor({ consent: 'working' }, { consent: 'choice', choiceFallback: false }).text, 'your choice applied');
+  // consecutive answers on one tab (setTab merges): a kept refusal, then a new banner answered through an adapter,
+  // shows none of the first answer's clicks or kept mark
+  const first = { consent: 'done', cmp: 'Onetrust', doneAt: 5, clicks: 3, cosmetic: true, kept: true, choiceFallback: true };
+  const second = { ...first, ...FRESH_OUTCOME, consent: 'working', cmp: 'Cookiebot', ...{ consent: 'choice', cmp: 'Cookiebot', adapter: 'Cookiebot API', doneAt: 9 } };
+  assert.equal(outcomeDetail(second, time), 'Cookiebot via Cookiebot API · t9');
+  const wall = { ...first, ...FRESH_OUTCOME, consent: 'accepting', cmp: 'cz-wall-seznam' };
+  assert.equal(outcomeDetail(wall, time), 'cz-wall-seznam');
+  const bg = read('extension/background.js');
+  assert.equal(bg.match(/\.\.\.FRESH_OUTCOME, consent: '(working|accepting|wall)'/g)?.length, 3, 'every popupFound resets the outcome');
+  assert.match(bg, /\['done', 'acceptedSite', 'choice', 'accepted'\]\.includes\(prev\.consent\)/, 'a pay-wall accept is kept over a reload');
+  assert.match(read('extension/popup/popup.js'), /state\.choiceFallback && !state\.cosmetic/, 'a hidden banner is not called refused');
 });
 
 test('currencyFor: country domain, euro otherwise', () => {

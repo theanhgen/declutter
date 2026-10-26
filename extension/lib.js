@@ -73,6 +73,8 @@ export function chipFor(prev, next, last = {}, now = Date.now(), reloaded = fals
 // The popup's line under an answered banner: which banner (and adapter, for your choice), the local time it was
 // answered and how many clicks it took ("Cookiebot · 14:02 · 3 clicks"). kept: the state carried over a reload the
 // site did itself (background init), so the line says it happened before that. time formats a timestamp.
+// What a newly found banner resets in the tab state (setTab merges, so the previous answer would otherwise show).
+export const FRESH_OUTCOME = { kept: false, choiceFallback: false, clicks: 0, doneAt: 0, adapter: '', cosmetic: false };
 const localTime = (t) => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 export function outcomeDetail(state, time = localTime) {
   const parts = [state.consent === 'choice' && state.adapter ? `${state.cmp} via ${state.adapter}` : state.cmp];

@@ -53,7 +53,7 @@ async function main() {
       firefox: 'the extensions button → declutter → always allow on all sites',
       chrome: 'right-click the declutter button → "This can read and change site data" → on all sites',
     }[__TARGET__]));
-  } else if (state.consent === 'done') rows.push(statusRow('ok', state.cosmetic ? 'banner hidden' : 'cookies refused', state.choiceFallback ? `${outcomeDetail(state)} — your mix isn't supported by this banner, so everything was refused` : outcomeDetail(state)));
+  } else if (state.consent === 'done') rows.push(statusRow('ok', state.cosmetic ? 'banner hidden' : 'cookies refused', state.choiceFallback && !state.cosmetic ? `${outcomeDetail(state)} — your mix isn't supported by this banner, so everything was refused` : outcomeDetail(state)));
   else if (state.consent === 'choice') rows.push(statusRow('ok', 'your choice applied', outcomeDetail(state)));
   else if (state.consent === 'failed' || stuck) rows.push(statusRow('bad', 'banner not answered', state.cmp));
   else if (state.consent === 'wall') {

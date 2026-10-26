@@ -2,7 +2,7 @@
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
+import { badgeFor, chipFor, choiceMode, FRESH_OUTCOME, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -246,7 +246,7 @@ async function onConsentMessage(msg, sender) {
       if (frameId === 0) {
         // Many sites reload themselves after the choice is saved; keep showing that it was refused, marked as kept
         // (the popup says it happened before the reload).
-        const kept = ['done', 'acceptedSite', 'choice'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
+        const kept = ['done', 'acceptedSite', 'choice', 'accepted'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
           ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter,
             clicks: prev.clicks, choiceFallback: prev.choiceFallback, kept: true } : {};
         await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil }),
@@ -298,11 +298,11 @@ async function onConsentMessage(msg, sender) {
         const accepting = (walls === 'auto' && !looping) || (await getTab(tabId)).acceptUntil > Date.now();
         if (accepting) await logAutoAccept(tabId, msg.cmp);
         await setTab(tabId, accepting
-          ? { consent: 'accepting', cmp: msg.cmp, wallFrame: frameId }
-          : { consent: 'wall', cmp: msg.cmp, wallFrame: frameId, looping });
+          ? { ...FRESH_OUTCOME, consent: 'accepting', cmp: msg.cmp, wallFrame: frameId }
+          : { ...FRESH_OUTCOME, consent: 'wall', cmp: msg.cmp, wallFrame: frameId, looping });
       } else {
-        // A new banner on a kept page: what follows is answered here, not before the reload.
-        await setTab(tabId, { consent: 'working', cmp: msg.cmp, since: Date.now(), kept: false, choiceFallback: false });
+        // A new banner: nothing of the previous answer (its time, clicks, adapter, kept mark) carries over.
+        await setTab(tabId, { ...FRESH_OUTCOME, consent: 'working', cmp: msg.cmp, since: Date.now() });
         const settings = await getSettings();
         const siteAccepted = hostMatches(tabHost, settings.acceptSites ?? []);
         if (!siteAccepted && choiceMode(settings.categories) === 'mix') await applyChoice(tabId, frameId, msg.cmp, settings.categories);
