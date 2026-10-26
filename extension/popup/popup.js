@@ -1,4 +1,4 @@
-import { reportUrl, wallMode } from '../lib.js';
+import { hostMatches, reportUrl, wallMode } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -77,7 +77,7 @@ async function main() {
 
   // Per-site choice: refuse (default) / accept / leave alone. A pay wall can't be refused (D5), so a wall site gets
   // its own: agree for me (acceptSites) / ask me (wallAskSites) / leave alone, defaulting to the global walls mode.
-  const wall = await api.runtime.sendMessage({ type: 'wallSite', tabId: tab.id }).catch(() => false);
+  const wall = await api.runtime.sendMessage({ type: 'wallSite', tabId: tab.id, url: tab.url }).catch(() => false);
   const mode = wall ? wallMode(host, s) : s.exceptions.includes(host) ? 'ignore' : s.acceptSites.includes(host) ? 'accept' : 'refuse';
   const lists = { ignore: 'exceptions', accept: 'acceptSites', agree: 'acceptSites', ask: 'wallAskSites' };
   for (const b of $(wall ? 'wallMode' : 'siteMode').querySelectorAll('button')) {
@@ -85,7 +85,9 @@ async function main() {
     b.onclick = async () => {
       const m = b.dataset.mode;
       await save(Object.fromEntries(['exceptions', 'acceptSites', 'wallAskSites'].map((k) =>
-        [k, [...s[k].filter((h) => h !== host), ...(lists[m] === k ? [host] : [])]])));
+        // A wall site's mode is read with hostMatches (wallMode), so drop parent-domain entries too, or one left in
+        // wallAskSites would keep this host stuck in 'ask'.
+        [k, [...s[k].filter((h) => (wall ? !hostMatches(host, [h]) : h !== host)), ...(lists[m] === k ? [host] : [])]])));
       api.tabs.reload(tab.id);
       window.close();
     };

@@ -361,9 +361,11 @@ async function acceptWall(tabId) {
 }
 
 // Popup: is this tab's site a pay wall? It then gets the wall control (agree for me / ask me / leave alone).
-async function wallSite(tabId) {
-  const tab = await api.tabs.get(tabId);
-  return hostMatches(new URL(tab.url).hostname, (await getData()).consent.walls);
+// The popup sends the tab's url it already has; tabs.get is only a fallback, and a tab without a url is no wall.
+async function wallSite(tabId, msg = {}) {
+  const url = msg.url ?? (await api.tabs.get(tabId)).url;
+  if (!url) return false;
+  return hostMatches(new URL(url).hostname, (await getData()).consent.walls);
 }
 
 // "send to developer": only when the user presses it in the popup, after seeing the address. Goes to an
