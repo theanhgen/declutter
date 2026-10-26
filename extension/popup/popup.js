@@ -1,4 +1,5 @@
 import { choiceMode, reportUrl, siteModePatch, siteMode, outcomeDetail } from '../lib.js';
+import { declutterSnippets } from '../consent/snippets.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -80,6 +81,8 @@ async function main() {
       ? 'it came back twice within a minute after accepting, so auto-accept is paused in this tab'
       : 'there is no free refuse on this site'));
     $('acceptWall').hidden = false;
+    $('acceptWall').querySelector('.label').replaceChildren(`agree to tracking on ${host.replace(/^www\./, '')}`,
+      Object.assign(document.createElement('span'), { className: 'sub', textContent: "can't be undone here: clear this site's cookies to take it back" }));
     $('acceptWall').onclick = async () => {
       await api.runtime.sendMessage({ type: 'acceptWall', tabId: tab.id });
       window.close();
@@ -105,12 +108,21 @@ async function main() {
   for (const b of $('siteMode').querySelectorAll('button')) {
     b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
     b.onclick = async () => {
-      await save((current) => siteModePatch(host, b.dataset.mode, current));
+      const m = b.dataset.mode;
+      await save((current) => siteModePatch(host, m, current));
+      if (m === 'accept' && mode !== 'accept') await api.runtime.sendMessage({ type: 'reopen', tabId: tab.id });
       api.tabs.reload(tab.id);
       window.close();
     };
   }
   $('siteSection').hidden = false;
+  // After a switch to accept the reload asks again a CMP DECLUTTER_REOPEN knows (not on a wall site, where only the
+  // wall rules run). Any other change, and any other CMP, keeps the answer the site already has: say so before the press.
+  if (mode === 'accept' || /^(cz-)?wall-/.test(state.cmp ?? '')) $('siteNote').hidden = false;
+  else {
+    api.scripting.executeScript({ target: { tabId: tab.id, frameIds: [0] }, world: 'MAIN', func: declutterSnippets.DECLUTTER_CAN_REOPEN })
+      .then(([r] = []) => { $('siteNote').hidden = !!r?.result; }, () => { $('siteNote').hidden = false; });
+  }
 
   $('report').hidden = false;
   // When declutter failed, reporting is the next step: put it first.
