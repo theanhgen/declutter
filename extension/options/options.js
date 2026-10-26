@@ -105,8 +105,16 @@ async function render() {
   const actions = el('p', { className: 'bullet', style: '--dot:#8d8d8d' });
   actions.append(link('copy list', async () => { await navigator.clipboard.writeText(lines.join('\n')); actions.firstChild.textContent = 'copied'; }), ' / ',
     link('clear', () => api.storage.local.set({ reports: [] }).then(render)));
+  // A send that could not go out waits on the report (background.js sendReport); cancel drops it before it is retried.
+  const cancelSend = async (host) => {
+    const { reports: current = [] } = await api.storage.local.get('reports');
+    await api.storage.local.set({ reports: current.map(({ sendPending, ...r }) => (r.host === host ? r : { ...r, ...(sendPending && { sendPending }) })) });
+    render();
+  };
+  const sendState = (r) => r.sendPending ? ['  ', el('span', { className: 'muted', textContent: 'waiting to send (' }), link('cancel', () => cancelSend(r.host)), el('span', { className: 'muted', textContent: ')' })]
+    : r.sentAt ? ['  ', el('span', { className: 'muted', textContent: 'sent' })] : [];
   $('reports').replaceChildren(...(reports.length
-    ? [...lines.map((t) => el('p', { className: 'bullet', style: '--dot:#e5484d', textContent: t })), actions]
+    ? [...lines.map((t, i) => el('p', { className: 'bullet', style: '--dot:#e5484d' }, t, ...sendState(reports[i]))), actions]
     : [el('p', { className: 'muted', textContent: 'none.' })]));
 }
 render();

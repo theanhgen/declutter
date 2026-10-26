@@ -76,6 +76,36 @@ test('reportUrl sends the site only: no path, query, fragment or credentials', (
   assert.equal(reportUrl(''), null);
 });
 
+test('failed report send: kept with the approved body, retried for a week, cancel and sent end it (#17)', async () => {
+  const { afterSend, expireSends, sendsDue, SEND_RETRY_MS } = await import('../extension/lib.js');
+  const body = { url: 'https://www.idnes.cz', consent: 'failed', cmp: 'x', version: '1.0', browser: 'chrome' };
+  const pending = { url: body.url, body, at: 1000 };
+  const other = { host: 'www.alza.cz', url: 'https://www.alza.cz/', at: 1 };
+  const reports = [{ host: 'www.idnes.cz', url: 'https://www.idnes.cz/a', at: 900, sendPending: pending }, other];
+  // Offline: still pending, with why; the body is the one the popup showed, unchanged.
+  const failed = afterSend(reports, 'www.idnes.cz', pending, { ok: false, reason: 'offline? Failed to fetch' }, 2000);
+  assert.deepEqual(failed[0].sendPending, { ...pending, reason: 'offline? Failed to fetch' });
+  assert.equal(failed[1], other);
+  assert.deepEqual(sendsDue(failed, 2000).map((r) => r.sendPending.body), [body]);
+  // Back online: sent, nothing left to retry.
+  const sent = afterSend(failed, 'www.idnes.cz', pending, { ok: true, reason: '' }, 3000);
+  assert.equal(sent[0].sendPending, undefined);
+  assert.equal(sent[0].sentAt, 3000);
+  assert.deepEqual(sendsDue(sent, 3000), []);
+  // Cancelled in Settings while a retry was in flight: the failed retry must not bring it back.
+  const { sendPending, ...cancelled } = failed[0];
+  assert.equal(afterSend([cancelled], 'www.idnes.cz', pending, { ok: false, reason: 'x' }, 4000)[0].sendPending, undefined);
+  // A week on: no longer retried, and dropped.
+  assert.deepEqual(sendsDue(failed, 1000 + SEND_RETRY_MS), []);
+  assert.equal(expireSends(failed, 1000 + SEND_RETRY_MS)[0].sendPending, undefined);
+  assert.deepEqual(expireSends(failed, 2000)[0].sendPending, failed[0].sendPending);
+  // background.js keeps the send before trying, retries it on the data alarm and on popup open.
+  const bg = read('extension/background.js');
+  assert.match(bg, /sendPending: pending/);
+  assert.match(bg, /a\.name !== 'data'[\s\S]*retrySends\(\)/);
+  assert.match(read('extension/popup/popup.js'), /type: 'retrySends'/);
+});
+
 test('validData rejects malformed remote payloads', () => {
   const good = { schema: 1, generated: 'x', shorts: { hide: [], cards: [] }, consent: { walls: [], rules: [], disabledCmps: [] } };
   assert.ok(validData(good));

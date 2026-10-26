@@ -48,6 +48,28 @@ export function reportUrl(url) {
   } catch { return null; }
 }
 
+// A report the user chose to send waits on its local report as sendPending { url, body, reason, at } until it goes
+// out (offline, server down): retried on the 12 h data alarm and on every popup open, for a week. body is what the
+// popup showed when the user pressed send; a retry sends exactly that. sentAt once it went out.
+export const SEND_RETRY_MS = 7 * 24 * 60 * 60 * 1000;
+export const sendsDue = (reports, now) => reports.filter((r) => r.sendPending && now - r.sendPending.at < SEND_RETRY_MS);
+// Drops pending sends older than the retry window (given up).
+export const expireSends = (reports, now) => reports.map(({ sendPending, ...r }) =>
+  sendPending && now - sendPending.at < SEND_RETRY_MS ? { ...r, sendPending } : r);
+// The reports after one try of `pending` for host. Sent: sentAt, and nothing pending. Failed: still pending, with
+// the reason. Only the pending send that was tried is touched: one cancelled or replaced meanwhile stays that way.
+export function afterSend(reports, host, pending, { ok, reason }, now) {
+  return reports.map((r) => {
+    if (r.host !== host) return r;
+    const tried = r.sendPending?.at === pending.at;
+    if (ok) {
+      const { sendPending, ...rest } = r;
+      return { ...(tried ? rest : r), sentAt: now };
+    }
+    return tried ? { ...r, sendPending: { ...r.sendPending, reason } } : r;
+  });
+}
+
 // The chip (consent/chip.js) says what just happened to the banner: only when the outcome changes, and not again
 // for the same outcome on the same site within a minute (sites reload themselves after the choice is saved).
 // A page that reloads while the chip is still up (reloaded: the new page's init) gets it once more.
