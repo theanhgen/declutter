@@ -27,7 +27,7 @@ const CATEGORIES = [
 const DEFAULTS = {
   shorts: true, posts: true, consent: true, walls: __WALLS_DEFAULT__, display: 'hide', chip: true, gpc: false, debug: false, debugEvals: false, clickDelay: false,
   // Same default rule list as the background's (the build-time one), so adding or removing a list keeps it.
-  exceptions: [], acceptSites: [], dataUrls: __DATA_URL__ ? [__DATA_URL__] : [], categories: Object.fromEntries(CATEGORIES.map(([k]) => [k, false])),
+  exceptions: [], acceptSites: [], wallAskSites: [], dataUrls: __DATA_URL__ ? [__DATA_URL__] : [], categories: Object.fromEntries(CATEGORIES.map(([k]) => [k, false])),
 };
 
 const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
@@ -65,6 +65,7 @@ async function render() {
     : [el('span', { className: 'muted', textContent: 'no sites' })]));
   siteList('acceptSites');
   siteList('exceptions');
+  siteList('wallAskSites');
 
   // rule lists
   const urls = [...new Set([...s.dataUrls, s.dataUrl].filter(Boolean))];
