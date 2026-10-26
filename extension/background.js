@@ -3,7 +3,7 @@ import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import compactRulesText from '@duckduckgo/autoconsent/rules/compact-rules.json' with { type: 'text' };
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, siteMode, validData, FRESH_OUTCOME, afterSend, expireSends, sendsDue } from './lib.js';
+import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, siteMode, validData, FRESH_OUTCOME, afterSend, expireSends, sendsDue, fetchRuleList, ruleListStatus } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -119,15 +119,9 @@ async function refreshRemoteData() {
   const { remoteStatus = {}, remoteLists: previous } = await api.storage.local.get(['remoteStatus', 'remoteLists']);
   const fetched = {};
   for (const url of urls) {
-    try {
-      const res = await fetch(url, { cache: 'no-store' });
-      const d = await res.json();
-      if (!res.ok || !validData(d)) throw new Error(`invalid payload (${res.status})`);
-      fetched[url] = d;
-      remoteStatus[url] = { ok: true, at: Date.now(), generated: d.generated, rules: d.consent.rules.length };
-    } catch (e) {
-      remoteStatus[url] = { ok: false, at: Date.now(), error: String(e.message || e) };
-    }
+    const result = await fetchRuleList(url);
+    if (result.data) fetched[url] = result.data;
+    remoteStatus[url] = ruleListStatus(remoteStatus[url], result);
   }
   for (const url of Object.keys(remoteStatus)) if (!urls.includes(url)) delete remoteStatus[url];
   const remoteLists = keepRemoteLists(urls, previous, fetched);
