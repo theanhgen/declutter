@@ -53,6 +53,23 @@ const tabId = (sw, url) => sw.evaluate(async (u) => (await chrome.tabs.query({})
   await close();
 }
 
+// ---- auto, but "ask me" on one site (#13): that site waits for the popup, which shows the wall control ----
+{
+  const { ctx, sw, close } = await launch({ walls: 'auto' });
+  await setSettings(sw, { wallAskSites: ['www.blesk.cz'] });
+  const page = await ctx.newPage();
+  await page.goto('https://www.blesk.cz/', { waitUntil: 'domcontentloaded' }).catch(() => {});
+  await page.waitForTimeout(10000);
+  const s = await tabState(sw, page.url());
+  check('auto + ask me on blesk: wall detected, left alone', s?.consent === 'wall' && await wallVisible(page), JSON.stringify(s));
+  const pop = await ctx.newPage();
+  await pop.goto(`chrome-extension://${new URL(sw.url()).host}/popup/popup.html?tab=${await tabId(sw, page.url())}`);
+  await pop.waitForTimeout(800);
+  check('popup: wall control shows "ask me", no refuse control', await pop.locator('#wallMode [data-mode=ask]').getAttribute('aria-pressed') === 'true' &&
+    await pop.locator('#wallSection').isVisible() && !(await pop.locator('#siteSection').isVisible()));
+  await close();
+}
+
 // ---- fresh install: auto is the default ----
 {
   const { ctx, sw, close } = await launch({ walls: null });

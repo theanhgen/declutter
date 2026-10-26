@@ -28,6 +28,16 @@ export function keepRemoteLists(urls, previous = {}, fetched = {}) {
 const CURRENCY = { cz: 'Kč', uk: '£', pl: 'zł', ch: 'CHF', hu: 'Ft', se: 'kr', dk: 'kr', no: 'kr', ro: 'lei', bg: 'лв', us: '$', ca: '$', au: '$' };
 export const currencyFor = (host = '') => CURRENCY[host.split('.').pop()] ?? '€';
 
+// A pay-wall site's own per-site choice (never refuse: walls are never refused or hidden, D5): 'agree' (accept it for
+// me; acceptSites), 'ask' (detect it and wait for the popup; wallAskSites) or 'ignore' (leave alone; exceptions).
+// A site with no choice of its own follows the global walls mode.
+export function wallMode(host, s = {}) {
+  if (hostMatches(host, s.exceptions ?? [])) return 'ignore';
+  if (hostMatches(host, s.wallAskSites ?? [])) return 'ask';
+  if (hostMatches(host, s.acceptSites ?? [])) return 'agree';
+  return s.walls === 'auto' ? 'agree' : 'ask';
+}
+
 export function badgeFor(state, now = Date.now()) {
   const stuck = state.consent === 'working' && now - (state.since ?? now) > STUCK_AFTER_MS;
   if (state.shortsLeak > 0) return { text: '!', color: '#d93025', title: `declutter: ${state.shortsLeak} Shorts link(s) got past the selectors` };

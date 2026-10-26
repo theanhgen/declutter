@@ -1,4 +1,4 @@
-import { reportUrl } from '../lib.js';
+import { reportUrl, wallMode } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -22,7 +22,7 @@ async function main() {
   $('settings').onclick = () => { api.runtime.openOptionsPage(); window.close(); };
 
   const { settings = {} } = await api.storage.local.get('settings');
-  const s = { shorts: true, posts: true, consent: true, exceptions: [], acceptSites: [], ...settings };
+  const s = { shorts: true, posts: true, consent: true, exceptions: [], acceptSites: [], wallAskSites: [], walls: __WALLS_DEFAULT__, ...settings };
   // Only the changed keys over what is stored now (never the defaults above, and Settings may be open too).
   const save = async (patch) => {
     const { settings: current = {} } = await api.storage.local.get('settings');
@@ -75,21 +75,22 @@ async function main() {
   $('status').replaceChildren(...rows);
   $('pageSection').hidden = false;
 
-  // Per-site choice: refuse (default) / accept / leave alone.
-  const mode = s.exceptions.includes(host) ? 'ignore' : s.acceptSites.includes(host) ? 'accept' : 'refuse';
-  for (const b of $('siteMode').querySelectorAll('button')) {
+  // Per-site choice: refuse (default) / accept / leave alone. A pay wall can't be refused (D5), so a wall site gets
+  // its own: agree for me (acceptSites) / ask me (wallAskSites) / leave alone, defaulting to the global walls mode.
+  const wall = await api.runtime.sendMessage({ type: 'wallSite', tabId: tab.id }).catch(() => false);
+  const mode = wall ? wallMode(host, s) : s.exceptions.includes(host) ? 'ignore' : s.acceptSites.includes(host) ? 'accept' : 'refuse';
+  const lists = { ignore: 'exceptions', accept: 'acceptSites', agree: 'acceptSites', ask: 'wallAskSites' };
+  for (const b of $(wall ? 'wallMode' : 'siteMode').querySelectorAll('button')) {
     b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
     b.onclick = async () => {
       const m = b.dataset.mode;
-      await save({
-        exceptions: [...s.exceptions.filter((h) => h !== host), ...(m === 'ignore' ? [host] : [])],
-        acceptSites: [...s.acceptSites.filter((h) => h !== host), ...(m === 'accept' ? [host] : [])],
-      });
+      await save(Object.fromEntries(['exceptions', 'acceptSites', 'wallAskSites'].map((k) =>
+        [k, [...s[k].filter((h) => h !== host), ...(lists[m] === k ? [host] : [])]])));
       api.tabs.reload(tab.id);
       window.close();
     };
   }
-  $('siteSection').hidden = false;
+  $(wall ? 'wallSection' : 'siteSection').hidden = false;
 
   $('report').hidden = false;
   const sendUrl = reportUrl(tab.url);

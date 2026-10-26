@@ -187,6 +187,30 @@ test('BUILTIN_CMPS lists every code-based autoconsent rule (walls switch them al
   assert.deepEqual([...listed].sort(), [...names].sort());
 });
 
+test('wall sites: agree for me / ask me / leave alone per site, never refuse (#13)', async () => {
+  // Imported here so the rest of this file still runs against a lib.js without it.
+  const { wallMode } = await import('../extension/lib.js');
+  assert.equal(typeof wallMode, 'function', 'lib.js exports wallMode');
+  const h = 'www.blesk.cz';
+  assert.equal(wallMode(h, { walls: 'auto' }), 'agree');
+  assert.equal(wallMode(h, { walls: 'manual' }), 'ask');
+  // "ask me" overrides auto mode for that site only
+  assert.equal(wallMode(h, { walls: 'auto', wallAskSites: [h] }), 'ask');
+  assert.equal(wallMode('www.novinky.cz', { walls: 'auto', wallAskSites: [h] }), 'agree');
+  // "agree for me" (acceptSites, dead on wall sites before) overrides manual mode for that site
+  assert.equal(wallMode(h, { walls: 'manual', acceptSites: [h] }), 'agree');
+  assert.equal(wallMode(h, { walls: 'auto', exceptions: [h], acceptSites: [h] }), 'ignore');
+  assert.equal(wallMode(h, { walls: 'auto', wallAskSites: ['blesk.cz'] }), 'ask', 'subdomains, like every other site list');
+  // The background's wall autoAction (init and popupFound) follows the site's mode, not the global mode alone.
+  const bg = read('extension/background.js');
+  assert.equal(bg.match(/wallMode\(tabHost, settings\) === 'agree'/g)?.length, 2);
+  assert.doesNotMatch(bg, /walls === 'auto'/);
+  // The popup's wall control has no "refuse".
+  const html = read('extension/popup/popup.html');
+  const wallButtons = html.match(/id="wallMode">([\s\S]*?)<\/div>/)?.[1] ?? '';
+  assert.deepEqual([...wallButtons.matchAll(/data-mode="(\w+)"/g)].map((m) => m[1]), ['agree', 'ask', 'ignore']);
+});
+
 test('choiceMode: all off refuses, all on accepts, anything else is a mix', () => {
   assert.equal(choiceMode({}), 'refuse');
   assert.equal(choiceMode({ A: false, B: false, D: false, E: false, F: false, X: false }), 'refuse');
