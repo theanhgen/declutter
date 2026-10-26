@@ -28,7 +28,10 @@ test('hostMatches: exact host and subdomains only', () => {
 });
 
 test('badgeFor: problems are red, everything else is quiet', () => {
-  assert.equal(badgeFor({ shortsLeak: 2 }).text, '!');
+  // Shorts the backup check caught are already hidden: a tooltip line, not a red badge.
+  assert.equal(badgeFor({ shortsLeak: 2 }).text, '');
+  assert.match(badgeFor({ shortsLeak: 2 }).title, /2 shorts caught/);
+  assert.equal(badgeFor({ shortsLeak: 2, consent: 'failed' }).text, '!');
   assert.equal(badgeFor({ consent: 'failed', cmp: 'x' }).text, '!');
   assert.equal(badgeFor({ consent: 'working', since: 0 }, 20000).text, '!');
   assert.equal(badgeFor({ consent: 'working', since: 10000 }, 20000).text, '');
@@ -46,7 +49,7 @@ test('chipFor: once per outcome, not on a reload of the same site', () => {
   // a cosmetic rule answers nothing: say hidden, never refused or accepted
   assert.equal(chipFor({}, { consent: 'done', cosmetic: true }).text, 'banner hidden');
   assert.equal(chipFor({}, { consent: 'acceptedSite', cosmetic: true }).text, 'banner hidden');
-  assert.equal(chipFor({}, { consent: 'failed', cosmetic: true }).text, 'banner not answered');
+  assert.equal(chipFor({}, { consent: 'failed', cosmetic: true }).text, 'banner not answered: see the declutter button');
   assert.equal(chipFor({}, { consent: 'failed' }).tone, 'bad');
   for (const consent of ['working', 'paused', 'accepting', undefined]) assert.equal(chipFor({}, { consent }), null);
   assert.equal(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }), null);

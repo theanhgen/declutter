@@ -2,7 +2,7 @@
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
+import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -72,8 +72,12 @@ api.storage.onChanged.addListener((changes, area) => {
   if (changes.remoteData) dataCache = null;
 });
 
+// Per-site lists must be arrays: hostMatches on anything else throws and silently stops every frame's init.
+const normalise = (s) => ({ ...s, exceptions: Array.isArray(s.exceptions) ? s.exceptions : [],
+  acceptSites: Array.isArray(s.acceptSites) ? s.acceptSites : [] });
+
 function getSettings() {
-  settingsCache ??= api.storage.local.get('settings').then(({ settings }) => ({ ...DEFAULT_SETTINGS, ...settings }));
+  settingsCache ??= api.storage.local.get('settings').then(({ settings }) => normalise({ ...DEFAULT_SETTINGS, ...settings }));
   settingsCache.catch(() => { settingsCache = null; });
   return settingsCache;
 }
@@ -299,7 +303,9 @@ async function onConsentMessage(msg, sender) {
           ? { consent: 'accepting', cmp: msg.cmp, wallFrame: frameId }
           : { consent: 'wall', cmp: msg.cmp, wallFrame: frameId, looping });
       } else {
-        await setTab(tabId, { consent: 'working', cmp: msg.cmp, since: Date.now() });
+        const since = Date.now();
+        await setTab(tabId, { consent: 'working', cmp: msg.cmp, since });
+        watchStuck(tabId, since);
         const settings = await getSettings();
         const siteAccepted = hostMatches(tabHost, settings.acceptSites ?? []);
         if (!siteAccepted && choiceMode(settings.categories) === 'mix') await applyChoice(tabId, frameId, msg.cmp, settings.categories);
@@ -325,6 +331,20 @@ async function onConsentMessage(msg, sender) {
       console.warn('declutter: autoconsent error', msg.details);
       break;
   }
+}
+
+// A banner still 'working' after STUCK_AFTER_MS was not answered: mark it failed so the badge turns red and the
+// chip says so, without waiting for some other event to repaint. setTimeout covers the usual case; the alarm (Chrome
+// fires them no sooner than 30 s) covers a worker suspended in between. since: only that same attempt.
+const stuckAlarm = (tabId, since) => `stuck-${tabId}-${since}`;
+function watchStuck(tabId, since) {
+  setTimeout(() => markStuck(tabId, since), STUCK_AFTER_MS + 100);
+  api.alarms.create(stuckAlarm(tabId, since), { when: since + Math.max(STUCK_AFTER_MS, 30000) });
+}
+async function markStuck(tabId, since) {
+  api.alarms.clear(stuckAlarm(tabId, since));
+  const state = await getTab(tabId);
+  if (state.consent === 'working' && state.since === since) await setTab(tabId, { consent: 'failed', stuck: true });
 }
 
 // "Your choice" with a mix of categories: autoconsent found a banner and waits (autoAction null). Apply the mix
@@ -412,7 +432,11 @@ api.storage.onChanged.addListener((changes, area) => {
   if (urls(changes.settings.newValue) !== urls(changes.settings.oldValue)) refreshRemoteData();
 });
 
-api.alarms.onAlarm.addListener((a) => { if (a.name === 'data') refreshRemoteData(); });
+api.alarms.onAlarm.addListener((a) => {
+  if (a.name === 'data') refreshRemoteData();
+  const m = a.name.match(/^stuck-(\d+)-(\d+)$/);
+  if (m) markStuck(Number(m[1]), Number(m[2]));
+});
 
 async function start() {
   await applyShortsRedirect();

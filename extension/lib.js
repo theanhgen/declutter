@@ -30,12 +30,13 @@ export const currencyFor = (host = '') => CURRENCY[host.split('.').pop()] ?? '�
 
 export function badgeFor(state, now = Date.now()) {
   const stuck = state.consent === 'working' && now - (state.since ?? now) > STUCK_AFTER_MS;
-  if (state.shortsLeak > 0) return { text: '!', color: '#d93025', title: `declutter: ${state.shortsLeak} Shorts link(s) got past the selectors` };
-  if (state.consent === 'failed' || stuck) return { text: '!', color: '#d93025', title: `declutter: cookie banner (${state.cmp}) not answered` };
+  if (state.consent === 'failed' || stuck) return { text: '!', color: '#d93025', title: 'declutter: cookie banner not answered — answer it on the page' };
   if (state.consent === 'wall') return { text: currencyFor(state.host), color: '#e37400', title: 'declutter: consent-or-pay wall — agree or pay; accept from this menu' };
   if (state.consent === 'choice') return { text: '', color: '#1e8e3e', title: `declutter: applied your choice (${state.adapter})` };
   if (state.consent === 'accepted') return { text: '', color: '#777', title: `declutter: accepted the pay wall (${state.cmp})` };
   if (state.consent === 'done') return { text: '', color: '#1e8e3e', title: `declutter: ${state.cosmetic ? 'hid' : 'refused'} ${state.cmp}` };
+  // Shorts the backup check caught are already hidden: worth a line, not an alarm.
+  if (state.shortsLeak > 0) return { text: '', color: '#777', title: `declutter: ${state.shortsLeak} shorts caught by the backup check and hidden` };
   return { text: '', color: '#777', title: 'declutter' };
 }
 
@@ -55,7 +56,8 @@ export const CHIP_REPEAT_MS = 60000;
 export const CHIP_VISIBLE_MS = 2500;
 const CHIPS = {
   done: ['cookies refused', 'ok'], acceptedSite: ['cookies accepted', 'ok'], choice: ['your choice applied', 'ok'],
-  accepted: ['pay wall accepted', 'ok'], wall: ['pay wall: your choice', 'wait'], failed: ['banner not answered', 'bad'],
+  accepted: ['pay wall accepted', 'ok'], wall: ['pay wall: accept from the declutter button', 'wait'],
+  failed: ['banner not answered: see the declutter button', 'bad'],
 };
 export function chipFor(prev, next, last = {}, now = Date.now(), reloaded = false) {
   const chip = next.cosmetic && CHIPS[next.consent]?.[1] === 'ok' ? ['banner hidden', 'ok'] : CHIPS[next.consent];

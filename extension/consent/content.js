@@ -13,7 +13,9 @@ const send = (msg, retries = msg.type === 'init' ? 2 : 0) => api.runtime.sendMes
   if (retries) return new Promise((r) => setTimeout(r, 500)).then(() => send(msg, retries - 1));
 });
 const consent = new AutoConsent((msg) => send(msg));
-api.runtime.onMessage.addListener((msg) => {
+api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  // The popup asks whether this page has a live content script (tabs opened before an install or update do not).
+  if (msg.type === 'ping') { sendResponse(true); return; }
   if (msg.type === 'chip') return showChip(msg);
   consent.receiveMessageCallback(msg);
 });

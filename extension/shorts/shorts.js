@@ -1,7 +1,7 @@
 // www.youtube.com and m.youtube.com. shorts.css (built from data/shorts.json) does the hiding; this script:
 //  - sends /shorts/<id> to /watch?v=<id>, and a channel's /shorts tab to /videos
 //  - adds selectors from the remote data copy (D6)
-//  - self-check: any /shorts/ link still visible gets hidden by its card and reported (red badge)
+//  - self-check: any /shorts/ link still visible gets hidden by its card and counted (popup: "caught by the backup check")
 // The same stylesheet hides community posts in the feeds (its own switch, CSS only).
 import bundled from '../../data/shorts.json';
 import { redirectTarget } from '../lib.js';
@@ -38,20 +38,24 @@ function onClick(e) {
 
 const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
 
-let lastReported = -1;
+// Cards the backup check hid on this page. It only grows until the next navigation: the leftovers are hidden at
+// once, so counting what is still visible would report them and then clear the report a moment later.
+let caught = 0;
 function selfCheck() {
   if (!enabled) return;
   const leaked = [...document.querySelectorAll('a[href*="/shorts/"]')].filter(visible);
+  let added = 0;
   for (const a of leaked) {
     let card = a;
     try { card = a.closest(cards.join(',')) ?? a; } catch { /* a bad selector: hide the link itself */ }
+    if (!card.hasAttribute('data-declutter-hidden')) added += 1;
     card.setAttribute('data-declutter-hidden', '');
     card.style.setProperty('display', 'none', 'important');
   }
-  if (leaked.length !== lastReported && (leaked.length > 0 || lastReported > 0)) {
-    send({ type: 'shortsLeak', count: leaked.length, path: location.pathname });
+  if (added) {
+    caught += added;
+    send({ type: 'shortsLeak', count: caught, path: location.pathname });
   }
-  lastReported = leaked.length;
 }
 
 let timer;
@@ -60,6 +64,7 @@ const scheduleCheck = () => {
   // m.youtube.com has no yt-navigate-finish; notice in-app navigation from DOM changes instead.
   if (location.href !== lastUrl) {
     lastUrl = location.href;
+    caught = 0;
     if (redirectIfShort()) return;
   }
   clearTimeout(timer);
@@ -98,7 +103,7 @@ async function init() {
   document.addEventListener('click', onClick, true);
   // YouTube navigates inside the page; these fire on every in-app page change.
   document.addEventListener('yt-navigate-finish', () => {
-    lastReported = -1;
+    caught = 0;
     send({ type: 'shortsNav' });
     if (!redirectIfShort()) scheduleCheck();
   });
