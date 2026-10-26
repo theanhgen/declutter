@@ -33,7 +33,7 @@ const CATEGORIES = [
 const DEFAULTS = {
   shorts: true, posts: true, playables: true, dates: true, consent: true, walls: __WALLS_DEFAULT__, display: 'hide', chip: true, gpc: false, debug: false, debugEvals: false, clickDelay: false,
   // Same default rule list as the background's (the build-time one), so adding or removing a list keeps it.
-  exceptions: [], acceptSites: [], refuseSites: [], dataUrls: __DATA_URL__ ? [__DATA_URL__] : [], categories: Object.fromEntries(CATEGORIES.map(([k]) => [k, false])),
+  exceptions: [], acceptSites: [], refuseSites: [], wallAskSites: [], dataUrls: __DATA_URL__ ? [__DATA_URL__] : [], categories: Object.fromEntries(CATEGORIES.map(([k]) => [k, false])),
 };
 
 const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
@@ -92,6 +92,10 @@ async function render() {
   };
   $('addAccept').onclick = addSite('accept');
   $('addIgnore').onclick = addSite('ignore');
+  // Pay-wall sites set to "ask me" in the popup (wallMode in lib.js).
+  $('wallAskSites').replaceChildren(...(s.wallAskSites.length
+    ? s.wallAskSites.flatMap((host, i) => [...(i ? [', '] : []), `${host} (`, link('remove', () => save({ wallAskSites: s.wallAskSites.filter((h) => h !== host) })), ')'])
+    : [el('span', { className: 'muted', textContent: 'no sites' })]));
 
   // rule lists
   const urls = [...new Set([...s.dataUrls, s.dataUrl].filter(Boolean))];

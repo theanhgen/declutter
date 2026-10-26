@@ -3,7 +3,7 @@ import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import compactRulesText from '@duckduckgo/autoconsent/rules/compact-rules.json' with { type: 'text' };
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, siteMode, validData, FRESH_OUTCOME, afterSend, expireSends, sendsDue, fetchRuleList, ruleListStatus } from './lib.js';
+import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, siteMode, validData, FRESH_OUTCOME, afterSend, expireSends, sendsDue, fetchRuleList, ruleListStatus, wallMode } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -36,6 +36,9 @@ const DEFAULT_SETTINGS = {
   exceptions: [],
   acceptSites: [],
   refuseSites: [],
+  // Pay-wall sites set to "ask me" in the popup: wait for the popup there even in auto mode. On a wall site
+  // acceptSites means "agree for me" (even in manual mode); see wallMode in lib.js.
+  wallAskSites: [],
   // Consent-or-pay walls: 'auto' (default; 'manual' in store builds, see build.mjs --store) = accept (Souhlasím) automatically; 'manual' = detect, show a currency
   // badge, accept only when asked from the popup. Walls are never refused or hidden either way.
   walls: __WALLS_DEFAULT__,
@@ -79,7 +82,8 @@ api.storage.onChanged.addListener((changes, area) => {
 
 // Per-site lists must be arrays: hostMatches on anything else throws and silently stops every frame's init.
 const normalise = (s) => ({ ...s, exceptions: Array.isArray(s.exceptions) ? s.exceptions : [],
-  acceptSites: Array.isArray(s.acceptSites) ? s.acceptSites : [], refuseSites: Array.isArray(s.refuseSites) ? s.refuseSites : [] });
+  acceptSites: Array.isArray(s.acceptSites) ? s.acceptSites : [], refuseSites: Array.isArray(s.refuseSites) ? s.refuseSites : [],
+  wallAskSites: Array.isArray(s.wallAskSites) ? s.wallAskSites : [] });
 
 function getSettings() {
   settingsCache ??= api.storage.local.get('settings').then(({ settings }) => normalise({ ...DEFAULT_SETTINGS, ...settings }));
@@ -278,9 +282,10 @@ async function onConsentMessage(msg, sender) {
       // refuse (all categories off) / accept (all on) / mix (applied per CMP on popupFound, else refused).
       const mode = accepting ? 'accept' : choiceMode(settings.categories);
       // On a wall site only the wall rules run: nothing else on the page is refused, hidden or pre-hidden.
-      // Manual mode detects the wall and waits for an optIn from the popup; auto mode accepts at once.
+      // "ask me" (manual mode, or that site's own choice) detects the wall and waits for an optIn from the popup;
+      // "agree for me" (auto mode, or that site's own choice) accepts at once.
       const config = wall
-        ? { enabled: settings.consent && !excepted, autoAction: (settings.walls === 'auto' && !looping) || acceptPending ? 'optIn' : null,
+        ? { enabled: settings.consent && !excepted, autoAction: (wallMode(tabHost, settings) === 'agree' && !looping) || acceptPending ? 'optIn' : null,
           enablePrehide: false, enableCosmeticRules: false, enableGeneratedRules: false, disabledCmps: BUILTIN_CMPS,
           // Sourcepoint wall frames (Spiegel) sometimes render late; look for longer than the default 20 tries.
           detectRetries: 60, logs }
@@ -316,10 +321,10 @@ async function onConsentMessage(msg, sender) {
     }
     case 'popupFound':
       if (isWallRule(msg.cmp)) {
-        // Mirrors the autoAction chosen at init: auto mode (unless looping) or a pending accept.
-        const { walls } = await getSettings();
+        // Mirrors the autoAction chosen at init: "agree for me" on this site (unless looping) or a pending accept.
+        const settings = await getSettings();
         const looping = await isLooping(tabId, [wallFamily(msg.cmp)]);
-        const accepting = (walls === 'auto' && !looping) || (await getTab(tabId)).acceptUntil > Date.now();
+        const accepting = (wallMode(tabHost, settings) === 'agree' && !looping) || (await getTab(tabId)).acceptUntil > Date.now();
         if (accepting) await logAutoAccept(tabId, msg.cmp);
         await setTab(tabId, accepting
           ? { ...FRESH_OUTCOME, consent: 'accepting', cmp: msg.cmp, wallFrame: frameId }
@@ -414,6 +419,12 @@ async function reopenBanner(tabId) {
   }
 }
 
+// Popup: is this tab's site a pay wall? It then gets the wall control (agree for me / ask me / leave alone).
+async function wallSite(tabId) {
+  const tab = await api.tabs.get(tabId);
+  return hostMatches(new URL(tab.url).hostname, (await getData()).consent.walls);
+}
+
 // "send to developer": only when the user presses it in the popup, after seeing the address. Goes to an
 // insert-only Supabase table (supabase/migrations); the publishable key can add rows, never read them.
 const REPORTS_URL = 'https://wpsmgzihqgdmsrvzpcca.supabase.co/rest/v1/reports';
@@ -473,7 +484,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // (on every state update), which must not reach the popup's handler. Extension pages can be in a tab (tests), so
   // check the sender's URL, not sender.tab (falling back to it if a browser leaves sender.url out).
   const fromExtension = sender.url ? sender.url.startsWith(api.runtime.getURL('')) : !sender.tab;
-  const popupRequest = { acceptWall, reopen, report, sendReport, retrySends }[msg.type];
+  const popupRequest = { acceptWall, reopen, report, sendReport, retrySends, wallSite }[msg.type];
   if (fromExtension && popupRequest) {
     popupRequest(msg.tabId, msg).then(sendResponse, () => sendResponse(false));
     return true;

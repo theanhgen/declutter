@@ -109,6 +109,26 @@ export function updateOutcome(urls, before = {}, after = {}) {
 const CURRENCY = { cz: 'Kč', uk: '£', pl: 'zł', ch: 'CHF', hu: 'Ft', se: 'kr', dk: 'kr', no: 'kr', ro: 'lei', bg: 'лв', us: '$', ca: '$', au: '$' };
 export const currencyFor = (host = '') => CURRENCY[host.split('.').pop()] ?? '€';
 
+// A pay-wall site's own per-site choice (never refuse: walls are never refused or hidden, D5): 'agree' (accept it for
+// me; acceptSites), 'ask' (detect it and wait for the popup; wallAskSites) or 'ignore' (leave alone; exceptions).
+// The most specific entry wins, as in siteEntry; a site with no choice of its own (or only a refuse) follows the
+// global walls mode.
+export function wallMode(host, s = {}) {
+  const own = siteEntry(host, s);
+  const ask = (s.wallAskSites ?? []).filter((d) => hostMatches(host, [d])).sort((a, b) => b.length - a.length)[0];
+  if (ask && (!own || ask.length >= own.domain.length)) return 'ask';
+  if (own?.mode === 'accept') return 'agree';
+  if (own?.mode === 'ignore') return 'ignore';
+  return s.walls === 'auto' ? 'agree' : 'ask';
+}
+// The settings patch that gives a wall host this wall mode: only host's own entries change, like siteModePatch.
+export function wallModePatch(host, mode, s = {}) {
+  const lists = siteModePatch(host, { agree: 'accept', ignore: 'ignore' }[mode] ?? 'refuse', s);
+  const wallAskSites = (s.wallAskSites ?? []).filter((d) => d !== host);
+  if (wallMode(host, { ...s, ...lists, wallAskSites }) !== mode) wallAskSites.push(host);
+  return { ...lists, wallAskSites };
+}
+
 export function badgeFor(state, now = Date.now()) {
   const stuck = state.consent === 'working' && now - (state.since ?? now) > STUCK_AFTER_MS;
   if (state.consent === 'failed' || stuck) return { text: '!', color: '#d93025', title: 'declutter: cookie banner not answered — answer it on the page' };
