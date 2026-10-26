@@ -70,7 +70,10 @@ async function main() {
   else if (state.consent === 'paused') rows.push(statusRow('', 'banners left alone here'));
   else if (state.consent === 'acceptedSite') rows.push(statusRow('ok', 'cookies accepted (your choice)', state.cmp));
   else if (state.consent === 'working') rows.push(statusRow('', `answering ${state.cmp}…`));
-  else rows.push(statusRow('', 'no cookie banner here'));
+  else if (state.banner === 'suspected') {
+    // Cookie-banner wording no rule matched (bannerSuspected in lib.js). The report row goes right under it.
+    rows.push(statusRow('wall', "looks like a cookie banner declutter doesn't know yet", 'answer it on the page, then report it so a rule gets written'), $('report'));
+  } else rows.push(statusRow('', 'no cookie banner here'));
   if (state.shortsLeak > 0) rows.push(statusRow('bad', `${state.shortsLeak} shorts got through`, `on ${state.leakPath}`));
   $('status').replaceChildren(...rows);
   $('pageSection').hidden = false;

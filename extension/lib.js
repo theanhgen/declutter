@@ -39,6 +39,16 @@ export function badgeFor(state, now = Date.now()) {
   return { text: '', color: '#777', title: 'declutter' };
 }
 
+// A banner declutter doesn't know yet: autoconsent's heuristic detection (top frame only, never on wall sites) found
+// cookie-banner wording in the page text, and no rule did anything on this page. A banner a rule handled matches the
+// same wording, so any consent state wins. report: autoconsent's own 'report' message (sent on every state change).
+export function bannerSuspected(tab = {}, report = {}, mainFrame = false) {
+  if (!mainFrame || tab.consent || !report.state?.heuristicPatterns?.length) return false;
+  try {
+    return new URL(report.url).hostname === tab.host;
+  } catch { return false; }
+}
+
 // What a sent report carries of the page address: the site only (scheme, host, port). Paths, query strings and
 // fragments can hold tokens, emails or account names. null for anything that is not a web page.
 export function reportUrl(url) {

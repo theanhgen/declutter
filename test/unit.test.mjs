@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, bannerSuspected, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -59,6 +59,20 @@ test('chipFor: once per outcome, not on a reload of the same site', () => {
   assert.ok(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }, last, 2000, true));
   assert.equal(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }, last, 2000, false), null);
   assert.equal(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }, last, 9000, true), null);
+});
+
+test('bannerSuspected: banner wording in the top frame, only when no rule did anything', () => {
+  const report = (url, heuristicPatterns = ['/accept all/gi']) => ({ type: 'report', url, mainFrame: true, state: { heuristicPatterns } });
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.a.cz/clanek'), true), true);
+  // no wording, a sub-frame, or another page's late report
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.a.cz/', []), true), false);
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.a.cz/'), false), false);
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.b.cz/'), true), false);
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, {}, true), false);
+  // a banner a rule found or answered has the same wording: that state wins
+  for (const consent of ['working', 'done', 'failed', 'wall', 'paused', 'acceptedSite', 'choice']) {
+    assert.equal(bannerSuspected({ host: 'www.a.cz', consent }, report('https://www.a.cz/'), true), false);
+  }
 });
 
 test('currencyFor: country domain, euro otherwise', () => {

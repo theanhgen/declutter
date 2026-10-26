@@ -2,7 +2,7 @@
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
+import { badgeFor, bannerSuspected, chipFor, choiceMode, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -262,6 +262,9 @@ async function onConsentMessage(msg, sender) {
           detectRetries: 60, logs }
         : { enabled: settings.consent && !excepted, autoAction: { refuse: 'optOut', accept: 'optIn', mix: null }[mode],
           disabledCmps: data.consent.disabledCmps, enablePrehide: settings.display !== 'show', enableCosmeticRules: true,
+          // Top frame only: look for cookie-banner wording no rule matched (bannerSuspected). Detection only, no
+          // clicks: heuristicMode stays off.
+          enableHeuristicDetection: frameId === 0,
           visualTest: settings.clickDelay, logs };
       const rules = wall
         ? { autoconsent: wallRules }
@@ -319,6 +322,12 @@ async function onConsentMessage(msg, sender) {
         : { consent: mode === 'accept' ? 'acceptedSite' : 'done', cmp: msg.cmp, doneAt: Date.now(), cosmetic: !!msg.isCosmetic });
       await bump({ clicks: msg.totalClicks ?? 0, ...(isWallRule(msg.cmp) ? { walls: 1 } : mode === 'accept' ? { accepted: 1 } : { refused: 1 }) },
         msg.cmp, msg.totalClicks ?? 0);
+      break;
+    }
+    case 'report': {
+      // Kept in session storage for the popup; nothing leaves the browser.
+      const tab = await getTab(tabId);
+      if (!tab.banner && bannerSuspected(tab, msg, frameId === 0)) await setTab(tabId, { banner: 'suspected' });
       break;
     }
     case 'autoconsentError':
