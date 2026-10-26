@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, chipFor, countNewlyHidden, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, shortsStatsText, shortsSummary, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -18,6 +18,34 @@ test('redirectTarget: Shorts and channel Shorts tabs', () => {
   assert.equal(redirectTarget('https://www.youtube.com/watch?v=abc'), null);
   assert.equal(redirectTarget('https://www.youtube.com/@shorts'), null);
   assert.equal(redirectTarget('https://www.youtube.com/results?search_query=shorts'), null);
+});
+
+test('shorts hidden: each element counted once (by video id), however often YouTube re-renders; nav entries never', () => {
+  const link = (href) => ({ getAttribute: () => href });
+  const node = (...hrefs) => ({ querySelectorAll: () => hrefs.map(link) });
+  const a = node('/shorts/AAA', '/shorts/AAA'), b = node('/shorts/BBB?feature=x'), c = node('/shorts/CCC');
+  const shelf = node('/shorts/AAA', '/shorts/AAA', '/shorts/BBB?feature=x'); // a shelf holding cards a and b
+  const guide = node('/shorts/'), tab = node('/@chan/shorts');
+  const S = { shelf: 'ytd-reel-shelf-renderer', card: 'yt-lockup-view-model:has(a[href^="/shorts/"])', guide: 'ytd-guide-entry-renderer', tab: 'yt-tab-shape' };
+  let dom = { [S.shelf]: [shelf], [S.card]: [a, b], [S.guide]: [guide], [S.tab]: [tab] };
+  const root = { querySelectorAll: (s) => { if (s === 'bad(') throw new SyntaxError(s); return dom[s] ?? []; } };
+  const selectors = [...Object.values(S), 'bad('];
+  const seen = new Set();
+  assert.equal(countNewlyHidden(root, selectors, seen), 2, 'two Shorts: nested shelf and cards, two links per card, nav entries');
+  assert.equal(countNewlyHidden(root, selectors, seen), 0, 're-render of the same elements');
+  dom = { ...dom, [S.card]: [a, b, c] };
+  assert.equal(countNewlyHidden(root, selectors, seen), 1, 'only the new one (more results scrolled in)');
+  assert.equal(countNewlyHidden({ querySelectorAll: () => [guide, tab] }, ['x'], new Set()), 0, 'a page with no Shorts counts none');
+});
+
+test('shorts popup row and Settings line say what was hidden and redirected', () => {
+  assert.equal(shortsSummary({ shortsHidden: 12, shortsRedirects: 2 }), '12 shorts hidden on this page · 2 opened in the normal player');
+  assert.equal(shortsSummary({ shortsHidden: 1 }), '1 short hidden on this page');
+  assert.equal(shortsSummary({ shortsRedirects: 1 }), 'no shorts on this page · 1 opened in the normal player');
+  assert.equal(shortsSummary({}), 'no shorts on this page');
+  assert.equal(shortsStatsText({ shortsHidden: 1204, shortsPages: 57 }), '1,204 shorts hidden on 57 youtube pages');
+  assert.equal(shortsStatsText({ shortsHidden: 1, shortsPages: 1 }), '1 short hidden on 1 youtube page');
+  assert.equal(shortsStatsText({}), 'no shorts hidden yet.');
 });
 
 test('hostMatches: exact host and subdomains only', () => {

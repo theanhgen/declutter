@@ -1,4 +1,4 @@
-import { reportUrl } from '../lib.js';
+import { reportUrl, shortsSummary } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -71,6 +71,9 @@ async function main() {
   else if (state.consent === 'acceptedSite') rows.push(statusRow('ok', 'cookies accepted (your choice)', state.cmp));
   else if (state.consent === 'working') rows.push(statusRow('', `answering ${state.cmp}…`));
   else rows.push(statusRow('', 'no cookie banner here'));
+  if (s.shorts && /^(www|m)\.youtube\.com$/.test(host)) {
+    rows.push(statusRow(state.shortsHidden || state.shortsRedirects ? 'ok' : '', shortsSummary(state)));
+  }
   if (state.shortsLeak > 0) rows.push(statusRow('bad', `${state.shortsLeak} shorts got through`, `on ${state.leakPath}`));
   $('status').replaceChildren(...rows);
   $('pageSection').hidden = false;

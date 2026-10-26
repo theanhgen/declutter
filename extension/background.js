@@ -138,13 +138,23 @@ const tabKey = (tabId) => `tab-${tabId}`;
 async function getTab(tabId) {
   return (await api.storage.session.get(tabKey(tabId)))[tabKey(tabId)] ?? {};
 }
-async function setTab(tabId, patch, reset = false) {
-  const prev = await getTab(tabId);
-  const next = { ...(reset ? {} : prev), ...patch };
-  await api.storage.session.set({ [tabKey(tabId)]: next });
-  await paintBadge(tabId, next);
-  if ('consent' in patch) await showChip(tabId, prev, next, reset);
-  return next;
+// One update per tab at a time: two read-modify-writes in flight together would drop one of them.
+// patch can be a function of the current state, for updates that build on it (a counter, a carried-over field).
+const tabQueues = new Map();
+function setTab(tabId, patch, reset = false) {
+  const run = (tabQueues.get(tabId) ?? Promise.resolve()).then(async () => {
+    const prev = await getTab(tabId);
+    const p = typeof patch === 'function' ? patch(prev) : patch;
+    const next = { ...(reset ? {} : prev), ...p };
+    await api.storage.session.set({ [tabKey(tabId)]: next });
+    await paintBadge(tabId, next);
+    if ('consent' in p) await showChip(tabId, prev, next, reset);
+    return next;
+  });
+  const tail = run.catch(() => {});
+  tabQueues.set(tabId, tail);
+  tail.then(() => { if (tabQueues.get(tabId) === tail) tabQueues.delete(tabId); });
+  return run;
 }
 
 const chipKey = (tabId) => `chip-${tabId}`;
@@ -167,7 +177,14 @@ async function paintBadge(tabId, state) {
 }
 
 // ---- counters (Settings → about); local only ----
-async function bump(patch, cmp, clicks = 0) {
+// One at a time, for the same reason as setTab: concurrent bumps would each write over the other's count.
+let bumps = Promise.resolve();
+function bump(...args) {
+  const run = bumps.then(() => bumpNow(...args));
+  bumps = run.catch(() => {});
+  return run;
+}
+async function bumpNow(patch, cmp, clicks = 0) {
   const { stats = {} } = await api.storage.local.get('stats');
   for (const [k, v] of Object.entries(patch)) stats[k] = (stats[k] ?? 0) + v;
   if (cmp) {
@@ -247,8 +264,11 @@ async function onConsentMessage(msg, sender) {
         // Many sites reload themselves after the choice is saved; keep showing that it was refused.
         const kept = ['done', 'acceptedSite', 'choice'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
           ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter } : {};
-        await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil }),
-          ...(excepted ? { consent: 'paused' } : kept) }, true);
+        // A Short opened in the normal player is a new page load: keep the tab's count of those on the same site.
+        // Read at write time (cur), so a redirect counted while this message was being handled is not lost.
+        await setTab(tabId, (cur) => ({ host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil }),
+          ...(excepted ? { consent: 'paused' } : kept),
+          ...(cur.host === tabHost && cur.shortsRedirects && { shortsRedirects: cur.shortsRedirects }) }), true);
       }
       const logs = { lifecycle: settings.debug, rulesteps: settings.debug, detectionsteps: settings.debug, evals: settings.debugEvals, errors: true };
       // refuse (all categories off) / accept (all on) / mix (applied per CMP on popupFound, else refused).
@@ -391,10 +411,15 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!sender.tab) return;
   if (msg.type === 'shortsLeak') {
     setTab(sender.tab.id, { shortsLeak: msg.count, leakPath: msg.path });
+  } else if (msg.type === 'shortsHidden') {
+    // count: this page's total so far; added: new since the last message; first: the page's first hidden short.
+    setTab(sender.tab.id, { shortsHidden: msg.count });
+    bump({ shortsHidden: msg.added, ...(msg.first && { shortsPages: 1 }) });
   } else if (msg.type === 'shortsRedirect') {
     bump({ shorts: 1 });
+    setTab(sender.tab.id, (t) => ({ shortsRedirects: (t.shortsRedirects ?? 0) + 1 }));
   } else if (msg.type === 'shortsNav') {
-    setTab(sender.tab.id, { shortsLeak: 0 });
+    setTab(sender.tab.id, { shortsLeak: 0, shortsHidden: 0 });
   } else {
     onConsentMessage(msg, sender).catch((e) => console.warn('declutter:', msg.type, e));
   }

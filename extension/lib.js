@@ -96,6 +96,36 @@ export function redirectTarget(url) {
   return null;
 }
 
+// Shorts the stylesheet hides, counted for the popup and Settings: each Short once (seen holds video ids), so a
+// shelf matched by several selectors, a card nested in a hidden shelf, or YouTube re-rendering never counts it
+// again. Hidden nav entries (sidebar, tabs, chips) link to /shorts/ with no id and count nothing.
+// A selector this browser can't parse counts nothing.
+const SHORT_ID = /\/shorts\/([^/?#]+)/;
+export function countNewlyHidden(root, selectors, seen) {
+  let added = 0;
+  for (const s of selectors) {
+    let found = [];
+    try { found = root.querySelectorAll(s); } catch { /* unparsable here: the CSS skips it too */ }
+    for (const el of found) {
+      for (const a of el.querySelectorAll('a[href*="/shorts/"]')) {
+        const id = a.getAttribute('href')?.match(SHORT_ID)?.[1];
+        if (id && !seen.has(id)) { seen.add(id); added++; }
+      }
+    }
+  }
+  return added;
+}
+
+const counted = (n, word) => `${n.toLocaleString('en')} ${word}${n === 1 ? '' : 's'}`;
+// Popup row on YouTube: shorts hidden on this page, and shorts opened in the normal player in this tab.
+export function shortsSummary({ shortsHidden = 0, shortsRedirects = 0 } = {}) {
+  return [shortsHidden ? `${counted(shortsHidden, 'short')} hidden on this page` : 'no shorts on this page',
+    ...(shortsRedirects ? [`${shortsRedirects.toLocaleString('en')} opened in the normal player`] : [])].join(' · ');
+}
+// Settings → youtube.
+export const shortsStatsText = ({ shortsHidden = 0, shortsPages = 0 } = {}) =>
+  shortsHidden ? `${counted(shortsHidden, 'short')} hidden on ${counted(shortsPages, 'youtube page')}` : 'no shorts hidden yet.';
+
 // Consent-O-Matic's categories -> how to answer: all off = refuse, all on = accept, anything else = mix.
 export const CATEGORY_KEYS = ['A', 'B', 'D', 'E', 'F', 'X'];
 export function choiceMode(categories = {}) {
