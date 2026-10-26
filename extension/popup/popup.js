@@ -1,3 +1,4 @@
+import { declutterSnippets } from '../consent/snippets.js';
 import { reportUrl } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
@@ -61,6 +62,8 @@ async function main() {
       ? 'it came back right after accepting, so auto-accept paused here'
       : 'there is no free refuse on this site'));
     $('acceptWall').hidden = false;
+    $('acceptWall').querySelector('.label').replaceChildren(`agree to tracking on ${host.replace(/^www\./, '')}`,
+      Object.assign(document.createElement('span'), { className: 'sub', textContent: "can't be undone here: clear this site's cookies to take it back" }));
     $('acceptWall').onclick = async () => {
       await api.runtime.sendMessage({ type: 'acceptWall', tabId: tab.id });
       window.close();
@@ -85,11 +88,19 @@ async function main() {
         exceptions: [...s.exceptions.filter((h) => h !== host), ...(m === 'ignore' ? [host] : [])],
         acceptSites: [...s.acceptSites.filter((h) => h !== host), ...(m === 'accept' ? [host] : [])],
       });
+      if (m === 'accept' && mode !== 'accept') await api.runtime.sendMessage({ type: 'reopen', tabId: tab.id });
       api.tabs.reload(tab.id);
       window.close();
     };
   }
   $('siteSection').hidden = false;
+  // After a switch to accept the reload asks again a CMP DECLUTTER_REOPEN knows (not on a wall site, where only the
+  // wall rules run). Any other change, and any other CMP, keeps the answer the site already has: say so before the press.
+  if (mode === 'accept' || /^(cz-)?wall-/.test(state.cmp ?? '')) $('siteNote').hidden = false;
+  else {
+    api.scripting.executeScript({ target: { tabId: tab.id, frameIds: [0] }, world: 'MAIN', func: declutterSnippets.DECLUTTER_CAN_REOPEN })
+      .then(([r] = []) => { $('siteNote').hidden = !!r?.result; }, () => { $('siteNote').hidden = false; });
+  }
 
   $('report').hidden = false;
   const sendUrl = reportUrl(tab.url);
