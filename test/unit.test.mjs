@@ -6,7 +6,7 @@ import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
 import { collectDates, videoIdOf } from '../extension/shorts/dates-lib.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules, restoreItem, restoreReports, restoreStats } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules, restoreItem, restoreReports, restoreStats, bannerSuspected } from '../extension/lib.js';
 import { declutterSnippets } from '../extension/consent/snippets.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -169,6 +169,20 @@ test('pay walls: one name and one definition everywhere, no Czech-only button', 
   for (const f of copy) assert.doesNotMatch(read(f), /consent-or-pay|souhlasím|\bsubscribe\b|agree or pay" walls/i, f);
   for (const f of ['extension/welcome/welcome.html', 'site/index.html', 'store/LISTING.md', 'store/asc-setup.mjs']) {
     assert.match(read(f).replace(/[“”]/g, '"'), /pay walls \("agree to tracking or pay"\) are never hidden or refused/i, f);
+  }
+});
+
+test('bannerSuspected: banner wording in the top frame, only when no rule did anything', () => {
+  const report = (url, heuristicPatterns = ['/accept all/gi']) => ({ type: 'report', url, mainFrame: true, state: { heuristicPatterns } });
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.a.cz/clanek'), true), true);
+  // no wording, a sub-frame, or another page's late report
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.a.cz/', []), true), false);
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.a.cz/'), false), false);
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.b.cz/'), true), false);
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, {}, true), false);
+  // a banner a rule found or answered has the same wording: that state wins
+  for (const consent of ['working', 'done', 'failed', 'wall', 'paused', 'acceptedSite', 'choice']) {
+    assert.equal(bannerSuspected({ host: 'www.a.cz', consent }, report('https://www.a.cz/'), true), false);
   }
 });
 
