@@ -245,11 +245,12 @@ async function onConsentMessage(msg, sender) {
       const acceptPending = prev.acceptUntil > Date.now() && !looping;
       const reopenPending = prev.reopenUntil > Date.now();
       if (frameId === 0) {
-        // Many sites reload themselves after the choice is saved; keep showing that it was refused.
+        // Many sites reload themselves after the choice is saved; keep showing that it was refused. Not after a switch
+        // to accept: that reload is meant to change the answer.
         const kept = ['done', 'acceptedSite', 'choice'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
           ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter } : {};
         await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil }),
-          ...(reopenPending && { reopenUntil: prev.reopenUntil }), ...(excepted ? { consent: 'paused' } : kept) }, true);
+          ...(reopenPending && { reopenUntil: prev.reopenUntil }), ...(excepted ? { consent: 'paused' } : reopenPending ? {} : kept) }, true);
       }
       const logs = { lifecycle: settings.debug, rulesteps: settings.debug, detectionsteps: settings.debug, evals: settings.debugEvals, errors: true };
       // refuse (all categories off) / accept (all on) / mix (applied per CMP on popupFound, else refused).

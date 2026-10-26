@@ -236,7 +236,7 @@ test('applyCategories: only the adapter of the CMP autoconsent detected runs', a
   } finally { delete globalThis.window; }
 });
 
-test('DECLUTTER_REOPEN: a refused Cookiebot/Didomi/OneTrust banner is opened again for the accept', async () => {
+test('DECLUTTER_REOPEN: a refused Cookiebot/Didomi banner is opened again for the accept', async () => {
   const { DECLUTTER_REOPEN: reopen, DECLUTTER_CAN_REOPEN: canReopen } = declutterSnippets;
   const calls = [];
   try {
@@ -247,13 +247,21 @@ test('DECLUTTER_REOPEN: a refused Cookiebot/Didomi/OneTrust banner is opened aga
     globalThis.window = { Didomi: { shouldConsentBeCollected: () => false, notice: { show: () => calls.push('didomi') },
       preferences: { show: () => calls.push('didomi-preferences') } } };
     assert.equal(await reopen(0), 'didomi');
-    globalThis.window = { OneTrust: { IsAlertBoxClosed: () => true, ToggleInfoDisplay: () => calls.push('onetrust') } };
-    assert.equal(await reopen(0), 'onetrust');
-    assert.deepEqual(calls, ['cookiebot', 'didomi', 'onetrust']);
+    assert.deepEqual(calls, ['cookiebot', 'didomi']);
     assert.ok(canReopen());
-    // No stored answer yet: the banner shows by itself, nothing is reopened.
-    globalThis.window = { Cookiebot: { hasResponse: false, renew: () => calls.push('again') } };
+    // OneTrust's reopen is the preference centre, which can leave a modal with no accept button: not reopened.
+    globalThis.window = { OneTrust: { IsAlertBoxClosed: () => true, ToggleInfoDisplay: () => calls.push('onetrust') } };
     assert.equal(await reopen(0), false);
+    assert.equal(canReopen(), false);
+    // No stored answer yet: the banner shows by itself, nothing is reopened, and the wait ends at once, so the
+    // banner is not reopened after autoconsent answers it.
+    const cb = { hasResponse: false, renew: () => calls.push('again') };
+    globalThis.window = { Cookiebot: cb };
+    setTimeout(() => { cb.hasResponse = true; }, 100);
+    const t0 = Date.now();
+    assert.equal(await reopen(2000), false);
+    assert.ok(Date.now() - t0 < 100);
+    await new Promise((r) => setTimeout(r, 150));
     // A CMP that loads late is waited for.
     globalThis.window = {};
     setTimeout(() => { globalThis.window.Cookiebot = { hasResponse: true, renew: () => calls.push('late') }; }, 100);
@@ -262,7 +270,7 @@ test('DECLUTTER_REOPEN: a refused Cookiebot/Didomi/OneTrust banner is opened aga
     globalThis.window = { __tcfapi: () => {} };
     assert.equal(await reopen(0), false);
     assert.equal(canReopen(), false);
-    assert.deepEqual(calls, ['cookiebot', 'didomi', 'onetrust', 'late']);
+    assert.deepEqual(calls, ['cookiebot', 'didomi', 'late']);
   } finally { delete globalThis.window; }
 });
 
