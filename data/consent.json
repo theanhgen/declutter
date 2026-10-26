@@ -28,6 +28,7 @@
   ],
   "disabledCmps": [
     "bbc.com",
-    "ionos.de"
+    "ionos.de",
+    "microsoft.com"
   ]
 }

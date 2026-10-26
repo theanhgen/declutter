@@ -438,6 +438,14 @@
   {
    "host": "www.interactivebrokers.ie",
    "expect": "clear"
+  },
+  {
+   "host": "www.microsoft.com",
+   "expect": "done"
+  },
+  {
+   "host": "dchic.vn",
+   "expect": "done"
   }
  ]
 }

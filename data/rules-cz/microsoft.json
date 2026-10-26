@@ -1,0 +1,40 @@
+{
+  "name": "microsoft-wcp",
+  "_comment": "Microsoft's WCP banner (#wcpConsentBannerCtrl; user report microsoft.com 2026-10-20, 'failed'). autoconsent's 'microsoft.com' rule (disabled in consent.json) finds the buttons by English/German text ('Reject|Ablehnen') and throws in every other language. The three buttons are in the same order in every locale: accept, reject, manage cookies.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*microsoft\\.com/"
+  },
+  "prehideSelectors": ["#wcpConsentBannerCtrl"],
+  "detectCmp": [
+    {
+      "exists": "#wcpConsentBannerCtrl button:nth-of-type(2)"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#wcpConsentBannerCtrl"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#wcpConsentBannerCtrl button:nth-of-type(1)"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#wcpConsentBannerCtrl button:nth-of-type(2)"
+    },
+    {
+      "waitForVisible": "#wcpConsentBannerCtrl",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#wcpConsentBannerCtrl",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

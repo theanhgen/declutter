@@ -1,0 +1,39 @@
+{
+  "name": "dchic",
+  "_comment": "D.CHIC's own consent banner ([data-testid=consent-banner]; user report dchic.vn 2026-10-22). Refuse is 'Chỉ cần thiết' (necessary only).",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*dchic\\.vn/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-testid=consent-banner] [data-testid=consent-necessary]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[data-testid=consent-banner]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-testid=consent-banner] [data-testid=consent-accept-all]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-testid=consent-banner] [data-testid=consent-necessary]"
+    },
+    {
+      "waitForVisible": "[data-testid=consent-banner]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "[data-testid=consent-banner]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}
