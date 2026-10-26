@@ -1,4 +1,4 @@
-import { choiceMode, reportUrl, siteModePatch, siteMode, wallMode, wallModePatch, outcomeDetail, REASONS, reasonsFor } from '../lib.js';
+import { choiceMode, reportUrl, siteModePatch, siteMode, wallMode, wallModePatch, outcomeDetail, REASONS, reasonsFor, shortsSummary } from '../lib.js';
 import { declutterSnippets } from '../consent/snippets.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
@@ -96,6 +96,9 @@ async function main() {
     // Cookie-banner wording no rule matched (bannerSuspected in lib.js). The report row goes right under it.
     rows.push(statusRow('wall', "looks like a cookie banner declutter doesn't know yet", 'answer it on the page, then report it so a rule gets written'), $('report'));
   } else rows.push(statusRow('', 'no known cookie banner found'));
+  if (s.shorts && /^(www|m)\.youtube\.com$/.test(host)) {
+    rows.push(statusRow(state.shortsHidden || state.shortsRedirects ? 'ok' : '', shortsSummary(state)));
+  }
   if (state.shortsLeak > 0) {
     rows.push(statusRow('', `${state.shortsLeak} shorts caught by the backup check, hidden`,
       `on ${state.leakPath}: report it so the main list learns them`));

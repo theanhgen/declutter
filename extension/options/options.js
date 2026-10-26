@@ -1,4 +1,4 @@
-import { siteHost, siteMode, siteModePatch, ruleListLine, updateOutcome, REASONS, UNDO_MS, restoreItem, restoreReports, restoreStats } from '../lib.js';
+import { siteHost, siteMode, siteModePatch, ruleListLine, updateOutcome, REASONS, UNDO_MS, restoreItem, restoreReports, restoreStats, shortsStatsText } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -177,6 +177,7 @@ async function render() {
 
   // about
   const n = (k) => stats[k] ?? 0;
+  $('shortsStats').textContent = shortsStatsText(stats);
   $('clicksSaved').textContent = n('clicks');
   $('stats').textContent = stats.since
     ? `${n('refused')} banners refused, ${n('choice')} answered with your mix, ${n('accepted')} accepted, ${n('walls')} pay walls accepted, ` +

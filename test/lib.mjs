@@ -74,6 +74,8 @@ export async function shortsChecks(page, sw, check) {
   const entry = sidebar.find(([t]) => t === 'Shorts');
   check('youtube sidebar: Shorts entry hidden', !!entry && !entry[1], entry ? '' : `titles: ${sidebar.map(([t]) => t).join(', ')}`);
   check('youtube search: self-check reports no leak', !((await tabState(sw, page.url()))?.shortsLeak > 0));
+  const hidden = (await tabState(sw, page.url()))?.shortsHidden;
+  check('youtube search: hidden shorts counted for the popup', hidden > 0, `${hidden}`);
 
   const shortId = await page.evaluate(() => document.querySelector('a[href^="/shorts/"]')?.getAttribute('href').split('/')[2]);
   if (shortId) {
@@ -84,6 +86,9 @@ export async function shortsChecks(page, sw, check) {
     }, shortId);
     await page.waitForURL(/\/watch\?v=/, { timeout: 15000 }).catch(() => {});
     check('youtube: click on a Short opens /watch', page.url().includes(`/watch?v=${shortId}`), page.url());
+    await page.waitForTimeout(1000);
+    const redirects = (await tabState(sw, page.url()))?.shortsRedirects;
+    check('youtube: the click is counted as opened in the normal player', redirects === 1, `${redirects}`);
 
     await page.goto(`https://www.youtube.com/shorts/${shortId}`, { waitUntil: 'domcontentloaded' }).catch(() => {});
     await page.waitForTimeout(4000);
