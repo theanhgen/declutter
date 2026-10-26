@@ -70,7 +70,7 @@ async function main() {
     rows.push(statusRow('bad', "declutter isn't running on this page yet", 'it was open before declutter was installed or updated'));
     $('reload').hidden = false;
     $('reload').onclick = () => { api.tabs.reload(tab.id); window.close(); };
-  } else if (state.consent === 'done') rows.push(handled('cookie banner', state.cosmetic ? 'hidden' : 'refused', outcomeDetail(state), state.choiceFallback && "your mix isn't supported by this banner, so everything was refused"));
+  } else if (state.consent === 'done') rows.push(handled('cookie banner', state.cosmetic ? 'hidden' : 'refused', outcomeDetail(state), state.choiceFallback && !state.cosmetic && "your mix isn't supported by this banner, so everything was refused"));
   else if (state.consent === 'choice') rows.push(handled('cookie banner', 'your choice applied', outcomeDetail(state)));
   else if (failed) rows.push(statusRow('bad', "declutter couldn't answer this banner", 'answer it yourself on the page. reporting it helps get it fixed.'));
   else if (state.consent === 'wall') {
