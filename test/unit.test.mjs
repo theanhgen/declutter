@@ -235,6 +235,36 @@ test('applyCategories: only the adapter of the CMP autoconsent detected runs', a
   } finally { delete globalThis.window; }
 });
 
+test('applyCategories: consentmanager and Usercentrics get the mix, not refuse-all', async () => {
+  const MIX = { A: true, B: true, D: false, E: false, F: false, X: false };
+  const calls = [];
+  // o2's purposes, as getCMPData returned them live.
+  globalThis.window = { __cmp: (cmd, arg) => {
+    if (cmd === 'getCMPData') return { purposesList: [{ id: 'c51', name: 'Nezbytné' }, { id: 'c52', name: 'Marketingové' }, { id: 'c54', name: 'Analytické' }] };
+    calls.push([cmd, arg]);
+  } };
+  try {
+    assert.equal(await applyCategories(MIX, 'consentmanager.net'), 'consentmanager');
+    // Wanted first, refused last: a vendor with both an analytics and a marketing purpose ends up off.
+    assert.deepEqual(calls, [['setPurposeConsent', [['c51', 'c54'], 1, true]], ['setPurposeConsent', [['c52'], 0, true]], ['close', undefined]]);
+  } finally { delete globalThis.window; }
+  // dm's categories: the label decides (Google Analytics sits under slug "functional", labelled as statistics).
+  const accepted = [], rejected = [];
+  globalThis.window = { UC_UI: {
+    getSettingsLabels: () => ({ categories: [
+      { slug: 'essential', label: 'Nezbytné cookies' }, { slug: 'functional', label: 'Statistické cookies' },
+      { slug: 'customCategory-1f59', label: 'Pokročilé funkce' }, { slug: 'marketing', label: 'Marketingové cookies' }] }),
+    getServicesBaseInfo: () => [
+      { id: 'uc', categorySlug: 'essential', isEssential: true }, { id: 'ga', categorySlug: 'functional', isEssential: false },
+      { id: 'yt', categorySlug: 'customCategory-1f59', isEssential: false }, { id: 'fb', categorySlug: 'marketing', isEssential: false }],
+    acceptServices: async (ids) => accepted.push(...ids), rejectServices: async (ids) => rejected.push(...ids), closeCMP: async () => true,
+  } };
+  try {
+    assert.equal(await applyCategories(MIX, 'usercentrics-api'), 'usercentrics');
+    assert.deepEqual({ accepted, rejected }, { accepted: ['ga', 'yt'], rejected: ['fb'] });
+  } finally { delete globalThis.window; }
+});
+
 test('GPC: one header rule, skipped sites excluded both ways', () => {
   const r = gpcRule(['o2.cz', 'seznam.cz']);
   assert.deepEqual(r.action.requestHeaders, [{ header: 'Sec-GPC', operation: 'set', value: '1' }]);

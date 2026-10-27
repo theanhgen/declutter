@@ -12,7 +12,8 @@
 //   E content selection/delivery    F ad selection/delivery      X other purposes
 export async function applyCategories(c, cmp = '') {
   const family = /cookiebot/i.test(cmp) ? 'cookiebot' : /didomi/i.test(cmp) ? 'didomi'
-    : /cookieconsent|orestbida/i.test(cmp) ? 'cookieconsent' : /onetrust/i.test(cmp) ? 'onetrust' : '';
+    : /cookieconsent|orestbida/i.test(cmp) ? 'cookieconsent' : /onetrust/i.test(cmp) ? 'onetrust'
+    : /consentmanager/i.test(cmp) ? 'consentmanager' : /usercentrics/i.test(cmp) ? 'usercentrics' : '';
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   // Category of a purpose/group/category name, by keyword. Necessary/essential is always on and never asked.
   // English and Czech (with and without diacritics) stems; ads before content so "personalizace reklam" is an ad.
@@ -100,6 +101,36 @@ export async function applyCategories(c, cmp = '') {
     if (!save) return '';
     save.click();
     return 'onetrust';
+  }
+
+  // consentmanager (window.__cmp; o2): purposes by name from getCMPData. setPurposeConsent [ids, 1|0, true] also
+  // sets every vendor that has the purpose, and saves the choice. Wanted purposes first, refused ones second, so a
+  // vendor that also has a refused purpose (ad tech that measures too) ends up off. The newer consentmanager-ncmp
+  // banner (window.__npcmp) has no such API and gets no adapter.
+  if (family === 'consentmanager' && typeof window.__cmp === 'function') {
+    const purposes = list(window.__cmp('getCMPData')?.purposesList);
+    if (!purposes.length) return '';
+    const on = purposes.filter((p) => want(p.name)).map((p) => p.id);
+    const off = purposes.map((p) => p.id).filter((id) => !on.includes(id));
+    if (on.length) window.__cmp('setPurposeConsent', [on, 1, true]);
+    if (off.length) window.__cmp('setPurposeConsent', [off, 0, true]);
+    try { window.__cmp('close'); } catch { /* already hidden */ }
+    return 'consentmanager';
+  }
+
+  // Usercentrics browser UI v2 (window.UC_UI; dm): consent is per service, each in a category. The category's label
+  // decides, not its slug: dm files Google Analytics under slug "functional" labelled "Statistické cookies", and
+  // custom categories have slugs like "customCategory-<uuid>". Accept the wanted services, reject the rest, close.
+  if (family === 'usercentrics' && window.UC_UI?.acceptServices && window.UC_UI.rejectServices && window.UC_UI.getServicesBaseInfo) {
+    const labels = Object.fromEntries(list(window.UC_UI.getSettingsLabels?.()?.categories).map((k) => [k.slug, k.label]));
+    const services = list(window.UC_UI.getServicesBaseInfo()).filter((s) => !s.isEssential);
+    if (!services.length) return '';
+    const on = services.filter((s) => want(labels[s.categorySlug] ?? s.categorySlug)).map((s) => s.id);
+    const off = services.map((s) => s.id).filter((id) => !on.includes(id));
+    if (on.length) await window.UC_UI.acceptServices(on);
+    if (off.length) await window.UC_UI.rejectServices(off);
+    try { await window.UC_UI.closeCMP?.(); } catch { /* already closed */ }
+    return 'usercentrics';
   }
   return '';
 }
