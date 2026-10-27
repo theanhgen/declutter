@@ -12,6 +12,14 @@ const SITES = [
     ok: (v) => /C0002/.test(v) && /C0003/.test(v) && !/C0004/.test(v) },
   { host: 'www.ceskatelevize.cz', cmp: 'cookieconsent-v3', read: () => JSON.stringify(window.CookieConsent?.getUserPreferences?.().acceptedCategories ?? []),
     ok: (v) => /analyt|perform|stat/i.test(v) && !/ad|market|target/i.test(v) },
+  // Purpose names on o2: Nezbytné / Analytické / Marketingové.
+  { host: 'www.o2.cz', cmp: 'consentmanager', read: () => { const d = window.__cmp?.('getCMPData'); const on = (re) => (d?.purposesList ?? []).filter((p) => re.test(p.name)).map((p) => !!d.purposeConsents?.[p.id]);
+    return JSON.stringify({ chosen: d?.userChoiceExists, analytics: on(/analy/i), ads: on(/market/i) }); },
+    ok: (v) => v === JSON.stringify({ chosen: true, analytics: [true], ads: [false] }) },
+  // Category labels on dm: Statistické cookies (slug functional) / Pokročilé funkce / Marketingové cookies.
+  { host: 'www.dm.cz', cmp: 'usercentrics', read: () => { const by = (slug) => [...new Set((window.UC_UI?.getServicesBaseInfo?.() ?? []).filter((s) => s.categorySlug === slug).map((s) => s.consent.status))];
+    return JSON.stringify({ stats: by('functional'), ads: by('marketing') }); },
+    ok: (v) => v === JSON.stringify({ stats: [true], ads: [false] }) },
 ];
 
 const { results, check } = reporter();
@@ -26,12 +34,6 @@ for (const site of SITES) {
   check(`${site.cmp} on ${site.host}: mix applied`, state?.consent === 'choice' && state.adapter === site.cmp && site.ok(recorded),
     JSON.stringify({ state, recorded }));
 }
-// No adapter (consentmanager on o2): a mix falls back to refusing everything.
-await page.goto('https://www.o2.cz/', { waitUntil: 'domcontentloaded' }).catch(() => {});
-await page.waitForTimeout(15000);
-const st = await tabState(sw, page.url());
-check('no adapter (o2 / consentmanager): falls back to refuse', st?.consent === 'done' && st.choiceFallback === true, JSON.stringify(st));
-
 await close();
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} passed`);
