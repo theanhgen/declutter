@@ -1,3 +1,5 @@
+import { UNDO_MS, restoreItem, restoreReports, restoreStats } from '../lib.js';
+
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 
@@ -37,6 +39,21 @@ const choiceLine = (options, current, onPick) => options.flatMap(([value, label]
   value === current ? el('span', { className: 'current', textContent: `[${label}]` }) : link(label, () => onPick(value)),
 ]);
 
+// Removals and clears wait UNDO_MS for an undo, shown as a note where they happened. Each undo reads storage again
+// and adds back only what was taken (lib.js), so a change the popup or background made meanwhile is kept.
+let undos = [];
+const offerUndo = (where, text, undo) => {
+  const u = { where, text, undo };
+  u.timer = setTimeout(() => { undos = undos.filter((x) => x !== u); render(); }, UNDO_MS);
+  undos.push(u);
+};
+const undoNotes = (where) => undos.filter((u) => u.where === where).flatMap((u) => [
+  el('span', { className: 'muted', textContent: ` ${u.text}. ` }),
+  link('undo', () => { if (!undos.includes(u)) return; clearTimeout(u.timer); undos = undos.filter((x) => x !== u); u.undo(); }),
+]);
+const undoLine = (where) => (undos.some((u) => u.where === where) ? [el('p', { className: 'bullet', style: '--dot:#8d8d8d' }, ...undoNotes(where))] : []);
+const storedSettings = async () => (await api.storage.local.get('settings')).settings ?? {};
+
 async function render() {
   const { settings = {}, remoteStatus = {}, stats = {}, reports = [] } =
     await api.storage.local.get(['settings', 'remoteStatus', 'stats', 'reports']);
@@ -60,21 +77,38 @@ async function render() {
     el('p', { className: 'desc', textContent: desc }),
   ]));
 
+  const SITE_LISTS = { acceptSites: ['always accept', 'exceptions'], exceptions: ['leave alone', 'acceptSites'] };
+  const removeSite = (key, host) => {
+    const [name, other] = SITE_LISTS[key], at = s[key].indexOf(host);
+    offerUndo(key, `removed ${host} from ${name}`, async () => {
+      const c = await storedSettings();
+      save({ [key]: restoreItem(c[key], host, at, c[other]) });
+    });
+    save({ [key]: s[key].filter((h) => h !== host) });
+  };
   const siteList = (key) => $(key).replaceChildren(...(s[key].length
-    ? s[key].flatMap((host, i) => [...(i ? [', '] : []), `${host} (`, link('remove', () => save({ [key]: s[key].filter((h) => h !== host) })), ')'])
-    : [el('span', { className: 'muted', textContent: 'no sites' })]));
+    ? s[key].flatMap((host, i) => [...(i ? [', '] : []), `${host} (`, link('remove', () => removeSite(key, host)), ')'])
+    : [el('span', { className: 'muted', textContent: 'no sites' })]), ...undoNotes(key));
   siteList('acceptSites');
   siteList('exceptions');
 
   // rule lists
   const urls = [...new Set([...s.dataUrls, s.dataUrl].filter(Boolean))];
   const when = (t) => new Date(t).toLocaleString();
+  const removeList = (url) => {
+    const at = s.dataUrls.indexOf(url), wasLegacy = s.dataUrl === url;
+    offerUndo('ruleLists', `removed ${url}`, async () => {
+      const c = await storedSettings();
+      save({ ...(at >= 0 && { dataUrls: restoreItem(c.dataUrls ?? DEFAULTS.dataUrls, url, at) }), ...(wasLegacy && !c.dataUrl && { dataUrl: url }) });
+    });
+    save({ dataUrls: s.dataUrls.filter((u) => u !== url), ...(wasLegacy && { dataUrl: '' }) });
+  };
   $('ruleLists').replaceChildren(...urls.map((url) => {
     const st = remoteStatus[url];
     return el('p', { className: 'bullet', style: `--dot:${st?.ok ? '#30a46c' : st ? '#e5484d' : '#8d8d8d'}` },
       `${url} `, el('span', { className: 'muted', textContent: st ? (st.ok ? `(${st.rules} rules, checked ${when(st.at)}) ` : `(failed: ${st.error}) `) : '(not checked yet) ' }),
-      link('remove', () => save({ dataUrls: s.dataUrls.filter((u) => u !== url), ...(s.dataUrl === url && { dataUrl: '' }) })));
-  }));
+      link('remove', () => removeList(url)));
+  }), ...undoLine('ruleLists'));
   $('addList').onclick = (e) => {
     e.preventDefault();
     const url = $('newList').value.trim();
@@ -94,20 +128,42 @@ async function render() {
       `${n('shorts')} shorts sent to the normal player — since ${new Date(stats.since).toLocaleDateString()}.`
     : 'nothing yet.';
   const rows = Object.entries(stats.byCmp ?? {}).sort((a, b) => b[1].filled - a[1].filled);
+  // Clears what is stored at the click (the background may have counted since this render), and offers that back.
+  const clearStats = async () => {
+    const { stats: old = {} } = await api.storage.local.get('stats');
+    await api.storage.local.set({ stats: {} });
+    const banners = ['refused', 'choice', 'accepted', 'walls'].reduce((t, k) => t + (old[k] ?? 0), 0);
+    const since = old.since ? ` since ${new Date(old.since).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` : '';
+    offerUndo('byCmp', `counters cleared (${banners} banners${since})`, async () => {
+      const { stats: now = {} } = await api.storage.local.get('stats');
+      await api.storage.local.set({ stats: restoreStats(old, now) });
+      render();
+    });
+    render();
+  };
   $('byCmp').replaceChildren(...(rows.length ? [
     el('table', {}, el('tr', {}, el('th', { textContent: 'banner (cmp)' }), el('th', { textContent: 'filled' }), el('th', { textContent: 'clicks' })),
       ...rows.map(([cmp, r]) => el('tr', {}, el('td', { textContent: cmp }), el('td', { className: 'n', textContent: r.filled }), el('td', { className: 'n', textContent: r.clicks })))),
-    el('p', { className: 'bullet', style: '--dot:#8d8d8d' }, link('clear counters', () => api.storage.local.set({ stats: {} }).then(render))),
-  ] : []));
+    el('p', { className: 'bullet', style: '--dot:#8d8d8d' }, link('clear counters', clearStats)),
+  ] : []), ...undoLine('byCmp'));
 
   // reported sites
   const lines = reports.map((r) => `${new Date(r.at).toISOString().slice(0, 16).replace('T', ' ')}  ${r.url}  [${r.consent}${r.cmp ? ' ' + r.cmp : ''}]`);
   const actions = el('p', { className: 'bullet', style: '--dot:#8d8d8d' });
   actions.append(link('copy list', async () => { await navigator.clipboard.writeText(lines.join('\n')); actions.firstChild.textContent = 'copied'; }), ' / ',
-    link('clear', () => api.storage.local.set({ reports: [] }).then(render)));
+    link('clear', async () => {
+      const { reports: old = [] } = await api.storage.local.get('reports');
+      await api.storage.local.set({ reports: [] });
+      offerUndo('reports', `cleared ${old.length} reported site${old.length === 1 ? '' : 's'}`, async () => {
+        const { reports: now = [] } = await api.storage.local.get('reports');
+        await api.storage.local.set({ reports: restoreReports(old, now) });
+        render();
+      });
+      render();
+    }));
   $('reports').replaceChildren(...(reports.length
     ? [...lines.map((t) => el('p', { className: 'bullet', style: '--dot:#e5484d', textContent: t })), actions]
-    : [el('p', { className: 'muted', textContent: 'none.' })]));
+    : [el('p', { className: 'muted', textContent: 'none.' })]), ...undoLine('reports'));
 }
 render();
 
