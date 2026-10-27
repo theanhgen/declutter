@@ -61,6 +61,20 @@ test('chipFor: once per outcome, not on a reload of the same site', () => {
   assert.equal(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }, last, 9000, true), null);
 });
 
+test('pay walls: one name and one definition everywhere, no Czech-only button', () => {
+  assert.equal(chipFor({}, { consent: 'wall' }).text, 'pay wall: your call');
+  assert.equal(badgeFor({ consent: 'wall', host: 'www.spiegel.de' }).title, 'declutter: pay wall — agree or pay, from this menu');
+  assert.match(read('extension/popup/popup.js'), /'pay wall: agree to tracking or pay'/);
+  assert.match(read('extension/popup/popup.html'), />agree to tracking on this site</);
+  // user-facing copy; research and review notes keep their own words
+  const copy = ['extension/popup/popup.html', 'extension/popup/popup.js', 'extension/options/options.html',
+    'extension/welcome/welcome.html', 'site/index.html', 'store/LISTING.md', 'store/asc-setup.mjs'];
+  for (const f of copy) assert.doesNotMatch(read(f), /consent-or-pay|souhlasím|\bsubscribe\b|agree or pay" walls/i, f);
+  for (const f of ['extension/welcome/welcome.html', 'site/index.html', 'store/LISTING.md', 'store/asc-setup.mjs']) {
+    assert.match(read(f).replace(/[“”]/g, '"'), /pay walls \("agree to tracking or pay"\) are never hidden or refused/i, f);
+  }
+});
+
 test('currencyFor: country domain, euro otherwise', () => {
   assert.equal(currencyFor('metro.co.uk'), '£');
   assert.equal(currencyFor('elpais.com'), '€');

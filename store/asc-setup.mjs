@@ -25,7 +25,7 @@ COOKIE BANNERS
 Answers cookie-consent banners for you. By default it refuses everything that is not strictly necessary. You can instead allow categories (preferences, analytics, storage, content, ads, other); where the site uses Cookiebot, Didomi, OneTrust or cookieconsent, your exact mix is applied through the banner's own settings, and elsewhere a mix is answered by refusing.
 • per site: refuse, accept, or leave the banner alone
 • works on sites worldwide: hundreds of consent platforms (via DuckDuckGo's open-source autoconsent) plus its own rules for sites autoconsent misses
-• pay walls ("agree to tracking or subscribe") are never hidden or refused; declutter shows a badge and lets you decide, or agrees automatically if you turn that on
+• pay walls ("agree to tracking or pay") are never hidden or refused; declutter shows a badge and lets you decide, or agrees automatically if you turn that on
 • a counter of clicks saved, and a "not handled right" list you keep on your device
 
 PRIVACY

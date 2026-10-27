@@ -32,7 +32,7 @@ export function badgeFor(state, now = Date.now()) {
   const stuck = state.consent === 'working' && now - (state.since ?? now) > STUCK_AFTER_MS;
   if (state.shortsLeak > 0) return { text: '!', color: '#d93025', title: `declutter: ${state.shortsLeak} Shorts link(s) got past the selectors` };
   if (state.consent === 'failed' || stuck) return { text: '!', color: '#d93025', title: `declutter: cookie banner (${state.cmp}) not answered` };
-  if (state.consent === 'wall') return { text: currencyFor(state.host), color: '#e37400', title: 'declutter: consent-or-pay wall — agree or pay; accept from this menu' };
+  if (state.consent === 'wall') return { text: currencyFor(state.host), color: '#e37400', title: 'declutter: pay wall — agree or pay, from this menu' };
   if (state.consent === 'choice') return { text: '', color: '#1e8e3e', title: `declutter: applied your choice (${state.adapter})` };
   if (state.consent === 'accepted') return { text: '', color: '#777', title: `declutter: accepted the pay wall (${state.cmp})` };
   if (state.consent === 'done') return { text: '', color: '#1e8e3e', title: `declutter: ${state.cosmetic ? 'hid' : 'refused'} ${state.cmp}` };
@@ -55,7 +55,7 @@ export const CHIP_REPEAT_MS = 60000;
 export const CHIP_VISIBLE_MS = 2500;
 const CHIPS = {
   done: ['cookies refused', 'ok'], acceptedSite: ['cookies accepted', 'ok'], choice: ['your choice applied', 'ok'],
-  accepted: ['pay wall accepted', 'ok'], wall: ['pay wall: your choice', 'wait'], failed: ['banner not answered', 'bad'],
+  accepted: ['pay wall accepted', 'ok'], wall: ['pay wall: your call', 'wait'], failed: ['banner not answered', 'bad'],
 };
 export function chipFor(prev, next, last = {}, now = Date.now(), reloaded = false) {
   const chip = next.cosmetic && CHIPS[next.consent]?.[1] === 'ok' ? ['banner hidden', 'ok'] : CHIPS[next.consent];

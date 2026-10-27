@@ -57,7 +57,7 @@ async function main() {
   else if (state.consent === 'choice') rows.push(statusRow('ok', 'your choice applied', `${state.cmp} via ${state.adapter}`));
   else if (state.consent === 'failed' || stuck) rows.push(statusRow('bad', 'banner not answered', state.cmp));
   else if (state.consent === 'wall') {
-    rows.push(statusRow('wall', 'pay wall: agree or pay', state.looping
+    rows.push(statusRow('wall', 'pay wall: agree to tracking or pay', state.looping
       ? 'it came back right after accepting, so auto-accept paused here'
       : 'there is no free refuse on this site'));
     $('acceptWall').hidden = false;
