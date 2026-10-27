@@ -2,9 +2,10 @@
 //  - sends /shorts/<id> to /watch?v=<id>, and a channel's /shorts tab to /videos
 //  - adds selectors from the remote data copy (D6)
 //  - self-check: any /shorts/ link still visible gets hidden by its card and reported (red badge)
+//  - counts the shorts kept off the page (Settings → about)
 // The same stylesheet hides community posts in the feeds (its own switch, CSS only).
 import bundled from '../../data/shorts.json';
-import { redirectTarget } from '../lib.js';
+import { countNewShorts, redirectTarget } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const html = document.documentElement;
@@ -54,6 +55,15 @@ function selfCheck() {
   lastReported = leaked.length;
 }
 
+// Settings → about: shorts hidden. Every /shorts/<id> link left on the page is hidden by now; each id counts once
+// per tab (YouTube keeps the page across in-app navigation).
+const counted = new Set();
+function countHidden() {
+  if (!enabled) return;
+  const added = countNewShorts([...document.querySelectorAll('a[href*="/shorts/"]')].map((a) => a.href), counted);
+  if (added) send({ type: 'shortsHidden', count: added });
+}
+
 let timer;
 let lastUrl = location.href;
 const scheduleCheck = () => {
@@ -63,7 +73,7 @@ const scheduleCheck = () => {
     if (redirectIfShort()) return;
   }
   clearTimeout(timer);
-  timer = setTimeout(selfCheck, 700);
+  timer = setTimeout(() => { selfCheck(); countHidden(); }, 700);
 };
 
 // A remote selector is used only if it parses and adds no rule of its own ("{", "}"); one bad entry is skipped

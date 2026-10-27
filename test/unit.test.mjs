@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { aboutSummary, badgeFor, chipFor, countNewShorts, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -18,6 +18,24 @@ test('redirectTarget: Shorts and channel Shorts tabs', () => {
   assert.equal(redirectTarget('https://www.youtube.com/watch?v=abc'), null);
   assert.equal(redirectTarget('https://www.youtube.com/@shorts'), null);
   assert.equal(redirectTarget('https://www.youtube.com/results?search_query=shorts'), null);
+});
+
+test('aboutSummary: leads with banners answered and shorts hidden; a fresh install gets guidance, not "0"', () => {
+  const empty = aboutSummary({});
+  assert.equal(empty.headline, 'nothing yet. open a site with a cookie banner (bbc.com) or a YouTube search, and it shows up here.');
+  assert.equal(empty.clicks, '');
+  // A banner a cosmetic rule only hid saves no clicks but is still answered (autoconsentDone counts it in `refused`).
+  const s = aboutSummary({ since: Date.UTC(2026, 9, 3, 12), refused: 40, choice: 1, walls: 1, shortsHidden: 310, shorts: 2, clicks: 0 }, 'en-US');
+  assert.equal(s.headline, 'since Oct 3: 42 banners answered, 310 shorts hidden');
+  assert.equal(s.clicks, '0 clicks saved');
+  assert.doesNotMatch(JSON.stringify([empty, s]), /tracker|block/i);
+});
+
+test('countNewShorts: each short once per tab, channel tabs and other links not at all', () => {
+  const seen = new Set();
+  assert.equal(countNewShorts(['https://www.youtube.com/shorts/abc', 'https://www.youtube.com/shorts/abc?feature=x', 'https://www.youtube.com/shorts/def'], seen), 2);
+  assert.equal(countNewShorts(['https://www.youtube.com/shorts/def', 'https://www.youtube.com/shorts/ghi'], seen), 1);
+  assert.equal(countNewShorts(['https://www.youtube.com/@MrBeast/shorts', 'https://www.youtube.com/watch?v=abc', 'not a url'], seen), 0);
 });
 
 test('hostMatches: exact host and subdomains only', () => {

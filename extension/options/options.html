@@ -53,7 +53,6 @@
   input[type=url] { font: inherit; font-size: 13px; width: 28em; max-width: 70%; background: none; color: inherit;
     border: 0; border-bottom: 1px solid var(--dim-line); padding: 2px 0; }
   input[type=url]:focus { outline: none; border-bottom-color: var(--fg); }
-  .big { font-size: 28px; }
   /* One section per page; the nav switches between them (options.js). */
   section:not(.shown) { display: none; }
   nav a.current:link, nav a.current:visited { color: var(--fg); text-decoration: none; }
@@ -122,7 +121,8 @@
 
   <section data-tab="about">
   <h2>about</h2>
-  <p><span class="big" id="clicksSaved">0</span> clicks saved</p>
+  <p id="summary"></p>
+  <p class="muted" id="clicksSaved"></p>
   <p class="bullet" style="--dot:#c96575" id="tip" hidden>declutter is free. if it saves you clicks, <a id="tipLink" target="_blank" rel="noopener">leave a tip</a>.</p>
   <p class="bullet" style="--dot:#3e63dd" id="stats"></p>
   <div id="byCmp"></div>

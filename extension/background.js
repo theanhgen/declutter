@@ -393,6 +393,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     setTab(sender.tab.id, { shortsLeak: msg.count, leakPath: msg.path });
   } else if (msg.type === 'shortsRedirect') {
     bump({ shorts: 1 });
+  } else if (msg.type === 'shortsHidden') {
+    bump({ shortsHidden: msg.count });
   } else if (msg.type === 'shortsNav') {
     setTab(sender.tab.id, { shortsLeak: 0 });
   } else {
