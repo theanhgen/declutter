@@ -265,6 +265,21 @@ test('applyCategories: consentmanager and Usercentrics get the mix, not refuse-a
   } finally { delete globalThis.window; }
 });
 
+test('applyCategories: measuring ads or content is not analytics', async () => {
+  const calls = [];
+  globalThis.window = { __cmp: (cmd, arg) => {
+    if (cmd === 'getCMPData') return { purposesList: [
+      { id: '7', name: 'Measure advertising performance' }, { id: '8', name: 'Measure content performance' },
+      { id: '9', name: 'Understand audiences through statistics' }, { id: 'c1', name: 'Měření výkonu reklamy' }] };
+    calls.push([cmd, arg]);
+  } };
+  try {
+    // Analytics only (B on, E and F off): ad and content measurement stay off.
+    assert.equal(await applyCategories({ A: false, B: true, D: false, E: false, F: false, X: false }, 'consentmanager.net'), 'consentmanager');
+    assert.deepEqual(calls.slice(0, 2), [['setPurposeConsent', [['9'], 1, true]], ['setPurposeConsent', [['7', '8', 'c1'], 0, true]]]);
+  } finally { delete globalThis.window; }
+});
+
 test('GPC: one header rule, skipped sites excluded both ways', () => {
   const r = gpcRule(['o2.cz', 'seznam.cz']);
   assert.deepEqual(r.action.requestHeaders, [{ header: 'Sec-GPC', operation: 'set', value: '1' }]);
