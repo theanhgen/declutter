@@ -281,3 +281,18 @@ test('canary: most sites not loading is an outage, not 90 broken rules', () => {
   assert.ok(!looksOffline([r('x'), r(null), r(null), r(null)]));
   assert.ok(!looksOffline([r('x')]), 'a one-site rerun is not an outage');
 });
+
+test('site: every link on index.html resolves; tip worded like the Safari tip jar', () => {
+  const html = read('site/index.html');
+  const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
+  // External links are https store/GitHub URLs (not fetched here); the rest must point at the page or a site/ file.
+  for (const [, href] of html.matchAll(/\shref="([^"]+)"/g)) {
+    if (href.startsWith('#')) assert.ok(ids.has(href.slice(1)), `${href} points at nothing on the page`);
+    else if (!href.startsWith('https://')) assert.ok(fs.existsSync(path.join(root, 'site', href)), `${href} is not in site/`);
+  }
+  // Tips exist only as StoreKit purchases in the Safari app; the site and settings use its sentence.
+  const tip = read('safari/Shared/TipJar.swift').match(/"(declutter is free\.[^"]+)"/)[1];
+  const text = (p) => read(p).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ');
+  assert.ok(text('site/index.html').includes(tip), `site: "${tip}"`);
+  assert.ok(text('extension/options/options.html').includes(tip), `settings: "${tip}"`);
+});
