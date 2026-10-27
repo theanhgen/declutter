@@ -5,6 +5,30 @@ export const STUCK_AFTER_MS = 15000;
 export const hostMatches = (host, domains) =>
   domains.some((d) => host === d || host.endsWith('.' + d));
 
+// Per-site choice for cookie banners, shared by the popup and Settings: 'refuse' (the default: on neither list),
+// 'accept' (acceptSites) or 'ignore' (exceptions, "leave alone"). Matched the way the background matches, so a site
+// added in Settings as idnes.cz shows as left alone in the popup on www.idnes.cz.
+export const siteMode = (host, s) =>
+  hostMatches(host, s.exceptions ?? []) ? 'ignore' : hostMatches(host, s.acceptSites ?? []) ? 'accept' : 'refuse';
+// The settings patch that sets it: every entry covering the host comes off both lists (it would still win
+// otherwise), then the host goes on the chosen one. 'refuse' only takes it off.
+export function siteModePatch(host, mode, s) {
+  const drop = (list = []) => list.filter((d) => !hostMatches(host, [d]));
+  return {
+    exceptions: [...drop(s.exceptions), ...(mode === 'ignore' ? [host] : [])],
+    acceptSites: [...drop(s.acceptSites), ...(mode === 'accept' ? [host] : [])],
+  };
+}
+// A site typed into Settings ("idnes.cz", "https://www.idnes.cz/zpravy") -> its host without "www.", or null.
+export function siteHost(input) {
+  const t = String(input ?? '').trim().toLowerCase();
+  if (!t) return null;
+  try {
+    const h = new URL(/^[a-z][a-z0-9+.-]*:\/\//.test(t) ? t : `https://${t}`).hostname.replace(/^www\./, '');
+    return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(h) ? h : null;
+  } catch { return null; }
+}
+
 // A remote data.json is only used if it has this shape (and is newer than the bundled one). Every rule needs a name
 // and a urlPattern that compiles: the background builds a RegExp from it on every frame's init.
 const compiles = (re) => { try { new RegExp(re ?? ''); return true; } catch { return false; } };

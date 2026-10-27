@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, siteHost, siteMode, siteModePatch, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -25,6 +25,30 @@ test('hostMatches: exact host and subdomains only', () => {
   assert.ok(hostMatches('seznam.cz', ['seznam.cz']));
   assert.ok(!hostMatches('notseznam.cz', ['seznam.cz']));
   assert.ok(!hostMatches('seznam.cz.evil.com', ['seznam.cz']));
+});
+
+test('per-site choice: Settings and the popup read and write the same lists, one term "leave alone"', () => {
+  // A site added in Settings covers its subdomains, as in the background: the popup on www.idnes.cz shows it.
+  const s = { exceptions: ['idnes.cz'], acceptSites: ['www.o2.cz'] };
+  assert.equal(siteMode('www.idnes.cz', s), 'ignore');
+  assert.equal(siteMode('www.o2.cz', s), 'accept');
+  assert.equal(siteMode('o2.cz', s), 'refuse');
+  // Switching from the popup takes the covering entry off, else it would still win.
+  assert.deepEqual(siteModePatch('www.idnes.cz', 'accept', s), { exceptions: [], acceptSites: ['www.o2.cz', 'www.idnes.cz'] });
+  // Accept -> leave alone, and refuse takes the site off both lists.
+  assert.deepEqual(siteModePatch('www.o2.cz', 'ignore', s), { exceptions: ['idnes.cz', 'www.o2.cz'], acceptSites: [] });
+  assert.deepEqual(siteModePatch('idnes.cz', 'refuse', s), { exceptions: [], acceptSites: ['www.o2.cz'] });
+  // "Add a site" takes a host or an address.
+  assert.equal(siteHost(' https://www.iDnes.cz/zpravy?x=1 '), 'idnes.cz');
+  assert.equal(siteHost('sport.idnes.cz'), 'sport.idnes.cz');
+  for (const bad of ['', 'idnes', 'not a site', 'http://']) assert.equal(siteHost(bad), null, bad);
+  // Same words everywhere: the popup's third choice and Settings' per-site line.
+  assert.match(read('extension/popup/popup.html'), /data-mode="ignore">leave alone</);
+  assert.match(read('extension/options/options.js'), /\['ignore', 'leave alone'\]/);
+  for (const p of ['extension/options/options.html', 'extension/welcome/welcome.html', 'site/index.html']) {
+    assert.match(read(p), /leave alone/, p);
+    assert.doesNotMatch(read(p), /refuse \/ accept \/ leave[^ ]|choice-word">leave<|exceptions/i, p);
+  }
 });
 
 test('badgeFor: problems are red, everything else is quiet', () => {

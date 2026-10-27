@@ -1,4 +1,4 @@
-import { reportUrl } from '../lib.js';
+import { reportUrl, siteMode, siteModePatch } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -76,15 +76,12 @@ async function main() {
   $('pageSection').hidden = false;
 
   // Per-site choice: refuse (default) / accept / leave alone.
-  const mode = s.exceptions.includes(host) ? 'ignore' : s.acceptSites.includes(host) ? 'accept' : 'refuse';
+  // Same lists and matching as Settings → your choice → per site (lib.js).
+  const mode = siteMode(host, s);
   for (const b of $('siteMode').querySelectorAll('button')) {
     b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
     b.onclick = async () => {
-      const m = b.dataset.mode;
-      await save({
-        exceptions: [...s.exceptions.filter((h) => h !== host), ...(m === 'ignore' ? [host] : [])],
-        acceptSites: [...s.acceptSites.filter((h) => h !== host), ...(m === 'accept' ? [host] : [])],
-      });
+      await save(siteModePatch(host, b.dataset.mode, s));
       api.tabs.reload(tab.id);
       window.close();
     };

@@ -1,3 +1,5 @@
+import { siteHost, siteMode, siteModePatch } from '../lib.js';
+
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 
@@ -15,6 +17,8 @@ const CHOICES = {
   debugEvals: [[false, 'off'], [true, 'on']],
   clickDelay: [[false, 'off'], [true, 'on']],
 };
+// The popup's per-site words, same order.
+const SITE_MODES = [['refuse', 'refuse'], ['accept', 'accept'], ['ignore', 'leave alone']];
 // Consent-O-Matic's categories, same letters and meaning.
 const CATEGORIES = [
   ['A', 'preferences and functionality', 'remember your choices (language, region, login) and enhanced personal features; not used to track you on other sites.'],
@@ -60,11 +64,21 @@ async function render() {
     el('p', { className: 'desc', textContent: desc }),
   ]));
 
-  const siteList = (key) => $(key).replaceChildren(...(s[key].length
-    ? s[key].flatMap((host, i) => [...(i ? [', '] : []), `${host} (`, link('remove', () => save({ [key]: s[key].filter((h) => h !== host) })), ')'])
-    : [el('span', { className: 'muted', textContent: 'no sites' })]));
-  siteList('acceptSites');
-  siteList('exceptions');
+  // Per site: one line per host, the popup's choice (lib.js), so a change here is what the popup shows there.
+  const hosts = [...new Set([...s.acceptSites, ...s.exceptions])].sort();
+  $('sites').replaceChildren(...(hosts.length
+    ? hosts.map((host) => el('p', { className: 'bullet', style: '--dot:#8d8d8d' }, `${host}: `,
+      el('span', { className: 'choice' }, ...choiceLine(SITE_MODES, siteMode(host, s), (m) => save(siteModePatch(host, m, s))))))
+    : [el('p', { className: 'desc', textContent: 'no sites yet.' })]));
+  const addSite = (mode) => (e) => {
+    e.preventDefault();
+    const host = siteHost($('newSite').value);
+    if (!host) { $('newSite').focus(); return; }
+    $('newSite').value = '';
+    save(siteModePatch(host, mode, s));
+  };
+  $('addAccept').onclick = addSite('accept');
+  $('addIgnore').onclick = addSite('ignore');
 
   // rule lists
   const urls = [...new Set([...s.dataUrls, s.dataUrl].filter(Boolean))];

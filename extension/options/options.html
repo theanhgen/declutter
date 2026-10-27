@@ -81,9 +81,12 @@
     banners a mix is answered by refusing everything.</p>
   <p class="bullet" style="--dot:#3e63dd">answer cookie banners: <span class="choice" data-choice="consent"></span></p>
   <div id="categories"></div>
-  <p class="bullet" style="--dot:#30a46c">always accept on: <span id="acceptSites"></span></p>
-  <p class="bullet" style="--dot:#8d8d8d">leave alone on: <span id="exceptions"></span></p>
-  <p class="desc">set per site from the toolbar menu: refuse / accept / leave.</p>
+  <p class="bullet" style="--dot:#30a46c">per site:</p>
+  <p class="desc">the same choice as the toolbar menu on that site: refuse / accept / leave alone. refuse takes a site
+    off this list. a site covers its subdomains.</p>
+  <div id="sites"></div>
+  <p class="bullet" style="--dot:#8d8d8d">add a site: <input type="url" id="newSite" placeholder="idnes.cz">
+    <span class="choice"><a href="#" id="addAccept">accept</a> / <a href="#" id="addIgnore">leave alone</a></span></p>
   <p class="bullet" style="--dot:#3e63dd">send Global Privacy Control: <span class="choice" data-choice="gpc"></span></p>
   <p class="desc">tells every site "do not sell or share my data" (the Sec-GPC signal), before any banner. some
     consent platforms then refuse on their own; most sites in Europe ignore it so far. not sent to sites you accept or
