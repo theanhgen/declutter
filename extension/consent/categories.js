@@ -22,6 +22,11 @@ export async function applyCategories(c, cmp = '') {
     const n = String(name).toLowerCase();
     if (/necess|essential|strict|required|technical|technick|nezbyt|nutn/.test(n)) return 'necessary';
     if (/social|sociáln|socialn/.test(n)) return 'X';
+    // Measuring ads or content belongs to ads or content (IAB purposes 7 and 8, as Didomi maps them), not analytics.
+    if (/measure|perform|měřen|mereni|výkon|vykon/.test(n)) {
+      if (/(^|[^a-z])ads?([^a-z]|$)|advert|reklam/.test(n)) return 'F';
+      if (/content|obsah/.test(n)) return 'E';
+    }
     if (/analy|perform|statist|measure|audience|market_research|improve|měřen|mereni|výkon|vykon/.test(n)) return 'B';
     if (/(^|[^a-z])ads?([^a-z]|$)|advert|market|target|remarket|reklam|cílen|cilen/.test(n)) return 'F';
     if (/funct|funkč|funkc|prefer|comfort|convenien|pohodl|personaliz(ation)?$/.test(n)) return 'A';
