@@ -6,7 +6,7 @@ import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
 import { collectDates, videoIdOf } from '../extension/shorts/dates-lib.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules, restoreItem, restoreReports, restoreStats } from '../extension/lib.js';
 import { declutterSnippets } from '../extension/consent/snippets.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -577,4 +577,33 @@ test('site: every link on index.html resolves; tip worded like the Safari tip ja
   const text = (p) => read(p).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ');
   assert.ok(text('site/index.html').includes(tip), `site: "${tip}"`);
   assert.ok(text('extension/options/options.html').includes(tip), `settings: "${tip}"`);
+});
+
+test('settings undo: restores exactly, keeps what changed meanwhile', () => {
+  // A removed site or rule list goes back in its place; not twice, and not over the popup's newer choice for it.
+  assert.deepEqual(restoreItem(['a.cz', 'c.cz'], 'b.cz', 1), ['a.cz', 'b.cz', 'c.cz']);
+  assert.deepEqual(restoreItem(['a.cz'], 'b.cz', 5), ['a.cz', 'b.cz']);
+  assert.deepEqual(restoreItem(undefined, 'b.cz', 0), ['b.cz']);
+  assert.deepEqual(restoreItem(['b.cz', 'a.cz'], 'b.cz', 1), ['b.cz', 'a.cz']);
+  assert.deepEqual(restoreItem(['a.cz'], 'b.cz', 1, ['b.cz']), ['a.cz'], 'popup moved it to the other list');
+
+  const old = { refused: 40, walls: 2, clicks: 90, since: 1000, byCmp: { didomi: { filled: 42, clicks: 90 } } };
+  assert.deepEqual(restoreStats(old, {}), old);
+  assert.deepEqual(restoreStats(old, { refused: 1, clicks: 3, since: 5000, byCmp: { didomi: { filled: 1, clicks: 3 }, x: { filled: 1, clicks: 0 } } }),
+    { refused: 41, walls: 2, clicks: 93, since: 1000, byCmp: { didomi: { filled: 43, clicks: 93 }, x: { filled: 1, clicks: 0 } } });
+
+  const r = (host, at) => ({ host, url: `https://${host}/`, at });
+  const reports = [r('b.cz', 2), r('a.cz', 1)];
+  assert.deepEqual(restoreReports(reports, []), reports);
+  assert.deepEqual(restoreReports(reports, [r('a.cz', 9), r('c.cz', 8)]), [r('a.cz', 9), r('c.cz', 8), r('b.cz', 2)]);
+  assert.equal(restoreReports(Array.from({ length: 100 }, (_, i) => r(`${i}.cz`, i)), [r('new.cz', 999)]).length, 100);
+});
+
+test('settings undo: every removal and both clear links offer one, shown where it happened', () => {
+  const js = read('extension/options/options.js');
+  for (const [offer, shown] of [['offerUndo(key,', 'undoNotes(key)'], ["offerUndo('ruleLists',", "undoLine('ruleLists')"],
+    ["offerUndo('byCmp',", "undoLine('byCmp')"], ["offerUndo('reports',", "undoLine('reports')"]]) {
+    assert.ok(js.includes(offer), offer);
+    assert.ok(js.includes(shown), shown);
+  }
 });
