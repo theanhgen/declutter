@@ -126,3 +126,30 @@ export function mergeData(base, extra) {
     },
   };
 }
+
+// Settings: a removal or a clear can be taken back for UNDO_MS. Each restore merges what was taken into what is
+// stored now, so anything changed meanwhile (the popup choosing for a site, a banner counted, a site reported) stays.
+export const UNDO_MS = 10000;
+// A removed site or rule list goes back where it was, unless it is back already or, for a site, on the other list
+// (the popup has chosen for it since).
+export function restoreItem(list = [], item, index, elsewhere = []) {
+  if (list.includes(item) || elsewhere.includes(item)) return list;
+  return [...list.slice(0, index), item, ...list.slice(index)];
+}
+// Cleared counters are added to whatever was counted since the clear, and keep their original start date.
+export function restoreStats(old = {}, now = {}) {
+  const out = { ...now, since: old.since ?? now.since };
+  for (const [k, v] of Object.entries(old)) if (k !== 'since' && typeof v === 'number') out[k] = (now[k] ?? 0) + v;
+  if (old.byCmp) {
+    out.byCmp = { ...now.byCmp };
+    for (const [cmp, r] of Object.entries(old.byCmp)) {
+      const c = now.byCmp?.[cmp] ?? { filled: 0, clicks: 0 };
+      out.byCmp[cmp] = { filled: c.filled + r.filled, clicks: c.clicks + r.clicks };
+    }
+  }
+  if (out.since === undefined) delete out.since;
+  return out;
+}
+// Cleared reports go back behind any made since: newest first, one per site, at most 100 (as the background keeps them).
+export const restoreReports = (old = [], now = []) =>
+  [...now, ...old.filter((r) => !now.some((n) => n.host === r.host))].slice(0, 100);
