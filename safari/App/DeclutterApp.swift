@@ -23,6 +23,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Image("Logo").resizable().scaledToFit().frame(width: 28, height: 28)
+                    .accessibilityHidden(true)  // repeats the name next to it
                 Text("declutter").font(.title2.bold())
             }
             Text(status)
