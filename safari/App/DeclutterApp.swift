@@ -38,6 +38,10 @@ struct ContentView: View {
         .padding(24)
         .frame(width: 380)
         .task { await refresh() }
+        // Back from Safari Settings: read the state again, or the window keeps saying "off" after it was turned on.
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            Task { await refresh() }
+        }
     }
 
     private var status: String {
