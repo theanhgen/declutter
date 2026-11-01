@@ -99,35 +99,41 @@ struct TipJarView: View {
             .font(.system(.callout, design: .monospaced))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
-        HStack(spacing: 8) {
-            // Until the store answers, the row would be empty; show that it's loading.
-            if !jar.loaded {
-                ProgressView().controlSize(.small)
-            }
-            ForEach(jar.products, id: \.id) { p in
-                Button(p.displayPrice) { Task { await jar.buy(p) } }
-                    .buttonStyle(.bordered)
-                    .font(.system(.body, design: .monospaced))
-                    .disabled(jar.busy)
-                    .accessibilityLabel("Tip \(p.displayPrice)")  // the price alone doesn't say what the button does
-            }
-            if jar.loadFailed {
-                Button("retry") { Task { await jar.load() } }
-                    .buttonStyle(.bordered)
-                    .font(.system(.body, design: .monospaced))
-            }
-            #if DEBUG
-            // Debug builds launched outside Xcode have no StoreKit config and the products are not live yet;
-            // show the prices (from Declutter.storekit) so the layout can be seen and screenshotted.
-            if jar.products.isEmpty && !jar.loadFailed {
-                ForEach(["$0.99", "$2.99", "$4.99"], id: \.self) { price in
-                    Button(price) {}.buttonStyle(.bordered).font(.system(.body, design: .monospaced))
-                }
-            }
-            #endif
+        // One row while it fits; stacked at large text sizes instead of truncating the prices.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) { buttons }
+            VStack(alignment: .leading, spacing: 8) { buttons }
         }
         if let note = jar.note {
             Text(note).font(.system(.caption, design: .monospaced)).foregroundStyle(.secondary)
         }
+    }
+
+    @ViewBuilder private var buttons: some View {
+        // Until the store answers, the row would be empty; show that it's loading.
+        if !jar.loaded {
+            ProgressView().controlSize(.small)
+        }
+        ForEach(jar.products, id: \.id) { p in
+            Button(p.displayPrice) { Task { await jar.buy(p) } }
+                .buttonStyle(.bordered)
+                .font(.system(.body, design: .monospaced))
+                .disabled(jar.busy)
+                .accessibilityLabel("Tip \(p.displayPrice)")  // the price alone doesn't say what the button does
+        }
+        if jar.loadFailed {
+            Button("retry") { Task { await jar.load() } }
+                .buttonStyle(.bordered)
+                .font(.system(.body, design: .monospaced))
+        }
+        #if DEBUG
+        // Debug builds launched outside Xcode have no StoreKit config and the products are not live yet;
+        // show the prices (from Declutter.storekit) so the layout can be seen and screenshotted.
+        if jar.products.isEmpty && !jar.loadFailed {
+            ForEach(["$0.99", "$2.99", "$4.99"], id: \.self) { price in
+                Button(price) {}.buttonStyle(.bordered).font(.system(.body, design: .monospaced))
+            }
+        }
+        #endif
     }
 }

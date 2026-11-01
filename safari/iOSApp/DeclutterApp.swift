@@ -16,11 +16,10 @@ struct DeclutterApp: App {
 struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
-                Image("Logo").resizable().scaledToFit().frame(width: 40, height: 40)
-                    .accessibilityHidden(true)  // repeats the name next to it
-                Text("declutter")
-                    .font(.system(.largeTitle, design: .monospaced))
+            // Logo beside the name while it fits; stacked at large text sizes.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) { logo; title }
+                VStack(alignment: .leading, spacing: 8) { logo; title }
             }
             Text("Hides YouTube Shorts and answers cookie banners in Safari.")
                 .font(.system(.body, design: .monospaced))
@@ -37,5 +36,15 @@ struct ContentView: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var logo: some View {
+        Image("Logo").resizable().scaledToFit().frame(width: 40, height: 40)
+            .accessibilityHidden(true)  // repeats the name next to it
+    }
+
+    private var title: some View {
+        Text("declutter")
+            .font(.system(.largeTitle, design: .monospaced))
     }
 }
