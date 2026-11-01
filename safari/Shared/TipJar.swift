@@ -95,7 +95,7 @@ struct TipJarView: View {
 
     @ViewBuilder private var content: some View {
         Text("tip jar").font(.system(.headline, design: .monospaced))
-        Text(jar.thanks ? "thank you." : "declutter is free. If it saves you clicks, a tip keeps the rules up to date.")
+        Text(jar.thanks ? "thank you." : "declutter is free. if it saves you clicks, a tip keeps the rules up to date.")
             .font(.system(.callout, design: .monospaced))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
@@ -119,7 +119,7 @@ struct TipJarView: View {
                 .buttonStyle(.bordered)
                 .font(.system(.body, design: .monospaced))
                 .disabled(jar.busy)
-                .accessibilityLabel("Tip \(p.displayPrice)")  // the price alone doesn't say what the button does
+                .accessibilityLabel("tip \(p.displayPrice)")  // the price alone doesn't say what the button does
         }
         if jar.loadFailed {
             Button("retry") { Task { await jar.load() } }

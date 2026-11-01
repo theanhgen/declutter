@@ -30,7 +30,7 @@ struct ContentView: View {
             Text(status)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-            Button("Open Safari Extensions Settings…") {
+            Button("open Safari extensions settings…") {
                 SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionID) { _ in }
             }
             Divider().padding(.vertical, 4)
@@ -47,10 +47,10 @@ struct ContentView: View {
 
     private var status: String {
         switch state {
-        case .on: "The extension is on. For cookie banners, allow it on every website."
-        case .off: "The extension is off. Turn on declutter in Safari Settings → Extensions."
-        case .unknown: "Couldn't check Safari. Open Safari Settings → Extensions to see whether declutter is on."
-        case .checking: "Checking Safari…"
+        case .on: "the extension is on. for cookie banners, allow it on every website."
+        case .off: "the extension is off. turn on declutter in Safari Settings → Extensions."
+        case .unknown: "couldn't check Safari. open Safari Settings → Extensions to see whether declutter is on."
+        case .checking: "checking Safari…"
         }
     }
 
