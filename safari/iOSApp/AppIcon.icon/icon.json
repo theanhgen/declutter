@@ -1,0 +1,70 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "solid": "extended-srgb:0.96863,0.96863,0.96863,1.00000"
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "solid": "extended-srgb:0.10980,0.10980,0.11765,1.00000"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "layers": [
+        {
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "extended-srgb:0.65882,0.29020,0.36078,1.00000"
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "solid": "extended-srgb:0.65882,0.29020,0.36078,1.00000"
+              }
+            }
+          ],
+          "glass": true,
+          "image-name": "stem.png",
+          "name": "stem"
+        },
+        {
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "extended-srgb:0.78824,0.39608,0.45882,1.00000"
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "solid": "extended-srgb:0.78824,0.39608,0.45882,1.00000"
+              }
+            }
+          ],
+          "glass": true,
+          "image-name": "bowl.png",
+          "name": "bowl"
+        }
+      ],
+      "name": "d",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}
