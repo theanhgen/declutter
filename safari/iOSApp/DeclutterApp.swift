@@ -26,13 +26,13 @@ struct ContentView: View {
                     HStack(spacing: 12) { logo; title }
                     VStack(alignment: .leading, spacing: 8) { logo; title }
                 }
-                Text("Hides YouTube Shorts and answers cookie banners in Safari.")
+                Text("hides YouTube Shorts and answers cookie banners in Safari.")
                     .font(Martian.font(.body))
                 VStack(alignment: .leading, spacing: 8) {
                     Text("to turn it on:")
                     Text("1. Settings → Apps → Safari → Extensions → declutter")
                     Text("2. Allow Extension, and set Other Websites to Allow")
-                    Text("3. In Safari, tap the page menu (the icon at the left of the address bar) to see what it did on a page")
+                    Text("3. in Safari, tap the page menu (the icon at the left of the address bar) to see what it did on a page")
                 }
                 .font(Martian.font(.callout, weight: 300))
                 .foregroundStyle(.secondary)
