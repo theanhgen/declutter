@@ -105,6 +105,7 @@ struct TipJarView: View {
                     .buttonStyle(.bordered)
                     .font(.system(.body, design: .monospaced))
                     .disabled(jar.busy)
+                    .accessibilityLabel("Tip \(p.displayPrice)")  // the price alone doesn't say what the button does
             }
             if jar.loadFailed {
                 Button("retry") { Task { await jar.load() } }
