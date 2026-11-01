@@ -15,27 +15,30 @@ struct DeclutterApp: App {
 
 struct ContentView: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Logo beside the name while it fits; stacked at large text sizes.
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 12) { logo; title }
-                VStack(alignment: .leading, spacing: 8) { logo; title }
+        // Scrolls: in landscape and at large text sizes the steps and tip jar can be taller than the screen.
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                // Logo beside the name while it fits; stacked at large text sizes.
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) { logo; title }
+                    VStack(alignment: .leading, spacing: 8) { logo; title }
+                }
+                Text("Hides YouTube Shorts and answers cookie banners in Safari.")
+                    .font(.system(.body, design: .monospaced))
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("to turn it on:")
+                    Text("1. Settings → Apps → Safari → Extensions → declutter")
+                    Text("2. Allow Extension, and set Other Websites to Allow")
+                    Text("3. In Safari, tap the page menu (the icon at the left of the address bar) to see what it did on a page")
+                }
+                .font(.system(.callout, design: .monospaced))
+                .foregroundStyle(.secondary)
+                TipJarView().padding(.top, 8)
+                Spacer()
             }
-            Text("Hides YouTube Shorts and answers cookie banners in Safari.")
-                .font(.system(.body, design: .monospaced))
-            VStack(alignment: .leading, spacing: 8) {
-                Text("to turn it on:")
-                Text("1. Settings → Apps → Safari → Extensions → declutter")
-                Text("2. Allow Extension, and set Other Websites to Allow")
-                Text("3. In Safari, tap the page menu (the icon at the left of the address bar) to see what it did on a page")
-            }
-            .font(.system(.callout, design: .monospaced))
-            .foregroundStyle(.secondary)
-            TipJarView().padding(.top, 8)
-            Spacer()
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(24)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var logo: some View {
