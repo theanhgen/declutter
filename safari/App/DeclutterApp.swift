@@ -17,7 +17,8 @@ struct DeclutterApp: App {
 
 struct ContentView: View {
     private let extensionID = "com.theanhgen.declutter.extension"
-    @State private var enabled: Bool?
+    private enum ExtensionState { case checking, on, off, unknown }
+    @State private var state: ExtensionState = .checking
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -45,15 +46,20 @@ struct ContentView: View {
     }
 
     private var status: String {
-        switch enabled {
-        case .some(true): "The extension is on. For cookie banners, allow it on every website."
-        case .some(false): "The extension is off. Turn on declutter in Safari Settings → Extensions."
-        case .none: "Checking Safari…"
+        switch state {
+        case .on: "The extension is on. For cookie banners, allow it on every website."
+        case .off: "The extension is off. Turn on declutter in Safari Settings → Extensions."
+        case .unknown: "Couldn't check Safari. Open Safari Settings → Extensions to see whether declutter is on."
+        case .checking: "Checking Safari…"
         }
     }
 
+    // A failed check is not "off": telling someone whose extension is on to turn it on is wrong.
     private func refresh() async {
-        let state = try? await SFSafariExtensionManager.stateOfSafariExtension(withIdentifier: extensionID)
-        enabled = state?.isEnabled ?? false
+        do {
+            state = try await SFSafariExtensionManager.stateOfSafariExtension(withIdentifier: extensionID).isEnabled ? .on : .off
+        } catch {
+            state = .unknown
+        }
     }
 }
