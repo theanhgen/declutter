@@ -100,6 +100,10 @@ struct TipJarView: View {
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
         HStack(spacing: 8) {
+            // Until the store answers, the row would be empty; show that it's loading.
+            if !jar.loaded {
+                ProgressView().controlSize(.small)
+            }
             ForEach(jar.products, id: \.id) { p in
                 Button(p.displayPrice) { Task { await jar.buy(p) } }
                     .buttonStyle(.bordered)
