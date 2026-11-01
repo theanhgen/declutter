@@ -1,3 +1,4 @@
+import SafariServices
 import SwiftUI
 
 @main
@@ -36,6 +37,16 @@ struct ContentView: View {
                 }
                 .font(Martian.font(.callout, weight: 300))
                 .foregroundStyle(.secondary)
+                // iOS 26.2+ can open declutter's page in Safari's extension settings directly; older systems keep only
+                // the steps above. It fails unless the app is in the foreground, which a tap guarantees; on any other
+                // failure the written steps are still there.
+                if #available(iOS 26.2, *) {
+                    Button("open declutter in settings") {
+                        Task { try? await SFSafariSettings.openExtensionsSettings(forIdentifiers: ["com.theanhgen.declutter.extension"]) }
+                    }
+                    .buttonStyle(.bordered)
+                    .font(Martian.font(.body))
+                }
                 TipJarView().padding(.top, 8)
                 Spacer()
             }
