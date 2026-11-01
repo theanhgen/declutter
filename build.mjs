@@ -131,7 +131,8 @@ function inside(poly, x, y) {
 }
 
 // background: opaque [r, g, b] behind the glyph (app icons); scale: share of the canvas the 16-unit glyph grid fills.
-function png(size, { background = null, scale = 1, ss = 8 } = {}) {
+// part: 'bowl' or 'stem' draws only that half as a white mask (an Icon Composer layer; the colour lives in icon.json).
+function png(size, { background = null, scale = 1, ss = 8, part = null } = {}) {
   const px = Buffer.alloc(size * (size * 4 + 1));
   const counter = size === 16 && scale === 1 ? COUNTER.small : COUNTER.large;
   const unit = 16 / (size * scale), offset = size * (1 - scale) / 2;
@@ -142,6 +143,7 @@ function png(size, { background = null, scale = 1, ss = 8 } = {}) {
       for (let sy = 0; sy < ss; sy++) {
         for (let sx = 0; sx < ss; sx++) {
           const gx = (x - offset + (sx + 0.5) / ss) * unit - 0.25, gy = (y - offset + (sy + 0.5) / ss) * unit - 0.25;
+          if (part && (gx >= 10.1) !== (part === 'stem')) continue;
           if (inside(GLYPH, gx, gy) && !inside(counter, gx, gy)) { covered++; if (gx >= 10.1) stem++; }
         }
       }
@@ -149,7 +151,7 @@ function png(size, { background = null, scale = 1, ss = 8 } = {}) {
       // Two shades on purpose: Safari renders a single-colour toolbar icon as a template (grey, blue when
       // active). The stem is a darker rose so it keeps its colour.
       const a = covered / (ss * ss), light = [201, 101, 117], dark = [168, 74, 92]; // #c96575, #a84a5c
-      const rose = covered ? light.map((v, k) => Math.round(v + (dark[k] - v) * stem / covered)) : light;
+      const rose = part ? [255, 255, 255] : covered ? light.map((v, k) => Math.round(v + (dark[k] - v) * stem / covered)) : light;
       if (background) {
         for (let k = 0; k < 3; k++) px[i + k] = Math.round(background[k] + (rose[k] - background[k]) * a);
         px[i + 3] = 255;
@@ -234,27 +236,35 @@ async function buildTarget(name, data) {
   console.log(`built build/${name}`);
 }
 
-// node build.mjs --app-icon: regenerate the iPhone home-screen icon (1024, opaque) from the same glyph.
-// The Mac icon set is downscaled from the same 1024 with sips (full-bleed square; macOS applies its own mask).
+// node build.mjs --app-icon: regenerate the app icon as a layered Icon Composer file (AppIcon.icon) for the iPhone and
+// Mac apps. Two glyph layers, the rose bowl and the darker stem, as 1024 white masks on a light/dark background; the
+// colours are in icon.json, so the system can render the light, dark, clear and tinted appearances. Xcode builds the
+// flat icons for older OS versions from the same file.
 if (process.argv.includes('--app-icon')) {
-  const out = path.join(root, 'safari/iOSApp/Assets.xcassets/AppIcon.appiconset/icon.png');
-  fs.writeFileSync(out, png(1024, { background: [247, 247, 247], scale: 0.62, ss: 2 }));
-  console.log(`wrote ${path.relative(root, out)}`);
-  const { execFileSync } = await import('node:child_process');
-  const mac = path.join(root, 'safari/App/Assets.xcassets/AppIcon.appiconset');
-  fs.mkdirSync(mac, { recursive: true });
-  const images = [];
-  for (const pt of [16, 32, 128, 256, 512]) {
-    for (const scale of [1, 2]) {
-      const file = `icon_${pt}x${pt}@${scale}x.png`, px = pt * scale;
-      if (px === 1024) fs.copyFileSync(out, path.join(mac, file));
-      else execFileSync('sips', ['-z', String(px), String(px), out, '--out', path.join(mac, file)], { stdio: 'ignore' });
-      images.push({ filename: file, idiom: 'mac', scale: `${scale}x`, size: `${pt}x${pt}` });
-    }
+  const srgb = (hex) => `extended-srgb:${[0, 2, 4].map((i) => (parseInt(hex.slice(i, i + 2), 16) / 255).toFixed(5)).join(',')},1.00000`;
+  const fill = (light, dark) => [{ value: { solid: srgb(light) } }, { appearance: 'dark', value: { solid: srgb(dark) } }];
+  const layer = (name, colour) => ({ 'fill-specializations': fill(colour, colour), glass: true, 'image-name': `${name}.png`, name });
+  const icon = {
+    'fill-specializations': fill('f7f7f7', '1c1c1e'),
+    groups: [{
+      layers: [layer('stem', 'a84a5c'), layer('bowl', 'c96575')],
+      name: 'd',
+      shadow: { kind: 'neutral', opacity: 0.5 },
+      specular: true,
+      translucency: { enabled: false, value: 0.5 },
+    }],
+    'supported-platforms': { squares: 'shared' },
+  };
+  for (const app of ['iOSApp', 'App']) {
+    const dir = path.join(root, 'safari', app, 'AppIcon.icon');
+    fs.rmSync(dir, { recursive: true, force: true });
+    fs.mkdirSync(path.join(dir, 'Assets'), { recursive: true });
+    for (const part of ['bowl', 'stem']) fs.writeFileSync(path.join(dir, `Assets/${part}.png`), png(1024, { scale: 0.62, ss: 2, part }));
+    fs.writeFileSync(path.join(dir, 'icon.json'), JSON.stringify(icon, null, 2) + '\n');
+    // The layered icon replaces the flat PNG set; two icons named AppIcon would clash.
+    fs.rmSync(path.join(root, 'safari', app, 'Assets.xcassets/AppIcon.appiconset'), { recursive: true, force: true });
+    console.log(`wrote ${path.relative(root, dir)}`);
   }
-  fs.writeFileSync(path.join(mac, 'Contents.json'), JSON.stringify({ images, info: { author: 'xcode', version: 1 } }, null, 2));
-  fs.writeFileSync(path.join(root, 'safari/App/Assets.xcassets/Contents.json'), JSON.stringify({ info: { author: 'xcode', version: 1 } }, null, 2));
-  console.log(`wrote ${path.relative(root, mac)} (${images.length} sizes)`);
   process.exit(0);
 }
 
