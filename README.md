@@ -2,7 +2,7 @@
 
 Free, open-source browser extension that hides YouTube Shorts and answers cookie-consent banners the way you
 choose: refuse by default, or allow only the categories you pick; per site: refuse, accept, or leave alone.
-Consent-or-pay walls are never hidden. Nothing leaves your browser unless you send a report: no account, no analytics, no tracking.
+Consent-or-pay walls are never hidden. No account, no analytics, no tracking: the only requests are rule-list downloads (store builds fetch ours from GitHub Pages at install, at browser start, every 12 hours and when you change the lists) and reports you choose to send. Store builds for Chrome and Firefox also open a goodbye page when the extension is removed.
 
 Chrome, Edge, Opera, Brave, Vivaldi, Firefox (desktop and Android), Safari (Mac, iPhone, iPad). Works
 worldwide through DuckDuckGo's [autoconsent](https://github.com/duckduckgo/autoconsent), plus its own rule pack for sites it misses.
@@ -18,9 +18,13 @@ Project status and decisions: `PROJECT.md`.
 
 | Path | Purpose |
 |---|---|
-| `PROJECT.md` | Status, decisions (D1–D8), architecture, milestones, Safari checklist, open gates, gotchas |
+| `PROJECT.md` | Status, decisions (D1–D11), architecture, milestones, Safari checklist, open gates, gotchas |
 | `extension/`, `data/`, `build.mjs` | The extension; `data/` is what changes when a site changes |
 | `safari/`, `scripts/safari.sh` | Signed Safari container app |
+| `scripts/` | Safari/iOS builds, App Store archives, App Store Connect client, canary LaunchAgent, sent reports |
+| `store/` | Store listing copy, screenshots, App Store Connect setup |
+| `site/` | Public site and privacy page |
+| `supabase/` | Migrations for the reports table |
 | `test/`, `canary/` | Unit + live e2e tests; the daily canary |
 | `research/shorts.md` | Open-source Shorts blockers, licenses, current selectors (live-checked 2026-09-21) |
 | `research/consent.md` | CoM vs autoconsent vs IDCAC; the 42-site Czech run; consent-or-pay walls |
@@ -34,7 +38,7 @@ See `PROJECT.md` → Decisions. The ones that constrain every change:
 - Our code is MIT. Never copy code from GPL/AGPL, PolyForm-Noncommercial or unlicensed projects
   (Control Panel for YouTube has no license). Ideas only.
 - autoconsent stays an unmodified npm dependency (MPL-2.0). Czech rules live in our own rule pack.
-- Consent-or-pay walls (Seznam, Mafra, CPEx) are left alone: no auto-accept, no hiding.
+- Consent-or-pay walls (Seznam, Mafra, CPEx) are never hidden. Store builds leave them alone (`manual`); local/dev builds default to `auto`, which opts in (`__WALLS_DEFAULT__` in `build.mjs`): a dev build accepts walls on your own accounts unless you switch Settings to manual. Tests and the canary run in manual (D9).
 - Page-world code lives in the extension, never in `data/` (D8).
 
 ## What NOT to do
