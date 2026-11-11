@@ -1,0 +1,39 @@
+{
+  "name": "cz-gov",
+  "_comment": "Czech government portal design system (gov3) cookie popup on portal.gov.cz and other gov.cz sites. Refuse is Odmítnout všechny. Top-50 CZ sweep 2026-11-11.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*gov\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#pvs-cookies-popup #pvs-decline-cookies"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#pvs-cookies-popup"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#pvs-cookies-popup #pvs-accept-cookies"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#pvs-cookies-popup #pvs-decline-cookies"
+    },
+    {
+      "waitForVisible": "#pvs-cookies-popup",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#pvs-cookies-popup",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

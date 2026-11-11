@@ -1,5 +1,5 @@
 {
-  "name": "orejime",
+  "name": "dt-orejime",
   "_comment": "Orejime (open-source CMP). (Consent-O-Matic had a rule; autoconsent did not handle it.)",
   "runContext": {
     "urlPattern": "^https?://([a-z0-9-]+\\.)*(ameli\\.fr)/"

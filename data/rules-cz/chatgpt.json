@@ -1,0 +1,34 @@
+{
+  "name": "dt-chatgpt",
+  "_comment": "ChatGPT logged-out cookie dialog (dialog#cookie-consent, form buttons name=action value=reject|accept). Top-50 CZ sweep 2026-11-11. No closing check: the buttons submit a form (POST /unauth-mweb/privacy) that reloads the page and would interrupt it; the refusal is the oai_consent_analytics/marketing=false cookies.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*chatgpt\\.com/"
+  },
+  "detectCmp": [
+    {
+      "exists": "dialog#cookie-consent button[name=action][value=reject]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "dialog#cookie-consent[open]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "dialog#cookie-consent button[name=action][value=accept]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "dialog#cookie-consent button[name=action][value=reject]"
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "dialog#cookie-consent[open]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "name": "cz-wall-seznam-teaser",
   "_comment": "Seznam's bottom bar has no buttons; clicking it opens cmp.seznam.cz/nastaveni-souhlasu (cz-wall-seznam-page). After consent the bar stays in the page with visibility:hidden (which autoconsent's visible check ignores), so match on the inline style.",
   "runContext": {
-    "urlPattern": "^https?://([a-z0-9-]+\\.)*(seznam|novinky|seznamzpravy|sreality|sport|super|firmy)\\.cz/"
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(seznam|novinky|seznamzpravy|sreality|sport|super|firmy|lide|prozeny|stream)\\.cz/"
   },
   "detectCmp": [
     {

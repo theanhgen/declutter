@@ -10,29 +10,72 @@
   ],
   "detectPopup": [
     {
-      "visible": "#opbox-gdpr-consents-modal"
+      "visible": "#opbox-gdpr-consents-modal [role=alertdialog][open]"
     }
   ],
   "optIn": [
     {
-      "waitForThenClick": "#opbox-gdpr-consents-modal [data-role=\"accept-consent\"]"
+      "waitForThenClick": "#opbox-gdpr-consents-modal [role=alertdialog][open] [data-role=\"accept-consent\"]"
     }
   ],
   "optOut": [
     {
-      "waitForThenClick": "#opbox-gdpr-consents-modal [data-role=\"reject-rodo\"]"
+      "waitForThenClick": "#opbox-gdpr-consents-modal [role=alertdialog][open] [data-role=\"reject-rodo\"]"
     },
     {
-      "waitForVisible": "#opbox-gdpr-consents-modal [data-role=\"reject-rodo\"]",
+      "wait": 1500
+    },
+    {
+      "if": {
+        "visible": "#opbox-gdpr-consents-modal [role=alertdialog][open]"
+      },
+      "then": [
+        {
+          "click": "#opbox-gdpr-consents-modal [role=alertdialog][open] [data-role=\"reject-rodo\"]"
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    {
+      "if": {
+        "visible": "#opbox-gdpr-consents-modal [role=alertdialog][open]"
+      },
+      "then": [
+        {
+          "click": "#opbox-gdpr-consents-modal [role=alertdialog][open] [data-role=\"reject-rodo\"]"
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    {
+      "if": {
+        "visible": "#opbox-gdpr-consents-modal [role=alertdialog][open]"
+      },
+      "then": [
+        {
+          "click": "#opbox-gdpr-consents-modal [role=alertdialog][open] [data-role=\"reject-rodo\"]"
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    {
+      "waitForVisible": "#opbox-gdpr-consents-modal [role=alertdialog][open]",
       "check": "none",
       "timeout": 5000
     }
   ],
   "test": [
     {
-      "waitForVisible": "#opbox-gdpr-consents-modal",
+      "waitForVisible": "#opbox-gdpr-consents-modal [role=alertdialog][open]",
       "check": "none",
       "timeout": 3000
     }
-  ]
+  ],
+  "_comment": "Allegro/CZC consent sheet. The buttons render before the page hydrates and an early click does nothing, so refuse is retried while the dialog is still open. After the choice the #opbox-gdpr-consents-modal wrapper stays; only [role=alertdialog] loses its open attribute (checked 2026-11-11)."
 }

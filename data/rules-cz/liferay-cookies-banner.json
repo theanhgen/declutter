@@ -1,5 +1,5 @@
 {
-  "name": "liferay-cookies-banner",
+  "name": "dt-liferay-cookies-banner",
   "detectCmp": [
     {
       "exists": "#_com_liferay_cookies_banner_web_portlet_CookiesBannerPortlet_declineAllButton"

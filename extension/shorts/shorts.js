@@ -2,7 +2,8 @@
 //  - sends /shorts/<id> to /watch?v=<id>, and a channel's /shorts tab to /videos
 //  - adds selectors from the remote data copy (D6)
 //  - self-check: any /shorts/ link still visible gets hidden by its card and counted (popup: "caught by the backup check")
-// The same stylesheet hides community posts in the feeds (its own switch, CSS only).
+// The same stylesheet hides community posts in the feeds and the Playables (games) shelf and menu entry, each with
+// its own switch, CSS only. The /playables page itself stays, like a channel's Posts tab.
 import bundled from '../../data/shorts.json';
 import { redirectTarget } from '../lib.js';
 
@@ -91,6 +92,8 @@ async function init() {
   const remote = remoteData?.schema === 1 ? remoteData.shorts : null;
   if (settings?.posts === false) html.setAttribute('data-declutter-posts', 'off');
   else if (Array.isArray(remote?.posts)) injectRemoteSelectors(remote.posts.filter((s) => !bundled.posts.includes(s)), 'posts');
+  if (settings?.playables === false) html.setAttribute('data-declutter-playables', 'off');
+  else if (Array.isArray(remote?.playables)) injectRemoteSelectors(remote.playables.filter((s) => !bundled.playables.includes(s)), 'playables');
   if (!enabled) {
     html.setAttribute('data-declutter-shorts', 'off');
     return;
@@ -115,7 +118,7 @@ async function init() {
 api.storage.onChanged.addListener((changes, area) => {
   const c = changes.settings;
   const flipped = (k) => (c.oldValue?.[k] !== false) !== (c.newValue?.[k] !== false);
-  if (area === 'local' && c && (flipped('shorts') || flipped('posts'))) location.reload();
+  if (area === 'local' && c && ['shorts', 'posts', 'playables'].some(flipped)) location.reload();
 });
 
 init();

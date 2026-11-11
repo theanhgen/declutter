@@ -186,6 +186,8 @@ async function buildTarget(name, data) {
       'consent/content': 'extension/consent/content.js',
       'consent/open-shadow': 'extension/consent/open-shadow.js',
       'shorts/shorts': 'extension/shorts/shorts.js',
+      'shorts/dates': 'extension/shorts/dates.js',
+      'shorts/dates-main': 'extension/shorts/dates-main.js',
       'popup/popup': 'extension/popup/popup.js',
       'options/options': 'extension/options/options.js',
     },
@@ -202,6 +204,8 @@ async function buildTarget(name, data) {
       __UNINSTALL_URL__: JSON.stringify(STORE && name !== 'safari' ? `${SITE}/bye.html` : ''),
       __WALLS_DEFAULT__: JSON.stringify(STORE ? 'manual' : 'auto'),
       __TARGET__: JSON.stringify(name),
+      // background.js parses this instead of fetching data.json when the worker wakes.
+      __BUNDLED_DATA__: JSON.stringify(JSON.stringify(data)),
       // Tip link in settings. Never in Safari: App Store tips must be in-app purchases (the container app has them).
       __TIP_URL__: JSON.stringify(name === 'safari' ? '' : process.env.DECLUTTER_TIP_URL ?? ''),
     },
@@ -218,10 +222,10 @@ async function buildTarget(name, data) {
   copy('extension/welcome/welcome.html', 'welcome/welcome.html');
   copy('extension/consent/gpc.js', 'consent/gpc.js');
   copy('extension/shorts/dnr-rules.json', 'shorts/dnr-rules.json');
-  copy('node_modules/@duckduckgo/autoconsent/rules/compact-rules.json', 'consent/compact-rules.json');
   copy('LICENSE', 'LICENSE');
   copy('node_modules/@duckduckgo/autoconsent/LICENSE', 'licenses/autoconsent-MPL-2.0.txt');
-  fs.writeFileSync(path.join(out, 'shorts/shorts.css'), shortsCss(data.shorts.hide) + shortsCss(data.shorts.posts, 'posts'));
+  fs.writeFileSync(path.join(out, 'shorts/shorts.css'), shortsCss(data.shorts.hide) + shortsCss(data.shorts.posts, 'posts')
+    + shortsCss(data.shorts.playables ?? [], 'playables'));
   fs.writeFileSync(path.join(out, 'data.json'), JSON.stringify(data));
   fs.mkdirSync(path.join(out, 'icons'));
   // Toolbar sizes get a margin like other toolbar icons; the glyph alone at full size looks oversized.

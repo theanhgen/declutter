@@ -1,0 +1,98 @@
+{
+  "name": "rotana",
+  "_comment": "Rotana Hotels' cookie statement, shown as a full-screen box with this page in an iframe (user report mobile.rotana.com 2026-11-07). The frame is mobile.rotana.com/cookiestatement on a phone and redirects to www.rotana.com on a desktop browser. Performance and targeting start switched on; each switch change saves (doPreferrence), Save then reloads the page and destroys this frame, so the check is that both switches are off before Save is pressed: a switch that did not flip ends as failed, not done. The save request (dogdprupdate, 160-280 ms measured) sets httpOnly cookies the rule can't read, so Save waits 1.5 s for it.",
+  "runContext": {
+    "urlPattern": "^https://(www|mobile)\\.rotana\\.com/cookiestatement\\?gdpr=consent",
+    "main": false,
+    "frame": true
+  },
+  "detectCmp": [
+    {
+      "exists": "#perfckie"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#scButon button"
+    }
+  ],
+  "optIn": [
+    {
+      "if": {
+        "exists": "#perfckie:not(:checked)"
+      },
+      "then": [
+        {
+          "click": "label[for=perfckie]"
+        }
+      ]
+    },
+    {
+      "if": {
+        "exists": "#trgtckie:not(:checked)"
+      },
+      "then": [
+        {
+          "click": "label[for=trgtckie]"
+        }
+      ]
+    },
+    {
+      "waitFor": "#perfckie:checked",
+      "timeout": 3000
+    },
+    {
+      "waitFor": "#trgtckie:checked",
+      "timeout": 3000
+    },
+    {
+      "wait": 1500
+    },
+    {
+      "waitForThenClick": "#scButon button"
+    }
+  ],
+  "optOut": [
+    {
+      "if": {
+        "exists": "#perfckie:checked"
+      },
+      "then": [
+        {
+          "click": "label[for=perfckie]"
+        }
+      ]
+    },
+    {
+      "if": {
+        "exists": "#trgtckie:checked"
+      },
+      "then": [
+        {
+          "click": "label[for=trgtckie]"
+        }
+      ]
+    },
+    {
+      "waitFor": "#perfckie:not(:checked)",
+      "timeout": 3000
+    },
+    {
+      "waitFor": "#trgtckie:not(:checked)",
+      "timeout": 3000
+    },
+    {
+      "wait": 1500
+    },
+    {
+      "waitForThenClick": "#scButon button"
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#scButon button",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

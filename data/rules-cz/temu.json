@@ -1,0 +1,39 @@
+{
+  "name": "dt-temu",
+  "_comment": "Temu banner: classes are hashed, so match the buttons by their Czech aria-label (only the Czech site was checked). Top-50 CZ sweep 2026-11-11.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*temu\\.com/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[role=button][aria-label=\"Odmítnout všechna nastavení\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[role=button][aria-label=\"Odmítnout všechna nastavení\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[role=button][aria-label=\"Přijmout všechna nastavení\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[role=button][aria-label=\"Odmítnout všechna nastavení\"]"
+    },
+    {
+      "waitForVisible": "[role=button][aria-label=\"Odmítnout všechna nastavení\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "[role=button][aria-label=\"Odmítnout všechna nastavení\"]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

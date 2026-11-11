@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
+import { collectDates, videoIdOf } from '../extension/shorts/dates-lib.js';
 import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -149,13 +150,16 @@ test('build: wall list and CZ rules never overlap (wall rules only accept)', () 
 
 test('build: shorts.css gates every selector on the module switch', () => {
   const css = read('build/chrome/shorts/shorts.css');
-  const { hide, posts } = JSON.parse(read('data/shorts.json'));
+  const { hide, posts, playables } = JSON.parse(read('data/shorts.json'));
   for (const s of hide) assert.ok(css.includes(`html:not([data-declutter-shorts="off"]) ${s} {`), s);
   for (const s of posts) assert.ok(css.includes(`html:not([data-declutter-posts="off"]) ${s} {`), s);
+  for (const s of playables) assert.ok(css.includes(`html:not([data-declutter-playables="off"]) ${s} {`), s);
   // One rule per selector: in a list, one selector a browser can't parse would drop all of them.
-  assert.equal(css.match(/\{ display: none !important; \}/g).length, hide.length + posts.length);
+  assert.equal(css.match(/\{ display: none !important; \}/g).length, hide.length + posts.length + playables.length);
   // Posts are hidden in feeds only: every selector is tied to a feed container, so a channel's Posts tab stays.
   for (const s of posts) assert.match(s, /^yt[dm]-rich-(item|section|grid)-renderer/, s);
+  // Playables: the home shelf and the menu entries only, never a single card, so the /playables page stays.
+  for (const s of playables) assert.match(s, /^(yt[dm]-rich-section-renderer|ytd-(mini-)?guide-entry-renderer):has\(/, s);
 });
 
 test('build: per-browser manifests', () => {
@@ -205,6 +209,7 @@ test('mergeData: a rule list overrides rules by name and unions everything else'
   const m = mergeData(base, extra);
   assert.deepEqual(m.shorts.hide, ['a', 'b']);
   assert.deepEqual(m.shorts.posts, []); // lists built before posts existed
+  assert.deepEqual(m.shorts.playables, []); // ...or before playables
   assert.deepEqual(mergeData({ ...base, shorts: { ...base.shorts, posts: ['p'] } }, extra).shorts.posts, ['p']);
   assert.deepEqual(m.consent.walls, ['x.cz', 'y.cz']);
   assert.deepEqual(m.consent.rules.map((r) => `${r.name}${r.v ?? ''}`), ['r2', 'r12', 'r3']);
@@ -283,4 +288,19 @@ test('canary: most sites not loading is an outage, not 90 broken rules', () => {
   assert.ok(looksOffline([r('x'), r('x'), r('x'), r(null)]));
   assert.ok(!looksOffline([r('x'), r(null), r(null), r(null)]));
   assert.ok(!looksOffline([r('x')]), 'a one-site rerun is not an outage');
+});
+
+test('dates: upload dates by video id from any renderer, in the page language', () => {
+  const data = { playerOverlays: { endScreen: { results: [
+    { endScreenVideoRenderer: { videoId: 'a', publishedTimeText: { simpleText: '3 years ago' } } },
+    { endScreenVideoRenderer: { videoId: 'b', publishedTimeText: { runs: [{ text: 'před 2 ' }, { text: 'dny' }] } } },
+    { endScreenVideoRenderer: { videoId: 'c' } },
+  ] } }, contents: [{ videoWithContextRenderer: { videoId: 'a', shortViewCountText: { simpleText: '1M views' } } }] };
+  assert.deepEqual(collectDates(data), { a: '3 years ago', b: 'před 2 dny' });
+  const loop = { videoId: 'x', publishedTimeText: { simpleText: 'now' } };
+  loop.self = loop;
+  assert.deepEqual(collectDates(loop), { x: 'now' });
+  assert.equal(videoIdOf('/watch?v=y6nn4p5JOBM&pp=ugUH'), 'y6nn4p5JOBM');
+  assert.equal(videoIdOf('/@channel'), null);
+  assert.equal(videoIdOf(undefined), null);
 });

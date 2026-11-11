@@ -1,0 +1,10 @@
+{
+  "www.seznam.cz": {
+    "reason": "Consent-or-pay wall: left alone by design (D9); the report showed state none. Detected as cz-wall-seznam-teaser on 2026-11-11.",
+    "through": "2026-11-11"
+  },
+  "www.t-mobile.cz": {
+    "reason": "Reported 2026-11-08 from Safari with state done (cz-t-mobile); refused cleanly in Chrome on 2026-11-11 and covered by the canary.",
+    "through": "2026-11-11"
+  }
+}

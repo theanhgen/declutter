@@ -5,34 +5,37 @@
   },
   "detectCmp": [
     {
-      "exists": "xpath///div[contains(@class,'cookiebar')]//button[contains(., 'Odmítnout')]"
+      "exists": ".cookiebar .cookiebar__reject"
     }
   ],
   "detectPopup": [
     {
-      "visible": ".cookiebar"
+      "visible": ".cookiebar .cookiebar__reject"
     }
   ],
   "optIn": [
     {
-      "waitForThenClick": ".cookiebar [data-cy=\"accept-cookies\"]"
+      "waitForThenClick": ".cookiebar [data-cy=accept-cookies]"
     }
   ],
   "optOut": [
     {
-      "waitForThenClick": "xpath///div[contains(@class,'cookiebar')]//button[contains(., 'Odmítnout')]"
+      "waitForThenClick": ".cookiebar .cookiebar__reject",
+      "retry": 4,
+      "retryInterval": 1000
     },
     {
-      "waitForVisible": "xpath///div[contains(@class,'cookiebar')]//button[contains(., 'Odmítnout')]",
+      "waitForVisible": ".cookiebar .cookiebar__reject",
       "check": "none",
       "timeout": 5000
     }
   ],
   "test": [
     {
-      "waitForVisible": ".cookiebar",
+      "waitForVisible": ".cookiebar .cookiebar__reject",
       "check": "none",
       "timeout": 3000
     }
-  ]
+  ],
+  "_comment": "2026-11-11: the bar is now <section class=cookiebar> with \"ODMÍTNOUT\" in capitals; matched by its classes instead of the text. A click before the page hydrates does nothing, so the refuse click is retried while the bar stays."
 }

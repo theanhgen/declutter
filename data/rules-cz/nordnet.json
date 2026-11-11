@@ -1,5 +1,5 @@
 {
-  "name": "nordnet",
+  "name": "dt-nordnet",
   "_comment": "Afvis (reject), next to the accept button. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
   "runContext": {
     "urlPattern": "^https?://([a-z0-9-]+\\.)*(nordnet\\.dk|nordnet\\.se|nordnet\\.no|nordnet\\.fi)/"

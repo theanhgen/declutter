@@ -1,18 +1,18 @@
 {
   "name": "dpg-media",
-  "_comment": "DPG Media (nu.nl, and its other NL/BE titles) consent page: Instellen -> Alles weigeren.",
+  "_comment": "DPG Media (nu.nl, and its other NL/BE titles) consent page: Instellen -> Alles weigeren. 2026-11-11: the shadow host is now #pg-dom-shadow-host (was #pg-shadow-host-dom).",
   "runContext": {
     "urlPattern": "^https://myprivacy\\.dpgmedia\\.(nl|be)/consent"
   },
   "detectCmp": [
     {
-      "exists": "#pg-shadow-host-dom"
+      "exists": "#pg-dom-shadow-host"
     }
   ],
   "detectPopup": [
     {
       "visible": [
-        "#pg-shadow-host-dom",
+        "#pg-dom-shadow-host",
         "#pg-configure-btn"
       ]
     }
@@ -20,7 +20,7 @@
   "optIn": [
     {
       "waitForThenClick": [
-        "#pg-shadow-host-dom",
+        "#pg-dom-shadow-host",
         "#pg-accept-btn"
       ]
     }
@@ -28,13 +28,13 @@
   "optOut": [
     {
       "waitForThenClick": [
-        "#pg-shadow-host-dom",
+        "#pg-dom-shadow-host",
         "#pg-configure-btn"
       ]
     },
     {
       "waitForThenClick": [
-        "#pg-shadow-host-dom",
+        "#pg-dom-shadow-host",
         "#pg-reject-btn"
       ],
       "timeout": 5000

@@ -34,6 +34,14 @@
     "ytm-rich-grid-renderer ytm-backstage-post-thread-renderer",
     "ytm-rich-grid-renderer ytm-backstage-post-renderer"
   ],
+  "playables": [
+    "ytd-rich-section-renderer:has(a[href^=\"/playables\"])",
+    "ytd-rich-section-renderer:has(mini-game-card-view-model)",
+    "ytd-guide-entry-renderer:has(> a[href^=\"/playables\"])",
+    "ytd-mini-guide-entry-renderer:has(> a[href^=\"/playables\"])",
+    "ytm-rich-section-renderer:has(a[href*=\"/playables\"])",
+    "ytm-rich-section-renderer:has(mini-game-card-view-model)"
+  ],
   "cards": [
     "ytd-rich-item-renderer",
     "ytd-rich-section-renderer",

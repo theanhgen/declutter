@@ -7,6 +7,9 @@
     "sport.cz",
     "super.cz",
     "firmy.cz",
+    "lide.cz",
+    "prozeny.cz",
+    "stream.cz",
     "idnes.cz",
     "lidovky.cz",
     "expres.cz",
@@ -16,6 +19,7 @@
     "zive.cz",
     "aktualne.cz",
     "lupa.cz",
+    "centrum.cz",
     "lemonde.fr",
     "elpais.com",
     "corriere.it",
@@ -29,6 +33,15 @@
   "disabledCmps": [
     "bbc.com",
     "ionos.de",
-    "microsoft.com"
+    "microsoft.com",
+    "dfactory-cookie-notice",
+    "airbnb",
+    "orejime",
+    "autohero",
+    "danskebank",
+    "liferay-cookies-banner",
+    "nordnet",
+    "chatgpt",
+    "temu"
   ]
 }

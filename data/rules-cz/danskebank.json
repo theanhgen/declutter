@@ -1,5 +1,5 @@
 {
-  "name": "danskebank",
+  "name": "dt-danskebank",
   "_comment": "OK til nødvendige = necessary only. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
   "runContext": {
     "urlPattern": "^https?://([a-z0-9-]+\\.)*(danskebank\\.dk|danskebank\\.se|danskebank\\.no|danskebank\\.fi|danskebank\\.com)/"

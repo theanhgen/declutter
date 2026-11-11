@@ -1,5 +1,5 @@
 {
-  "name": "autohero",
+  "name": "dt-autohero",
   "_comment": "Konfigurieren opens the settings (only ESSENTIAL ticked); the same button then reads 'Auswahl speichern'. (Consent-O-Matic had a rule; autoconsent did not handle it.)",
   "runContext": {
     "urlPattern": "^https?://([a-z0-9-]+\\.)*(autohero\\.com)/"

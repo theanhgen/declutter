@@ -1,0 +1,39 @@
+{
+  "name": "energyson",
+  "_comment": "Energyson's banner (#ACM-container, full-screen overlay; user report energyson.fr 2026-11-10). Refuse is 'Continuer sans accepter'.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*energyson\\.fr/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#ACM-container #ACM-button-refuse"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#ACM-container"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#ACM-container #ACM-button-accept"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#ACM-container #ACM-button-refuse"
+    },
+    {
+      "waitForVisible": "#ACM-container",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#ACM-container",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

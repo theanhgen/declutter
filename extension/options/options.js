@@ -6,6 +6,8 @@ const ONOFF = [[true, 'on'], [false, 'off']];
 const CHOICES = {
   shorts: ONOFF,
   posts: ONOFF,
+  playables: ONOFF,
+  dates: ONOFF,
   consent: ONOFF,
   walls: [['auto', 'auto'], ['manual', 'manual']],
   display: [['hide', 'hide'], ['show', 'show']],
@@ -25,7 +27,7 @@ const CATEGORIES = [
   ['X', 'other purposes', 'anything the site does not describe clearly or that fits no other category.'],
 ];
 const DEFAULTS = {
-  shorts: true, posts: true, consent: true, walls: __WALLS_DEFAULT__, display: 'hide', chip: true, gpc: false, debug: false, debugEvals: false, clickDelay: false,
+  shorts: true, posts: true, playables: true, dates: true, consent: true, walls: __WALLS_DEFAULT__, display: 'hide', chip: true, gpc: false, debug: false, debugEvals: false, clickDelay: false,
   // Same default rule list as the background's (the build-time one), so adding or removing a list keeps it.
   exceptions: [], acceptSites: [], dataUrls: __DATA_URL__ ? [__DATA_URL__] : [], categories: Object.fromEntries(CATEGORIES.map(([k]) => [k, false])),
 };

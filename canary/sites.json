@@ -446,6 +446,155 @@
   {
    "host": "dchic.vn",
    "expect": "done"
+  },
+  {
+   "host": "www.kudyznudy.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.energyson.fr",
+   "expect": "done"
+  },
+  {
+   "host": "browser-use.com",
+   "expect": "done",
+   "wait": 25000,
+   "note": "banner appears ~8 s after load"
+  },
+  {
+   "host": "www.rotana.com",
+   "expect": "done",
+   "note": "banner is a cross-origin iframe the page-level check cannot see; trust the state"
+  },
+  {
+   "host": "mobile.rotana.com",
+   "expect": "clear",
+   "note": "same rule as www.rotana.com; Save reloads onto www.rotana.com with a desktop UA, so the state is not kept"
+  },
+  {
+   "host": "cnn.iprima.cz",
+   "expect": "done",
+   "note": "user report 2026-11-03 (Safari, reported done); works in Chrome"
+  },
+  {
+   "host": "www.seznamzpravy.cz",
+   "expect": "wall",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.lide.cz",
+   "expect": "wall",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.super.cz",
+   "expect": "wall",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.sport.cz",
+   "expect": "wall",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.prozeny.cz",
+   "expect": "wall",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.stream.cz",
+   "expect": "wall",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.centrum.cz",
+   "expect": "wall",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.facebook.com",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.instagram.com",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "chatgpt.com",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.iprima.cz",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "gov.cz",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.livesport.cz",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "allegro.cz",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.oneplay.cz",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.extra.cz",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "x.com",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.tipsport.cz",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.netflix.com",
+   "expect": "done",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "cs.wikipedia.org",
+   "expect": "clear",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "gemini.google.com",
+   "expect": "clear",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.playarcady.com",
+   "expect": "clear",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.toprecepty.cz",
+   "expect": "clear",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "www.google.cz",
+   "expect": "clear",
+   "note": "top-50 CZ (Similarweb, Oct 2026)"
   }
  ]
 }

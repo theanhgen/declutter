@@ -1,0 +1,39 @@
+{
+  "name": "cz-kudyznudy",
+  "_comment": "Kudy z nudy's own banner (.j-coinfo; user report 2026-11-11). Refuse is 'Odmítám vše'; 'Souhlasím' accepts.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*kudyznudy\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".j-coinfo #coinfo-refuse-button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".j-coinfo"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".j-coinfo #coinfo-advanced-button"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".j-coinfo #coinfo-refuse-button"
+    },
+    {
+      "waitForVisible": ".j-coinfo",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".j-coinfo",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

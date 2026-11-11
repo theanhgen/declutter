@@ -1,5 +1,6 @@
 // Background: settings, data (bundled + remote, D6), autoconsent wiring, per-tab status and badge.
 import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
+import compactRulesText from '@duckduckgo/autoconsent/rules/compact-rules.json' with { type: 'text' };
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
 import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
@@ -10,6 +11,8 @@ Object.assign(evalSnippets, declutterSnippets);
 const DEFAULT_SETTINGS = {
   shorts: true,
   posts: true,
+  playables: true,
+  dates: true,
   consent: true,
   // Rule lists (Consent-O-Matic's "Rule Lists"): extra data.json URLs merged over the bundled data. The one baked
   // in at build time (DECLUTTER_DATA_URL) comes first; dataUrl is the older single-URL setting.
@@ -83,9 +86,11 @@ function getSettings() {
 }
 
 // ---- data: bundled data.json merged with every rule list (D6) ----
+// Inlined at build time (like the compact rules below): fetching data.json just after the worker woke delayed the
+// first frame's initResp. The file is still in the build for the settings page.
 let bundledData;
-async function getBundledData() {
-  bundledData ??= await (await fetch(api.runtime.getURL('data.json'))).json();
+function getBundledData() {
+  bundledData ??= JSON.parse(__BUNDLED_DATA__);
   return bundledData;
 }
 
@@ -131,9 +136,11 @@ async function refreshRemoteData() {
 }
 
 // ---- autoconsent rules ----
+// Bundled, not fetched: reading a 270 KB extension file just after the worker wakes took 46 ms to 3.4 s, and the
+// first frame's initResp (which starts prehide) waited on it. Parsing the string costs ~3 ms.
 let compactRules;
-async function getCompactRules() {
-  compactRules ??= await (await fetch(api.runtime.getURL('consent/compact-rules.json'))).json();
+function getCompactRules() {
+  compactRules ??= JSON.parse(compactRulesText);
   return compactRules;
 }
 
@@ -272,7 +279,7 @@ async function onConsentMessage(msg, sender) {
         : {
           // Our Czech rules go first so they win over a generic rule for the same page.
           autoconsent: data.consent.rules.filter((r) => !isWallRule(r.name)),
-          compact: filterCompactRules(await getCompactRules(), { url: senderUrl, mainFrame: frameId === 0 }),
+          compact: filterCompactRules(getCompactRules(), { url: senderUrl, mainFrame: frameId === 0 }),
         };
       await api.tabs.sendMessage(tabId, { type: 'initResp', rules, config }, { frameId });
       break;

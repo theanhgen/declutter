@@ -81,8 +81,8 @@ that row records consent to all 11 IAB purposes and 58 of 74 vendors. So a wall 
 
 | Family | Sites | What shows | Accept |
 |---|---|---|---|
-| CPEx | blesk, e15, reflex, zive, aktualne, lupa | modal on the page | `#cpexSubs_consentButton` |
-| Seznam | seznam, novinky, seznamzpravy, sreality, sport, super, firmy | bottom bar (`szn-cwl`, no buttons); articles redirect to `cmp.seznam.cz/nastaveni-souhlasu` | bar → consent page → `cw-button-agree-with-ads` (closed shadow root, opened by `open-shadow.js`) |
+| CPEx | blesk, e15, reflex, zive, aktualne, lupa, centrum | modal on the page | `#cpexSubs_consentButton` |
+| Seznam | seznam, novinky, seznamzpravy, sreality, sport, super, firmy, lide, prozeny, stream | bottom bar (`szn-cwl`, no buttons); articles redirect to `cmp.seznam.cz/nastaveni-souhlasu` | bar → consent page → `cw-button-agree-with-ads` (closed shadow root, opened by `open-shadow.js`) |
 | Mafra | idnes, lidovky, expres | bottom bar `a.cookie-info`; articles redirect to `/nastaveni-souhlasu` | bar → consent page → `DECLUTTER_DIDOMI_AGREE` (the link is a CSP-blocked `javascript:` URL), then back to `?url=` on the same site |
 
 In manual mode, "Accept" on a Seznam/Mafra bar sets a 30 s hand-off so the consent page it opens accepts too.
@@ -169,7 +169,7 @@ Full table in `research/consent.md`, raw results in `research/consent-run-2026-0
 
 | Group | Sites | CoM | autoconsent | Our plan |
 |---|---|---|---|---|
-| Consent-or-pay walls | Seznam family (seznam, novinky, seznamzpravy, sreality, sport, super, firmy), Mafra (idnes, lidovky, expres), CPEx (blesk, e15, reflex, zive, aktualne, lupa) | wall stays | wall stays | **Leave alone (D5).** Refusing the Didomi underneath is fine; don't click "Souhlasím", don't hide the wall |
+| Consent-or-pay walls | Seznam family (seznam, novinky, seznamzpravy, sreality, sport, super, firmy, lide, prozeny, stream), Mafra (idnes, lidovky, expres), CPEx (blesk, e15, reflex, zive, aktualne, lupa, centrum) | wall stays | wall stays | **Leave alone (D5).** Refusing the Didomi underneath is fine; don't click "Souhlasím", don't hide the wall |
 | Seznam's own banner (shadow DOM) | mapy.com, kupi.cz | no | no | CZ rule (it isn't a pay wall; verify there's a free refuse) |
 | Standard CMPs | Didomi, Funding Choices, Cookie-Script, OneTrust, Cookiebot, orestbida v2 | ✓ | ✓ | autoconsent as-is |
 | CoM gaps | ceskatelevize (orestbida v3), rohlik + dm (Usercentrics in shadow DOM), o2 (consentmanager in shadow DOM), bazos (TermsFeed) | ✗ | ✓ | autoconsent as-is |

@@ -1,0 +1,39 @@
+{
+  "name": "x-com",
+  "_comment": "X (Twitter) logged-out bottom bar (role=region; classes are Tailwind utilities), matched by button text, which X shows in English even on a Czech browser. Top-50 CZ sweep 2026-11-11.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*x\\.com/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///div[@role='region']//button[contains(., 'Refuse non-essential cookies')]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "xpath///div[@role='region']//button[contains(., 'Refuse non-essential cookies')]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///div[@role='region']//button[contains(., 'Accept all cookies')]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///div[@role='region']//button[contains(., 'Refuse non-essential cookies')]"
+    },
+    {
+      "waitForVisible": "xpath///div[@role='region']//button[contains(., 'Refuse non-essential cookies')]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "xpath///div[@role='region']//button[contains(., 'Refuse non-essential cookies')]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

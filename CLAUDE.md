@@ -21,7 +21,7 @@ app generated with xcodegen (team `28DMV2MR8T`). Tests and canary: Playwright's 
 - Build: `npm run build` (both targets) · `node build.mjs chrome` · `node build.mjs --data-only` (just `build/data.json`, the
   rule list GitHub Pages publishes; store builds fetch it)
 - Unit: `npm test` (builds first)
-- E2E smoke (live sites): `npm run test:e2e` · walls: `npm run test:walls` · features: `npm run test:features` · posts: `npm run test:posts` · popup states (local page): `npm run test:states` · remote data: `node test/remote-data.mjs`
+- E2E smoke (live sites): `npm run test:e2e` · walls: `npm run test:walls` · features: `npm run test:features` · posts: `npm run test:posts` · playables: `npm run test:playables` · mobile dates: `npm run test:dates` · popup states (local page): `npm run test:states` · remote data: `node test/remote-data.mjs`
 - Canary: `npm run canary` (all) · `node canary/run.mjs <host> …` (subset, no alert)
 - Xcode: `safari.sh`/`ios.sh` use 27.2 beta; `scripts/archive.sh` (App Store) uses release Xcode, since beta builds are rejected
 - Safari: `npm run safari` (build, sign, install `~/Applications/Declutter.app`)
@@ -31,7 +31,7 @@ app generated with xcodegen (team `28DMV2MR8T`). Tests and canary: Playwright's 
 - Canary job: `scripts/canary-agent.sh install|remove`; log `/tmp/declutter-canary.log`
 - User reports: `node scripts/reports.mjs [days]` (all) · `--open` (unhandled only, exit 1). Check them at the start of
   every declutter session and before every build; `scripts/archive.sh` checks first and refuses to build while any are
-  open (`REPORTS_OK=1` overrides). Handled = rule + host in `canary/sites.json`, or host → reason in `canary/reports-skip.json`.
+  open (`REPORTS_OK=1` overrides). Handled = rule + host in `canary/sites.json`, or host → `{ reason, through: <date> }` in `canary/reports-skip.json` (reports after that date are open again).
 
 ## Conventions
 

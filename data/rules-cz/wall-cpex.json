@@ -2,7 +2,7 @@
   "name": "cz-wall-cpex",
   "_comment": "CPEx consent-or-pay wall: Souhlasím (free with tracking) or 99 Kč/month. Accept only; never refused (D5).",
   "runContext": {
-    "urlPattern": "^https?://([a-z0-9-]+\\.)*(blesk|e15|reflex|zive|aktualne|lupa)\\.cz/"
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*(blesk|e15|reflex|zive|aktualne|lupa|centrum)\\.cz/"
   },
   "detectCmp": [
     {

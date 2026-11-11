@@ -1,5 +1,5 @@
 {
-  "name": "airbnb",
+  "name": "dt-airbnb",
   "_comment": "No stable attributes; buttons are Accept all / Only necessary / Manage, next to the cookie-policy text.",
   "runContext": {
     "urlPattern": "^https://([a-z0-9-]+\\.)*airbnb\\.[a-z.]+/"

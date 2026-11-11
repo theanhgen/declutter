@@ -75,6 +75,25 @@
       ],
       "run_at": "document_start",
       "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://m.youtube.com/*"
+      ],
+      "js": [
+        "shorts/dates-main.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://m.youtube.com/*"
+      ],
+      "js": [
+        "shorts/dates.js"
+      ],
+      "run_at": "document_start"
     }
   ],
   "declarative_net_request": {

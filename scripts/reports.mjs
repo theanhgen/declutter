@@ -2,7 +2,9 @@
 //   node scripts/reports.mjs [days=30]
 //   node scripts/reports.mjs --open [days=30]   -> only reports nobody has handled yet; exit 1 if there are any
 // A report is handled when its host is in canary/sites.json (added with the fix) and the report is older than the
-// commit that added it there, or when canary/reports-skip.json lists the host with the reason it needs no fix.
+// commit that added it there, or when canary/reports-skip.json lists the host with the reason it needs no fix:
+// { "host": { "reason": "…", "through": "2026-11-11" } } covers reports up to the end of that day (UTC), so a later
+// report of the same host is open again; a bare string (old form) covers every report of the host.
 // archive.sh runs --open before every upload, so a build never goes out with unread reports.
 import { execFileSync, execSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -36,7 +38,9 @@ if (open) {
   };
   rows = rows.filter((r) => {
     const host = new URL(r.url).host;
-    if (skip[host]) return false;
+    const s = skip[host];
+    if (typeof s === 'string') return false;
+    if (s?.through && new Date(r.at) < new Date(new Date(s.through).getTime() + 864e5)) return false;
     if (!sites.some((s) => s.host === host)) return true;
     return new Date(r.at) > addedAt(host);
   });

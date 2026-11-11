@@ -1,0 +1,39 @@
+{
+  "name": "browser-use",
+  "_comment": "browser-use.com's own banner (aside 'Cookie preferences', appears ~8 s after load; user report 2026-10-28). Buttons have no ids or classes of their own, so they are matched by their text (English-only site).",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*browser-use\\.com/"
+  },
+  "detectCmp": [
+    {
+      "exists": "xpath///aside[@aria-label=\"Cookie preferences\"]//button[normalize-space(.)=\"Reject\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "aside[aria-label=\"Cookie preferences\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///aside[@aria-label=\"Cookie preferences\"]//button[normalize-space(.)=\"Accept\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///aside[@aria-label=\"Cookie preferences\"]//button[normalize-space(.)=\"Reject\"]"
+    },
+    {
+      "waitForVisible": "aside[aria-label=\"Cookie preferences\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "aside[aria-label=\"Cookie preferences\"]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

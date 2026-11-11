@@ -1,0 +1,39 @@
+{
+  "name": "cz-tipsport",
+  "_comment": "Tipsport own banner (data-atid consent-button-*). Top-50 CZ sweep 2026-11-11.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*tipsport\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[data-atid=consent-button-reject-all]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[data-atid=consent-button-reject-all]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-atid=consent-button-accept-all]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-atid=consent-button-reject-all]"
+    },
+    {
+      "waitForVisible": "[data-atid=consent-button-reject-all]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "[data-atid=consent-button-reject-all]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}
