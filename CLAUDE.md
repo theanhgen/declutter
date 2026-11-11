@@ -27,6 +27,7 @@ app generated with xcodegen (team `28DMV2MR8T`). Tests and canary: Playwright's 
 - Safari: `npm run safari` (build, sign, install `~/Applications/Declutter.app`)
 - iPhone: `npm run ios` (build, sign, install on a paired iPhone; `IPHONE=<udid>` to pick one) · mobile test: `npm run test:mobile`
 - Load in Chrome: `chrome://extensions` → Developer mode → Load unpacked → `build/chrome`
+- App Store release: `UPLOAD=1 scripts/archive.sh`, then the `app-store-submit` skill (version, What's New, review notes + recording, build, submit)
 - Store: `npm run store` (store build: walls default manual; zips + 1280x800 screenshots in `dist/`); listing, permission justifications, checklist: `store/LISTING.md`
 - Canary job: `scripts/canary-agent.sh install|remove`; log `/tmp/declutter-canary.log`
 - User reports: `node scripts/reports.mjs [days]` (all) · `--open` (unhandled only, exit 1). Check them at the start of

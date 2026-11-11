@@ -145,7 +145,7 @@ handling ("send to developer" only). The full text is in App Store Connect; cont
 
 | Store | State (2026-10-02) | Notes |
 |---|---|---|
-| App Store (macOS + iOS) | Waiting for Review, build 1.0 (3) | App `6816072545`. App Privacy: Data Not Collected. Build 3 predates the posts switch. |
+| App Store (macOS + iOS) | 1.0 (6) live; 1.1 (7) Waiting for Review, submitted 2026-11-11 | App `6816072545`. App Privacy: Data Not Collected. 1.1: Playables, mobile upload dates, top-50 CZ rules, autoconsent 18.3.0. Review recording `dist/declutter-app-review-ios.mp4` re-attached (attachments don't carry over). |
 | Firefox AMO | Awaiting Review, 1.0.0 | Listing name `declutter: shorts & cookies`, slug `declutter-shorts-and-cookies` (`declutter-shorts-cookies` was taken). Categories: Privacy & Security; Photos, Music & Videos. MIT. Source zip uploaded, icon + 5 screenshots with captions. |
 | Chrome Web Store | Submitted for review 2026-10-02 | Item `ipggncgnmnbfbdkpgkollcpdjabfonim`, publisher `be12818b-259a-4c0a-860f-5e5ffc0fb652`, contact email verified. Category Tools, language English, 1 of 5 screenshots uploaded. Data usage: Web history only. Free, Public. |
 | Edge Add-ons | Not started | Partner Center account has no Edge developer enrolment yet. |
