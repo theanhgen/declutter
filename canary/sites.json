@@ -595,6 +595,11 @@
    "host": "www.google.cz",
    "expect": "clear",
    "note": "top-50 CZ (Similarweb, Oct 2026)"
+  },
+  {
+   "host": "sso.t-mobile.cz",
+   "expect": "clear",
+   "_note": "Same consent dialog as www.t-mobile.cz (consent.t-mobile.cz/dialog), and the canary shares one browser, so after www refuses there is no banner here. Run alone it is answered (done): node canary/run.mjs sso.t-mobile.cz"
   }
  ]
 }

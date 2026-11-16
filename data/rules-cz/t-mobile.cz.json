@@ -1,7 +1,7 @@
 {
   "name": "cz-t-mobile",
   "runContext": {
-    "urlPattern": "^https://www\\.t-mobile\\.cz/_cookies/dialog",
+    "urlPattern": "^https://(www\\.t-mobile\\.cz/_cookies/dialog|consent\\.t-mobile\\.cz/dialog)",
     "main": false,
     "frame": true
   },
