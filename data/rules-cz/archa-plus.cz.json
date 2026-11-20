@@ -1,0 +1,39 @@
+{
+  "name": "cz-archa-plus",
+  "_comment": "Own bar: Odmítnout vše / Přijmout vše as data-consent=none / all. Reported 2026-11-18.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*archa-plus\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookieBar [data-consent=\"none\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookieBar .step-1"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookieBar [data-consent=\"all\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookieBar [data-consent=\"none\"]"
+    },
+    {
+      "waitForVisible": "#cookieBar .step-1",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookieBar .step-1",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

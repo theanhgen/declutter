@@ -1,0 +1,36 @@
+{
+  "name": "cz-shoptet",
+  "_comment": "Shoptet shops (any domain): the .siteCookies bar, Odmítnout / Souhlasím as value=reject / value=all. Reported from www.bruxx.cz 2026-11-20.",
+  "detectCmp": [
+    {
+      "exists": ".js-siteCookies button.js-cookiesConsentSubmit[value=reject]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".js-siteCookies"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".js-siteCookies button.js-cookiesConsentSubmit[value=all]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".js-siteCookies button.js-cookiesConsentSubmit[value=reject]"
+    },
+    {
+      "waitForVisible": ".js-siteCookies",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".js-siteCookies",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

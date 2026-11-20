@@ -1,0 +1,36 @@
+{
+  "name": "cz-inspire-nwjs",
+  "_comment": "Inspire.cz's CMS (nwjs_cookie_consent): Souhlasím / Zamítnout souhlasy as data-agree-all / data-reject-all. Reported from www.3queens.cz 2026-11-20.",
+  "detectCmp": [
+    {
+      "exists": ".nwjs_cookie_consent .cookie_consent__alert__buttons [data-reject-all]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".cookie_consent__alert.nwjs_cookie_consent"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".nwjs_cookie_consent .cookie_consent__alert__buttons [data-agree-all]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".nwjs_cookie_consent .cookie_consent__alert__buttons [data-reject-all]"
+    },
+    {
+      "waitForVisible": ".cookie_consent__alert.nwjs_cookie_consent",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".cookie_consent__alert.nwjs_cookie_consent",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}
