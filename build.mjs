@@ -49,7 +49,10 @@ const TARGETS = {
   safari: {
     esbuild: ['safari16'],
     // Safari runs `scripts` as a non-persistent event page; more predictable than its service worker.
-    manifest: (m) => ({ ...m, background: { scripts: ['background.js'], persistent: false } }),
+    // Toolbar icon: Safari crops the transparent margin and scales the glyph up to fill its button (~19pt), so a
+    // padded 16-64px icon gets upscaled and blurs. Every size points at one unpadded 128px image Safari only scales down.
+    manifest: (m) => ({ ...m, background: { scripts: ['background.js'], persistent: false },
+      action: { ...m.action, default_icon: Object.fromEntries(Object.keys(m.action.default_icon).map((k) => [k, 'icons/toolbar-safari.png'])) } }),
   },
 };
 
@@ -234,6 +237,7 @@ async function buildTarget(name, data) {
   for (const s of [16, 32, 48, 128]) fs.writeFileSync(path.join(out, `icons/${s}.png`), png(s, { scale: s <= 32 ? 0.5625 : 0.75 }));
   // Safari draws the toolbar button larger than 16pt and on 2x/3x screens; from 32px alone it upscales and blurs.
   for (const s of [48, 64, 96]) fs.writeFileSync(path.join(out, `icons/toolbar-${s}.png`), png(s, { scale: 0.5625 }));
+  if (name === 'safari') fs.writeFileSync(path.join(out, 'icons/toolbar-safari.png'), png(128));
 
   const manifest = t.manifest({ ...readJson('extension/manifest.base.json'), version: pkg.version });
   fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2));

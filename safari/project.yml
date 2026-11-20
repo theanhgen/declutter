@@ -24,7 +24,7 @@ targets:
   Declutter:
     type: application
     platform: macOS
-    sources: [App, Shared/TipJar.swift]
+    sources: [App, Shared/TipJar.swift, Shared/Martian.swift, Shared/MartianMono.ttf, Shared/MartianMono-OFL.txt]
     scheme:
       storeKitConfiguration: Shared/Declutter.storekit
     settings:
@@ -86,7 +86,7 @@ targets:
   Declutter-iOS:
     type: application
     platform: iOS
-    sources: [iOSApp, Shared/TipJar.swift]
+    sources: [iOSApp, Shared/TipJar.swift, Shared/Martian.swift, Shared/MartianMono.ttf, Shared/MartianMono-OFL.txt]
     scheme:
       storeKitConfiguration: Shared/Declutter.storekit
     settings:

@@ -5,7 +5,10 @@ import SwiftUI
 struct DeclutterApp: App {
     // Start listening for StoreKit transactions at launch, not when the tip jar view appears: an Ask to Buy
     // approval can arrive while no window is open.
-    init() { TipJar.shared.listen() }
+    init() {
+        Martian.register()
+        TipJar.shared.listen()
+    }
 
     var body: some Scene {
         Window("declutter", id: "main") {
@@ -23,7 +26,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Image("Logo").resizable().scaledToFit().frame(width: 28, height: 28)
-                Text("declutter").font(.title2.bold())
+                Text("declutter").font(Martian.font(.title2, weight: 600))
             }
             Text(status)
                 .foregroundStyle(.secondary)
@@ -34,6 +37,7 @@ struct ContentView: View {
             Divider().padding(.vertical, 4)
             TipJarView()
         }
+        .font(Martian.font(.body))
         .padding(24)
         .frame(width: 380)
         .task { await refresh() }

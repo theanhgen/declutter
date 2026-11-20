@@ -94,35 +94,35 @@ struct TipJarView: View {
     }
 
     @ViewBuilder private var content: some View {
-        Text("tip jar").font(.system(.headline, design: .monospaced))
+        Text("tip jar").font(Martian.font(.headline, weight: 600))
         Text(jar.thanks ? "thank you." : "declutter is free. If it saves you clicks, a tip keeps the rules up to date.")
-            .font(.system(.callout, design: .monospaced))
+            .font(Martian.font(.callout, weight: 300))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
         HStack(spacing: 8) {
             ForEach(jar.products, id: \.id) { p in
                 Button(p.displayPrice) { Task { await jar.buy(p) } }
                     .buttonStyle(.bordered)
-                    .font(.system(.body, design: .monospaced))
+                    .font(Martian.font(.body))
                     .disabled(jar.busy)
             }
             if jar.loadFailed {
                 Button("retry") { Task { await jar.load() } }
                     .buttonStyle(.bordered)
-                    .font(.system(.body, design: .monospaced))
+                    .font(Martian.font(.body))
             }
             #if DEBUG
             // Debug builds launched outside Xcode have no StoreKit config and the products are not live yet;
             // show the prices (from Declutter.storekit) so the layout can be seen and screenshotted.
             if jar.products.isEmpty && !jar.loadFailed {
                 ForEach(["$0.99", "$2.99", "$4.99"], id: \.self) { price in
-                    Button(price) {}.buttonStyle(.bordered).font(.system(.body, design: .monospaced))
+                    Button(price) {}.buttonStyle(.bordered).font(Martian.font(.body))
                 }
             }
             #endif
         }
         if let note = jar.note {
-            Text(note).font(.system(.caption, design: .monospaced)).foregroundStyle(.secondary)
+            Text(note).font(Martian.font(.caption, weight: 300)).foregroundStyle(.secondary)
         }
     }
 }

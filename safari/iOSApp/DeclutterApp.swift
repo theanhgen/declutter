@@ -4,7 +4,10 @@ import SwiftUI
 struct DeclutterApp: App {
     // Start listening for StoreKit transactions at launch, not when the tip jar view appears: an Ask to Buy
     // approval can arrive while no window is open.
-    init() { TipJar.shared.listen() }
+    init() {
+        Martian.register()
+        TipJar.shared.listen()
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -19,17 +22,17 @@ struct ContentView: View {
             HStack(spacing: 12) {
                 Image("Logo").resizable().scaledToFit().frame(width: 40, height: 40)
                 Text("declutter")
-                    .font(.system(.largeTitle, design: .monospaced))
+                    .font(Martian.font(.largeTitle))
             }
             Text("Hides YouTube Shorts and answers cookie banners in Safari.")
-                .font(.system(.body, design: .monospaced))
+                .font(Martian.font(.body))
             VStack(alignment: .leading, spacing: 8) {
                 Text("to turn it on:")
                 Text("1. Settings → Apps → Safari → Extensions → declutter")
                 Text("2. Allow Extension, and set Other Websites to Allow")
                 Text("3. In Safari, tap the page menu (the icon at the left of the address bar) to see what it did on a page")
             }
-            .font(.system(.callout, design: .monospaced))
+            .font(Martian.font(.callout, weight: 300))
             .foregroundStyle(.secondary)
             TipJarView().padding(.top, 8)
             Spacer()
