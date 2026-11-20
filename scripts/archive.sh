@@ -70,10 +70,12 @@ for p in ${1:-macos ios}; do
   else echo "$p: archive $archive, export $(ls "$DIST/$p" | grep -E '\.(pkg|ipa)$')"; fi
 done
 # Archiving leaves a copy of the Mac app in DerivedData, and Safari lists every registered copy as its own
-# extension. Unregister and delete it so only ~/Applications/Declutter.app remains.
+# extension. Unregister it (pluginkit and Launch Services) and delete it so only ~/Applications/Declutter.app remains.
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 for app in "$HOME"/Library/Developer/Xcode/DerivedData/Declutter-*/Build/Intermediates.noindex/ArchiveIntermediates/*/InstallationBuildProductsLocation/Applications/Declutter.app; do
   [ -d "$app" ] || continue
+  # pluginkit keeps its own registration of the extension; without -r Safari still lists the deleted copy.
+  pluginkit -r "$app/Contents/PlugIns/DeclutterExtension.appex" 2>/dev/null || true
   "$LSREGISTER" -u "$app" 2>/dev/null || true
   rm -rf "$app"
 done
