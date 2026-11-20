@@ -50,9 +50,10 @@ const TARGETS = {
     esbuild: ['safari16'],
     // Safari runs `scripts` as a non-persistent event page; more predictable than its service worker.
     // Toolbar icon: Safari crops the transparent margin and scales the glyph up to fill its button (~19pt), so a
-    // padded 16-64px icon gets upscaled and blurs. Every size points at one unpadded 128px image Safari only scales down.
+    // padded 16-64px icon gets upscaled and blurs. Every size, including the toolbar's 19/38, points at one 128px image
+    // whose glyph fills it edge to edge, so whatever size Safari resamples it to first, the glyph keeps every pixel.
     manifest: (m) => ({ ...m, background: { scripts: ['background.js'], persistent: false },
-      action: { ...m.action, default_icon: Object.fromEntries(Object.keys(m.action.default_icon).map((k) => [k, 'icons/toolbar-safari.png'])) } }),
+      action: { ...m.action, default_icon: Object.fromEntries([16, 19, 32, 38, 48, 64, 96, 128].map((k) => [k, 'icons/toolbar-safari.png'])) } }),
   },
 };
 
@@ -233,11 +234,14 @@ async function buildTarget(name, data) {
     + shortsCss(data.shorts.playables ?? [], 'playables'));
   fs.writeFileSync(path.join(out, 'data.json'), JSON.stringify(data));
   fs.mkdirSync(path.join(out, 'icons'));
-  // Toolbar sizes get a margin like other toolbar icons; the glyph alone at full size looks oversized.
-  for (const s of [16, 32, 48, 128]) fs.writeFileSync(path.join(out, `icons/${s}.png`), png(s, { scale: s <= 32 ? 0.5625 : 0.75 }));
+  // Toolbar sizes (16/32 and toolbar-*) fill the slot like Chrome's own icons; the grid's own margin is enough
+  // (0.5625 left the glyph at ~44% of the slot, half the size of its neighbours). 48/128 are the store and
+  // extension-page icons, which keep the usual padding. Safari's toolbar has its own image (TARGETS.safari).
+  for (const s of [16, 32, 48, 128]) fs.writeFileSync(path.join(out, `icons/${s}.png`), png(s, { scale: s <= 32 ? 1 : 0.75 }));
   // Safari draws the toolbar button larger than 16pt and on 2x/3x screens; from 32px alone it upscales and blurs.
-  for (const s of [48, 64, 96]) fs.writeFileSync(path.join(out, `icons/toolbar-${s}.png`), png(s, { scale: 0.5625 }));
-  if (name === 'safari') fs.writeFileSync(path.join(out, 'icons/toolbar-safari.png'), png(128));
+  for (const s of [48, 64, 96]) fs.writeFileSync(path.join(out, `icons/toolbar-${s}.png`), png(s));
+  // scale 1.26: the glyph spans 12.5 of the grid's 16 units; this fills the canvas with a hair for antialiasing.
+  if (name === 'safari') fs.writeFileSync(path.join(out, 'icons/toolbar-safari.png'), png(128, { scale: 1.26 }));
 
   const manifest = t.manifest({ ...readJson('extension/manifest.base.json'), version: pkg.version });
   fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2));

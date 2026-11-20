@@ -32,12 +32,8 @@ async function main() {
     Object.assign(s, patch);
   };
   for (const k of ['shorts', 'posts', 'playables', 'consent']) {
-    $(k).setAttribute('aria-checked', String(s[k]));
-    $(k).onclick = () => {
-      const on = $(k).getAttribute('aria-checked') !== 'true';
-      $(k).setAttribute('aria-checked', String(on));
-      save({ [k]: on });
-    };
+    $(k).checked = Boolean(s[k]);
+    $(k).onchange = () => save({ [k]: $(k).checked });
   }
 
   // ?tab=<id> renders the popup for a given tab (tests open it as a page).

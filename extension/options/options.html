@@ -48,7 +48,8 @@
   .choice .current { color: var(--fg); }
   .choice a:link, .choice a:visited { color: var(--muted); text-decoration-color: var(--dim-line); }
   .choice a:hover { color: var(--fg); }
-  .bullet { position: relative; margin-left: 23px; }
+  /* overflow-wrap: report lines are whole URLs; unbroken, they widen the page and iOS zooms it all out. */
+  .bullet { position: relative; margin-left: 23px; overflow-wrap: anywhere; }
   .bullet::before {
     content: " "; position: absolute; left: -20px; top: 8px;
     width: 5px; height: 5px; border-radius: 100%; background: var(--dot, currentColor);

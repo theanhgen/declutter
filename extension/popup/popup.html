@@ -60,15 +60,15 @@
 
   /* State as words in one right-hand column, like the settings page: [on] / off. Brackets mark the current word; the
      other is fainter. Both forms are ten characters, so the column holds. */
-  .toggle {
-    flex: none; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer;
-    white-space: pre;
-  }
+  .toggle { flex: none; white-space: pre; }
   .toggle .sep, .toggle .w { color: var(--faint); }
-  .toggle[aria-checked="true"] .on, .toggle[aria-checked="false"] .off { color: var(--muted); }
-  .toggle[aria-checked="true"] .on::before, .toggle[aria-checked="false"] .off::before { content: "["; }
-  .toggle[aria-checked="true"] .on::after, .toggle[aria-checked="false"] .off::after { content: "]"; }
-  .toggle:focus { outline: none; }
+  .hit:checked + .toggle .on, .hit:not(:checked) + .toggle .off { color: var(--muted); }
+  .hit:checked + .toggle .on::before, .hit:not(:checked) + .toggle .off::before { content: "["; }
+  .hit:checked + .toggle .on::after, .hit:not(:checked) + .toggle .off::after { content: "]"; }
+  /* Under the words, a real switch covering the whole row, invisible: iOS plays its haptic only when the finger
+     toggles a native switch (input type=checkbox switch). The words show its state. */
+  label.row { position: relative; }
+  label.row .hit { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
 
   /* The current row (pointer or keyboard): one ink band across the row, text reversed. */
   label.row:hover, label.row:has(:focus-visible), button.row:not(:disabled):hover, button.row:focus-visible {
@@ -111,10 +111,10 @@
   <header><h1><img src="d.svg" alt="" class="logo">declutter</h1><span id="host"></span></header>
 
   <div id="toggles">
-    <label class="row"><span class="label">hide shorts</span><button type="button" role="switch" class="toggle" id="shorts"><span aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></button></label>
-    <label class="row"><span class="label">hide posts in feeds</span><button type="button" role="switch" class="toggle" id="posts"><span aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></button></label>
-    <label class="row"><span class="label">hide playables</span><button type="button" role="switch" class="toggle" id="playables"><span aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></button></label>
-    <label class="row"><span class="label">answer cookie banners</span><button type="button" role="switch" class="toggle" id="consent"><span aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></button></label>
+    <label class="row"><span class="label">hide shorts</span><input type="checkbox" switch class="hit" id="shorts"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></label>
+    <label class="row"><span class="label">hide posts in feeds</span><input type="checkbox" switch class="hit" id="posts"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></label>
+    <label class="row"><span class="label">hide playables</span><input type="checkbox" switch class="hit" id="playables"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></label>
+    <label class="row"><span class="label">answer cookie banners</span><input type="checkbox" switch class="hit" id="consent"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></label>
   </div>
 
   <section id="pageSection" hidden>
