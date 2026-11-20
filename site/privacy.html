@@ -52,14 +52,15 @@
   links for reporting what went wrong. That page has no script and records nothing.</p>
 
 <h2 id="reports">reports you send</h2>
-<p>After you press "not handled right", the menu offers "send to developer" and shows what it sends. Only if you
-  press it, declutter sends: the site's address only (for example https://www.idnes.cz, never the page's path,
+<p>The menu's "send to developer: not handled right" shows what it sends before you press it. Only if you press
+  it, declutter sends: the site's address only (for example https://www.idnes.cz, never the page's path,
   query or fragment), what declutter saw on that page
   (for example "failed" and the banner's platform name), the declutter version and the browser type. No account,
   identifier, cookies, page content or other browsing is included. Reports are stored in a database hosted by
   Supabase (EU, Frankfurt) that only the developer can read, and are used only to fix how declutter handles
   those sites. Like any web request, it reveals your IP address to Supabase's servers, which keep request logs
-  briefly; declutter does not store it. To have a report deleted, open an issue or email via the link below.</p>
+  briefly; declutter does not store it. The same press keeps the site, with the page's full address, in settings →
+  reported sites on your device; that copy is never sent. To have a report deleted, open an issue or email via the link below.</p>
 
 <h2>third parties</h2>
 <p>Supabase stores reports you choose to send, and nothing else. GitHub Pages serves the rule list and the

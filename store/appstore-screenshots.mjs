@@ -36,7 +36,7 @@ for (const [device, d] of Object.entries(DEVICES)) {
     await ui.emulateMedia({ colorScheme: 'light' });
     let png;
     if (!shot.tab) {
-      await ui.setViewportSize({ width: (d.ios ? Math.min(d.w - 48, 420) : 300) * d.scale, height: 900 * d.scale });
+      await ui.setViewportSize({ width: (d.ios ? Math.min(d.w - 48, 420) : 352) * d.scale, height: 900 * d.scale });
       await ui.goto(`chrome-extension://${extId}/popup/popup.html?tab=${tabId}`);
       await ui.evaluate(([ios, z]) => { if (ios) document.documentElement.classList.add('ios'); document.documentElement.style.zoom = z; }, [d.ios, d.scale]);
       await ui.waitForTimeout(800);
@@ -66,7 +66,7 @@ for (const [device, d] of Object.entries(DEVICES)) {
       .t { font-size: ${landscape ? 40 : Math.round(d.w / 13)}px; line-height: 1.15; }
       p { font-size: ${landscape ? 18 : Math.round(d.w / 30)}px; line-height: 1.5; color: #737373; margin: 18px 0 0; }
       img { box-shadow: 0 12px 48px rgba(0,0,0,.14); border-radius: 16px; background: #fff; }
-      img.pop { width: ${d.ios ? Math.min(d.w - 48, 420) : 300}px; }
+      img.pop { width: ${d.ios ? Math.min(d.w - 48, 420) : 352}px; }
       img.page { width: ${landscape ? 760 : d.w - 48}px; }
     </style>${caption}${frame}`);
     await canvas.waitForTimeout(200);

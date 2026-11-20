@@ -43,7 +43,14 @@ check('per-site accept: o2 accepted', r.state?.consent === 'acceptedSite' && !r.
 check('counter: accepted', (await local('stats'))?.accepted >= 1);
 check('chip: shown, said "cookies accepted"', await seen && await chipSaid() === 'cookies accepted', await chipSaid());
 
-// Popup: the site control shows "accept" pressed; "report" saves the site.
+// Popup: the site control shows "accept" pressed; "send to developer" saves the site and sends it. The send is
+// caught in the service worker, so the test never reaches the reports table.
+await sw.evaluate(() => {
+  const real = self.fetch;
+  self.fetch = (url, opts) => String(url).includes('/rest/v1/reports')
+    ? (self.__sentReport = JSON.parse(opts.body), Promise.resolve(new Response(null, { status: 201 })))
+    : real(url, opts);
+});
 const pop = await ctx.newPage();
 await pop.goto(`chrome-extension://${extId}/popup/popup.html?tab=${await tabIdOf(page.url())}`);
 await pop.waitForTimeout(800);
@@ -51,6 +58,9 @@ check('popup: site control shows accept', await pop.locator('#siteMode [data-mod
 await pop.click('#report'); await pop.waitForTimeout(500);
 const reports = await local('reports');
 check('report saved locally', reports?.[0]?.host === 'www.o2.cz', JSON.stringify(reports?.[0]));
+const sentReport = await sw.evaluate(() => self.__sentReport);
+check('report sent: the site only', sentReport?.url === 'https://www.o2.cz', JSON.stringify(sentReport));
+check('popup: says sent', (await pop.locator('#report').textContent()) === 'sent, thanks');
 
 // Popup: switching to "leave" stores the exception (and drops the accept).
 await pop.click('#siteMode [data-mode=ignore]').catch(() => {}); // popup closes itself

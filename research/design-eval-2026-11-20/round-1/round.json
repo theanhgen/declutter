@@ -1,0 +1,31 @@
+{
+  "round": 1,
+  "project": "declutter",
+  "contract": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-1/contract.json",
+  "scope": [
+    "popup",
+    "all"
+  ],
+  "designer": "session 0e72846a",
+  "screens": [
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-1/screens/popup-new-light.png",
+      "caption": "popup, banner refused, light (uncommitted 2026-11-18)"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-1/screens/popup-new-dark.png",
+      "caption": "same, dark"
+    }
+  ],
+  "today": [
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-research/declutter-20261117/today/popup-light.png",
+      "caption": "popup at 15d82ad, light"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-research/declutter-20261117/today/popup-dark.png",
+      "caption": "popup at 15d82ad, dark"
+    }
+  ],
+  "contract_source": "/Users/nguyentheanh/Desktop/bitbybit/02-personal/declutter/research/direction-2026-11-18.json"
+}

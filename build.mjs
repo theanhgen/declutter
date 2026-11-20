@@ -218,6 +218,8 @@ async function buildTarget(name, data) {
   };
   copy('extension/popup/popup.html', 'popup/popup.html');
   copy('extension/popup/d.svg', 'popup/d.svg');
+  // Martian Mono (OFL-1.1, @fontsource-variable/martian-mono 5.3.0): the same mono on every OS.
+  for (const f of ['martian-mono-latin.woff2', 'martian-mono-latin-ext.woff2', 'OFL.txt']) copy(`extension/fonts/${f}`, `fonts/${f}`);
   copy('extension/options/options.html', 'options/options.html');
   copy('extension/welcome/welcome.html', 'welcome/welcome.html');
   copy('extension/consent/gpc.js', 'consent/gpc.js');

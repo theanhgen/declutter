@@ -1,0 +1,92 @@
+{
+  "round": 2,
+  "project": "declutter",
+  "contract": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-2/contract.json",
+  "scope": [
+    "popup",
+    "all"
+  ],
+  "designer": "subagent (round-2/designer-prompt.md)",
+  "screens": [
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-2/screens/popup-light.png",
+      "state": "popup-light"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-2/screens/popup-dark.png",
+      "state": "popup-dark"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-2/screens/popup-hover-row2-light.png",
+      "state": "popup-hover-row2-light"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-2/screens/popup-keyboard-focus-light.png",
+      "state": "popup-keyboard-focus-light"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-2/screens/popup-posts-off-light.png",
+      "state": "popup-posts-off-light"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-2/screens/popup-posts-off-dark.png",
+      "state": "popup-posts-off-dark"
+    }
+  ],
+  "today": [
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/now/popup-light.png",
+      "state": "popup-light",
+      "caption": "15d82ad"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/now/popup-dark.png",
+      "state": "popup-dark",
+      "caption": "15d82ad"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/now/popup-hover-row2-light.png",
+      "state": "popup-hover-row2-light",
+      "caption": "15d82ad"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/now/popup-keyboard-focus-light.png",
+      "state": "popup-keyboard-focus-light",
+      "caption": "15d82ad"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/now/popup-posts-off-light.png",
+      "state": "popup-posts-off-light",
+      "caption": "15d82ad"
+    },
+    {
+      "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/now/popup-posts-off-dark.png",
+      "state": "popup-posts-off-dark",
+      "caption": "15d82ad"
+    }
+  ],
+  "today_note": "rendered from 15d82ad (git archive) with the same shot.mjs; replaces the arena run screenshots, which showed a different page state",
+  "option_images": {
+    "site-choice pill": [
+      [
+        {
+          "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-2/options/opt-1-light.png",
+          "caption": ""
+        }
+      ],
+      [
+        {
+          "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-2/options/opt-2-light.png",
+          "caption": ""
+        }
+      ],
+      [
+        {
+          "file": "/Users/nguyentheanh/.cache/arena-eval/declutter-20261120/round-2/options/opt-3-light.png",
+          "caption": ""
+        }
+      ]
+    ]
+  },
+  "contract_source": "/Users/nguyentheanh/Desktop/bitbybit/02-personal/declutter/research/direction-2026-11-18.json"
+}

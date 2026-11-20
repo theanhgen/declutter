@@ -8,15 +8,16 @@ if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 
   document.documentElement.classList.add('ios');
 }
 
+// One status line and a quieter sub-line. kind 'done': the line names what was handled ("cookie banner") and is struck
+// through on a filled row; what was done with it goes in the sub-line ("refused · onetrust").
 function statusRow(kind, text, sub) {
   const row = document.createElement('div');
-  row.className = 'row';
-  const dot = Object.assign(document.createElement('span'), { className: `dot ${kind}` });
-  const label = Object.assign(document.createElement('span'), { className: 'label', textContent: text });
-  if (sub) label.append(Object.assign(document.createElement('span'), { className: 'sub', textContent: sub }));
-  row.append(dot, label);
+  row.className = kind ? `status ${kind}` : 'status';
+  row.append(Object.assign(document.createElement(kind === 'done' ? 's' : 'span'), { className: 'line', textContent: text }));
+  if (sub) row.append(Object.assign(document.createElement('span'), { className: 'sub', textContent: sub }));
   return row;
 }
+const handled = (thing, ...sub) => statusRow('done', thing, sub.filter(Boolean).join(' · '));
 
 async function main() {
   $('settings').onclick = () => { api.runtime.openOptionsPage(); window.close(); };
@@ -31,8 +32,12 @@ async function main() {
     Object.assign(s, patch);
   };
   for (const k of ['shorts', 'posts', 'playables', 'consent']) {
-    $(k).checked = s[k];
-    $(k).onchange = () => save({ [k]: $(k).checked });
+    $(k).setAttribute('aria-checked', String(s[k]));
+    $(k).onclick = () => {
+      const on = $(k).getAttribute('aria-checked') !== 'true';
+      $(k).setAttribute('aria-checked', String(on));
+      save({ [k]: on });
+    };
   }
 
   // ?tab=<id> renders the popup for a given tab (tests open it as a page).
@@ -67,8 +72,8 @@ async function main() {
     rows.push(statusRow('bad', "declutter isn't running on this page yet", 'it was open before declutter was installed or updated'));
     $('reload').hidden = false;
     $('reload').onclick = () => { api.tabs.reload(tab.id); window.close(); };
-  } else if (state.consent === 'done') rows.push(statusRow('ok', state.cosmetic ? 'banner hidden' : 'cookies refused', state.choiceFallback ? `${state.cmp} — your mix isn't supported by this banner, so everything was refused` : state.cmp));
-  else if (state.consent === 'choice') rows.push(statusRow('ok', 'your choice applied', `${state.cmp} via ${state.adapter}`));
+  } else if (state.consent === 'done') rows.push(handled('cookie banner', state.cosmetic ? 'hidden' : 'refused', state.cmp, state.choiceFallback && "your mix isn't supported by this banner, so everything was refused"));
+  else if (state.consent === 'choice') rows.push(handled('cookie banner', 'your choice applied', `${state.cmp} via ${state.adapter}`));
   else if (failed) rows.push(statusRow('bad', "declutter couldn't answer this banner", 'answer it yourself on the page. reporting it helps get it fixed.'));
   else if (state.consent === 'wall') {
     rows.push(statusRow('wall', 'pay wall: agree or pay', state.looping
@@ -80,9 +85,9 @@ async function main() {
       window.close();
     };
   } else if (state.consent === 'accepting') rows.push(statusRow('wall', 'accepting the wall…', state.cmp));
-  else if (state.consent === 'accepted') rows.push(statusRow('wall', 'pay wall accepted', state.cmp));
+  else if (state.consent === 'accepted') rows.push(handled('pay wall', 'accepted', state.cmp));
   else if (state.consent === 'paused') rows.push(statusRow('', 'banners left alone here'));
-  else if (state.consent === 'acceptedSite') rows.push(statusRow('ok', 'cookies accepted (your choice)', state.cmp));
+  else if (state.consent === 'acceptedSite') rows.push(handled('cookie banner', 'accepted (your choice)', state.cmp));
   else if (state.consent === 'working') rows.push(statusRow('', `answering ${state.cmp}…`));
   else rows.push(statusRow('', 'no known cookie banner found'));
   if (state.shortsLeak > 0) {
@@ -112,26 +117,23 @@ async function main() {
   $('report').hidden = false;
   // When declutter failed, reporting is the next step: put it first.
   if (failed) $('actions').prepend($('report'));
+  // One press saves the site on this device (settings → reported sites, with the page's full address) and sends it.
+  // The note says exactly what goes out before the press.
   const sendUrl = reportUrl(tab.url);
+  $('sendNote').textContent = `sends ${sendUrl} (the site, not the page), what declutter saw here, and its version. nothing else.`;
+  $('sendNote').hidden = false;
   $('report').onclick = async () => {
-    await api.runtime.sendMessage({ type: 'report', tabId: tab.id });
-    $('report').querySelector('.label').textContent = 'reported, thanks';
+    // Firefox: sending a page address is optional data collection, granted in its own prompt (from this click, so
+    // first). Refused: the site is still saved here, just not sent.
+    const mayCollect = __TARGET__ !== 'firefox'
+      || await api.permissions.request({ data_collection: ['browsingActivity'] }).catch(() => false);
     $('report').disabled = true;
-    $('reported').hidden = false;
-    // Offer to send it, showing exactly what goes out. Nothing is sent without this second press.
-    if (!sendUrl) return;
-    $('sendNote').textContent = `sends ${sendUrl} (the site, not the page), what declutter saw here, and its version. nothing else.`;
-    $('sendNote').hidden = false;
-    $('send').hidden = false;
-  };
-  $('send').onclick = async () => {
-    // Firefox: sending a page address is optional data collection, granted in its own prompt (from this click).
-    if (__TARGET__ === 'firefox' && !(await api.permissions.request({ data_collection: ['browsingActivity'] }))) return;
-    $('send').disabled = true;
+    await api.runtime.sendMessage({ type: 'report', tabId: tab.id });
     // The background sends this exact address, and nothing if the tab has moved to another site since.
-    const ok = await api.runtime.sendMessage({ type: 'sendReport', tabId: tab.id, url: sendUrl });
-    $('send').querySelector('.label').textContent = ok ? 'sent, thanks' : 'could not send, try later';
-    if (!ok) $('send').disabled = false;
+    const sent = mayCollect && await api.runtime.sendMessage({ type: 'sendReport', tabId: tab.id, url: sendUrl });
+    $('report').querySelector('.label').textContent =
+      sent ? 'sent, thanks' : mayCollect ? 'saved here, could not send: try again later' : 'saved here, not sent';
+    if (mayCollect && !sent) $('report').disabled = false;
   };
 }
 main();

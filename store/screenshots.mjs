@@ -19,7 +19,7 @@ if (!r.ok) throw new Error(`stackoverflow not refused: ${JSON.stringify(r.state)
 const tabId = await sw.evaluate(async (u) => (await chrome.tabs.query({})).find((t) => t.url === u)?.id, page.url());
 const pop = await ctx.newPage();
 await pop.emulateMedia({ colorScheme: 'light' });
-await pop.setViewportSize({ width: 300, height: 600 });
+await pop.setViewportSize({ width: 352, height: 600 });
 await pop.goto(`chrome-extension://${extId}/popup/popup.html?tab=${tabId}`);
 await pop.waitForTimeout(800);
 const popupPng = await pop.locator('body').screenshot();
@@ -33,7 +33,7 @@ await shot.setContent(`<body style="margin:0;height:800px;display:flex;align-ite
   <div style="max-width:420px"><div style="font-size:34px;line-height:1.2">cookie banners,<br>answered for you</div>
   <p style="font-size:17px;line-height:1.5;color:#737373">Refuses tracking by default, or applies the categories you
   allow. Per-site accept / refuse / leave alone. No tracking.</p></div>
-  <img src="data:image/png;base64,${popupPng.toString('base64')}" style="width:300px;border-radius:14px;
+  <img src="data:image/png;base64,${popupPng.toString('base64')}" style="width:352px;border-radius:14px;
   box-shadow:0 10px 40px rgba(0,0,0,.14)"></body>`);
 await shot.screenshot({ path: path.join(out, '1-popup.png') });
 

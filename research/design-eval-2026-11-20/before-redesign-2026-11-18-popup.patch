@@ -1,0 +1,202 @@
+diff --git a/build.mjs b/build.mjs
+index 7a070ac..468a8ff 100644
+--- a/build.mjs
++++ b/build.mjs
+@@ -218,6 +218,8 @@ async function buildTarget(name, data) {
+   };
+   copy('extension/popup/popup.html', 'popup/popup.html');
+   copy('extension/popup/d.svg', 'popup/d.svg');
++  // Martian Mono (OFL-1.1, @fontsource-variable/martian-mono 5.3.0): the same mono on every OS.
++  for (const f of ['martian-mono-latin.woff2', 'martian-mono-latin-ext.woff2', 'OFL.txt']) copy(`extension/fonts/${f}`, `fonts/${f}`);
+   copy('extension/options/options.html', 'options/options.html');
+   copy('extension/welcome/welcome.html', 'welcome/welcome.html');
+   copy('extension/consent/gpc.js', 'consent/gpc.js');
+diff --git a/extension/popup/popup.html b/extension/popup/popup.html
+index 762c9b3..643af10 100644
+--- a/extension/popup/popup.html
++++ b/extension/popup/popup.html
+@@ -4,14 +4,26 @@
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <style>
+-  /* Same type as the settings page (monospace, lowercase), laid out like an iOS grouped list. */
++  /* The settings page's grammar in the popup's cards: one mono, ink on paper, state written as words (on / off),
++     the chosen side of a pill filled in ink. No system blue or green. */
++  @font-face {
++    font-family: "Martian Mono"; font-style: normal; font-display: swap; font-weight: 100 800; font-stretch: 75% 112.5%;
++    src: url(../fonts/martian-mono-latin.woff2) format("woff2");
++    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++  }
++  @font-face {
++    font-family: "Martian Mono"; font-style: normal; font-display: swap; font-weight: 100 800; font-stretch: 75% 112.5%;
++    src: url(../fonts/martian-mono-latin-ext.woff2) format("woff2");
++    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
++  }
+   :root {
+     color-scheme: light dark;
+-    --bg: #f2f2f7; --card: #fff; --fg: hsl(0, 0%, 10%); --muted: #8a8a8e; --sep: rgba(60, 60, 67, .18);
+-    --green: #34c759; --orange: #ff9500; --red: #ff3b30; --blue: #007aff; --grey: #aeaeb2;
++    --bg: #f5f5f4; --card: #fff; --fg: #1a1a1a; --muted: #6b6b6b; --line: #d6d6d6; --sep: #ededed;
++    --off: #ebebeb; --on-ink: #fff;
++    --ok: #2f9e6a; --wall: #d9822b; --bad: #e5484d; --idle: #b0b0b0;
+   }
+   @media (prefers-color-scheme: dark) {
+-    :root { --bg: #000; --card: #1c1c1e; --fg: hsl(0, 0%, 92%); --muted: #8d8d93; --sep: rgba(84, 84, 88, .6); --blue: #0a84ff; }
++    :root { --bg: #171717; --card: #222; --fg: #e3e3e3; --muted: #9c9c9c; --line: #3d3d3d; --sep: #2e2e2e; --off: #3a3a3a; --on-ink: #171717; --idle: #6b6b6b; }
+   }
+   * { box-sizing: border-box; }
+   [hidden] { display: none !important; }
+@@ -19,63 +31,65 @@
+   body {
+     margin: 0; padding: 14px 14px 16px; width: 300px;
+     background: var(--bg); color: var(--fg);
+-    font: 13px/1.4 ui-monospace, "SF Mono", Menlo, monospace;
++    font: 12px/1.45 "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace; font-stretch: 81%;
+     -webkit-font-smoothing: antialiased;
+   }
+-  html.ios body { width: auto; padding: 16px 16px 24px; font-size: 15px; }
++  html.ios body { width: auto; padding: 16px 16px 24px; font-size: 14px; }
+   header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 4px 12px; }
+-  h1 { margin: 0; font-size: 1.35em; font-weight: normal; display: flex; align-items: center; gap: 8px; }
++  h1 { margin: 0; font-size: 1.33em; font-weight: normal; display: flex; align-items: center; gap: 8px; }
+   /* The rose d from the app icon, sized to the wordmark's cap height. */
+   .logo { width: 1.1em; height: 1.1em; flex: none; }
+-  #host { color: var(--muted); font-size: .85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+-  .caption { margin: 16px 12px 6px; color: var(--muted); font-size: .8em; text-transform: lowercase; }
++  #host { color: var(--muted); font-size: .92em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++  .caption { margin: 16px 12px 6px; color: var(--muted); font-size: .92em; }
+   .group { background: var(--card); border-radius: 12px; overflow: hidden; }
+   .row {
+-    display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px;
++    display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 6px 14px;
+     width: 100%; border: 0; background: none; color: inherit; font: inherit; text-align: left;
+   }
++  html.ios .row { min-height: 44px; }
+   /* separator above every visible row except the first visible one */
+   .row:not([hidden]) ~ .row:not([hidden]) { box-shadow: inset 0 1px 0 var(--sep); }
+   .row .label { flex: 1; }
++  label.row { padding-right: 8px; cursor: pointer; }
++  /* Focus: dim a switched-off row. */
++  label.row:has([aria-checked="false"]) .label { color: var(--muted); }
+   button.row { cursor: pointer; }
+   button.row:active { background: var(--sep); }
+-  .action { color: var(--blue); }
+-  .action.wall { color: var(--orange); }
+-  .chevron { color: var(--grey); }
+-  .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--grey); }
+-  .dot.ok { background: var(--green); } .dot.wall { background: var(--orange); } .dot.bad { background: var(--red); }
+-  .sub { display: block; color: var(--muted); font-size: .85em; }
+-  /* iOS switch */
+-  input.switch {
+-    appearance: none; -webkit-appearance: none; flex: none; margin: 0; cursor: pointer;
+-    width: 42px; height: 26px; border-radius: 13px; background: var(--sep); position: relative; transition: background .2s;
+-  }
+-  html.ios input.switch { width: 51px; height: 31px; border-radius: 16px; }
+-  input.switch::after {
+-    content: ""; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%;
+-    background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, .2); transition: transform .2s;
+-  }
+-  html.ios input.switch::after { width: 27px; height: 27px; }
+-  input.switch:checked { background: var(--green); }
+-  /* iOS segmented control */
+-  .segmented { display: flex; flex: 1; padding: 2px; border-radius: 9px; background: var(--sep); }
+-  .segmented button {
+-    flex: 1; border: 0; border-radius: 7px; padding: 6px 4px; background: none; color: inherit; font: inherit; font-size: .9em; cursor: pointer;
++  button.row:disabled { cursor: default; }
++  .chevron { color: var(--muted); }
++  .dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--idle); align-self: baseline; transform: translateY(-1px); }
++  .dot.ok { background: var(--ok); } .dot.wall { background: var(--wall); } .dot.bad { background: var(--bad); }
++  #status .row { align-items: baseline; padding-top: 11px; padding-bottom: 11px; }
++  /* Handled: what was answered is struck through. */
++  s { color: var(--muted); text-decoration-thickness: 1px; }
++  .sub { display: block; color: var(--muted); font-size: .92em; }
++  /* Pills: the chosen side filled. Toggles read on | off; the site choice reads refuse | accept | leave. */
++  .toggle, .segmented { display: flex; padding: 2px; border: 1px solid var(--line); border-radius: 999px; background: none; }
++  .toggle { flex: none; margin: 0; font: inherit; color: inherit; cursor: pointer; }
++  .toggle span, .segmented button {
++    border: 0; border-radius: 999px; background: none; color: var(--muted); font: inherit; letter-spacing: .04em;
+   }
+-  .segmented button[aria-pressed="true"] { background: var(--card); box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
+-  .note { margin: 6px 12px 0; color: var(--muted); font-size: .8em; }
+-  input.switch:checked::after { transform: translateX(16px); }
+-  html.ios input.switch:checked::after { transform: translateX(20px); }
++  .toggle span { padding: 3px 7px; font-size: .875em; }
++  html.ios .toggle span { padding: 5px 12px; }
++  .toggle[aria-checked="true"] span:first-child { background: var(--fg); color: var(--on-ink); }
++  .toggle[aria-checked="false"] span:last-child { background: var(--off); color: var(--fg); }
++  .segmented { flex: 1; }
++  .segmented button { flex: 1; padding: 5px 4px; font-size: .96em; letter-spacing: 0; cursor: pointer; }
++  html.ios .segmented button { padding: 8px 4px; }
++  .segmented button[aria-pressed="true"] { background: var(--fg); color: var(--on-ink); }
++  #siteSection .row { padding: 8px; }
++  :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
++  .note { margin: 6px 12px 0; color: var(--muted); font-size: .92em; }
+ </style>
+ </head>
+ <body>
+   <header><h1><img src="d.svg" alt="" class="logo">declutter</h1><span id="host"></span></header>
+ 
+   <div class="group">
+-    <label class="row"><span class="label">hide shorts</span><input type="checkbox" class="switch" id="shorts"></label>
+-    <label class="row"><span class="label">hide posts in feeds</span><input type="checkbox" class="switch" id="posts"></label>
+-    <label class="row"><span class="label">hide playables</span><input type="checkbox" class="switch" id="playables"></label>
+-    <label class="row"><span class="label">answer cookie banners</span><input type="checkbox" class="switch" id="consent"></label>
++    <label class="row"><span class="label">hide shorts</span><button type="button" role="switch" class="toggle" id="shorts"><span>on</span><span>off</span></button></label>
++    <label class="row"><span class="label">hide posts in feeds</span><button type="button" role="switch" class="toggle" id="posts"><span>on</span><span>off</span></button></label>
++    <label class="row"><span class="label">hide playables</span><button type="button" role="switch" class="toggle" id="playables"><span>on</span><span>off</span></button></label>
++    <label class="row"><span class="label">answer cookie banners</span><button type="button" role="switch" class="toggle" id="consent"><span>on</span><span>off</span></button></label>
+   </div>
+ 
+   <div id="pageSection" hidden>
+diff --git a/extension/popup/popup.js b/extension/popup/popup.js
+index aeaa558..54430ef 100644
+--- a/extension/popup/popup.js
++++ b/extension/popup/popup.js
+@@ -8,11 +8,13 @@ if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints >
+   document.documentElement.classList.add('ios');
+ }
+ 
+-function statusRow(kind, text, sub) {
++// struck: what was handled, shown struck through before the text ("~~cookie banner~~ refused").
++function statusRow(kind, text, sub, struck) {
+   const row = document.createElement('div');
+   row.className = 'row';
+   const dot = Object.assign(document.createElement('span'), { className: `dot ${kind}` });
+   const label = Object.assign(document.createElement('span'), { className: 'label', textContent: text });
++  if (struck) label.prepend(Object.assign(document.createElement('s'), { textContent: struck }), ' ');
+   if (sub) label.append(Object.assign(document.createElement('span'), { className: 'sub', textContent: sub }));
+   row.append(dot, label);
+   return row;
+@@ -31,8 +33,12 @@ async function main() {
+     Object.assign(s, patch);
+   };
+   for (const k of ['shorts', 'posts', 'playables', 'consent']) {
+-    $(k).checked = s[k];
+-    $(k).onchange = () => save({ [k]: $(k).checked });
++    $(k).setAttribute('aria-checked', String(s[k]));
++    $(k).onclick = () => {
++      const on = $(k).getAttribute('aria-checked') !== 'true';
++      $(k).setAttribute('aria-checked', String(on));
++      save({ [k]: on });
++    };
+   }
+ 
+   // ?tab=<id> renders the popup for a given tab (tests open it as a page).
+@@ -67,7 +73,7 @@ async function main() {
+     rows.push(statusRow('bad', "declutter isn't running on this page yet", 'it was open before declutter was installed or updated'));
+     $('reload').hidden = false;
+     $('reload').onclick = () => { api.tabs.reload(tab.id); window.close(); };
+-  } else if (state.consent === 'done') rows.push(statusRow('ok', state.cosmetic ? 'banner hidden' : 'cookies refused', state.choiceFallback ? `${state.cmp} — your mix isn't supported by this banner, so everything was refused` : state.cmp));
++  } else if (state.consent === 'done') rows.push(statusRow('ok', state.cosmetic ? 'hidden' : 'refused', state.choiceFallback ? `${state.cmp} — your mix isn't supported by this banner, so everything was refused` : state.cmp, 'cookie banner'));
+   else if (state.consent === 'choice') rows.push(statusRow('ok', 'your choice applied', `${state.cmp} via ${state.adapter}`));
+   else if (failed) rows.push(statusRow('bad', "declutter couldn't answer this banner", 'answer it yourself on the page. reporting it helps get it fixed.'));
+   else if (state.consent === 'wall') {
+@@ -82,7 +88,7 @@ async function main() {
+   } else if (state.consent === 'accepting') rows.push(statusRow('wall', 'accepting the wall…', state.cmp));
+   else if (state.consent === 'accepted') rows.push(statusRow('wall', 'pay wall accepted', state.cmp));
+   else if (state.consent === 'paused') rows.push(statusRow('', 'banners left alone here'));
+-  else if (state.consent === 'acceptedSite') rows.push(statusRow('ok', 'cookies accepted (your choice)', state.cmp));
++  else if (state.consent === 'acceptedSite') rows.push(statusRow('ok', 'accepted (your choice)', state.cmp, 'cookie banner'));
+   else if (state.consent === 'working') rows.push(statusRow('', `answering ${state.cmp}…`));
+   else rows.push(statusRow('', 'no known cookie banner found'));
+   if (state.shortsLeak > 0) {

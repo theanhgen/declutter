@@ -4,102 +4,138 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  /* Same type as the settings page (monospace, lowercase), laid out like an iOS grouped list. */
+  /* A plain-text menu, the settings page's grammar: one mono at its natural width, lowercase, state written as words
+     ([on] / off) in one right-hand column, the current row marked by one ink band. Only this page's status is at full
+     contrast; a handled banner is struck through on a rose field. The site choice is the one pill. */
+  @font-face {
+    font-family: "Martian Mono"; font-style: normal; font-display: swap; font-weight: 100 800; font-stretch: 75% 112.5%;
+    src: url(../fonts/martian-mono-latin.woff2) format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  @font-face {
+    font-family: "Martian Mono"; font-style: normal; font-display: swap; font-weight: 100 800; font-stretch: 75% 112.5%;
+    src: url(../fonts/martian-mono-latin-ext.woff2) format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
   :root {
     color-scheme: light dark;
-    --bg: #f2f2f7; --card: #fff; --fg: hsl(0, 0%, 10%); --muted: #8a8a8e; --sep: rgba(60, 60, 67, .18);
-    --green: #34c759; --orange: #ff9500; --red: #ff3b30; --blue: #007aff; --grey: #aeaeb2;
+    --bg: hsl(0, 0%, 97%); --fg: hsl(0, 0%, 10%); --muted: hsl(0, 0%, 42%); --faint: hsl(0, 0%, 62%); --line: hsl(0, 0%, 78%);
+    /* handled: the app icon's rose (#c96575) as a pale field under ink */
+    --done: #f1d3d9; --done-fg: hsl(0, 0%, 10%);
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #000; --card: #1c1c1e; --fg: hsl(0, 0%, 92%); --muted: #8d8d93; --sep: rgba(84, 84, 88, .6); --blue: #0a84ff; }
+    :root {
+      --bg: hsl(0, 0%, 9%); --fg: hsl(0, 0%, 90%); --muted: hsl(0, 0%, 58%); --faint: hsl(0, 0%, 38%); --line: hsl(0, 0%, 30%);
+      --done: #5e2c37; --done-fg: hsl(0, 0%, 95%);
+    }
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
-  .gap { height: 16px; }
   body {
-    margin: 0; padding: 14px 14px 16px; width: 300px;
-    background: var(--bg); color: var(--fg);
-    font: 13px/1.4 ui-monospace, "SF Mono", Menlo, monospace;
+    margin: 0; padding: 14px 0 12px; width: 352px;
+    background: var(--bg); color: var(--muted);
+    font: 12px/1.5 "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace; font-stretch: 100%;
+    /* Quieter by weight, not by a paler grey: --muted is already the lightest grey that keeps 4.5:1 contrast. */
+    font-weight: 300;
     -webkit-font-smoothing: antialiased;
   }
-  html.ios body { width: auto; padding: 16px 16px 24px; font-size: 15px; }
-  header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 4px 12px; }
-  h1 { margin: 0; font-size: 1.35em; font-weight: normal; display: flex; align-items: center; gap: 8px; }
-  /* The rose d from the app icon, sized to the wordmark's cap height. */
+  html.ios body { width: auto; padding: 16px 0 24px; font-size: 14px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 16px; margin-bottom: 12px; }
+  h1 { margin: 0; font-size: 1em; font-weight: normal; display: flex; align-items: center; gap: 8px; color: var(--muted); }
   .logo { width: 1.1em; height: 1.1em; flex: none; }
-  #host { color: var(--muted); font-size: .85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .caption { margin: 16px 12px 6px; color: var(--muted); font-size: .8em; text-transform: lowercase; }
-  .group { background: var(--card); border-radius: 12px; overflow: hidden; }
+  #host { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  section { margin-top: 14px; }
+  .caption { margin: 0 0 4px; padding: 0 16px; color: var(--faint); }
+
+  /* Menu rows: plain text lines on the page, full width, so the band runs edge to edge. */
   .row {
-    display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px;
-    width: 100%; border: 0; background: none; color: inherit; font: inherit; text-align: left;
+    display: flex; align-items: center; gap: 12px; min-height: 30px; padding: 4px 16px; margin: 0;
+    width: 100%; border: 0; border-radius: 0; background: none; color: inherit; font: inherit; text-align: left;
   }
-  /* separator above every visible row except the first visible one */
-  .row:not([hidden]) ~ .row:not([hidden]) { box-shadow: inset 0 1px 0 var(--sep); }
+  html.ios .row { min-height: 44px; }
   .row .label { flex: 1; }
-  button.row { cursor: pointer; }
-  button.row:active { background: var(--sep); }
-  .action { color: var(--blue); }
-  .action.wall { color: var(--orange); }
-  .chevron { color: var(--grey); }
-  .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--grey); }
-  .dot.ok { background: var(--green); } .dot.wall { background: var(--orange); } .dot.bad { background: var(--red); }
-  .sub { display: block; color: var(--muted); font-size: .85em; }
-  /* iOS switch */
-  input.switch {
-    appearance: none; -webkit-appearance: none; flex: none; margin: 0; cursor: pointer;
-    width: 42px; height: 26px; border-radius: 13px; background: var(--sep); position: relative; transition: background .2s;
+  label.row, button.row { cursor: pointer; }
+  button.row:disabled { cursor: default; }
+  .chevron { color: var(--faint); }
+
+  /* State as words in one right-hand column, like the settings page: [on] / off. Brackets mark the current word; the
+     other is fainter. Both forms are ten characters, so the column holds. */
+  .toggle {
+    flex: none; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer;
+    white-space: pre;
   }
-  html.ios input.switch { width: 51px; height: 31px; border-radius: 16px; }
-  input.switch::after {
-    content: ""; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%;
-    background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, .2); transition: transform .2s;
+  .toggle .sep, .toggle .w { color: var(--faint); }
+  .toggle[aria-checked="true"] .on, .toggle[aria-checked="false"] .off { color: var(--muted); }
+  .toggle[aria-checked="true"] .on::before, .toggle[aria-checked="false"] .off::before { content: "["; }
+  .toggle[aria-checked="true"] .on::after, .toggle[aria-checked="false"] .off::after { content: "]"; }
+  .toggle:focus { outline: none; }
+
+  /* The current row (pointer or keyboard): one ink band across the row, text reversed. */
+  label.row:hover, label.row:has(:focus-visible), button.row:not(:disabled):hover, button.row:focus-visible {
+    background: var(--fg); outline: none;
   }
-  html.ios input.switch::after { width: 27px; height: 27px; }
-  input.switch:checked { background: var(--green); }
-  /* iOS segmented control */
-  .segmented { display: flex; flex: 1; padding: 2px; border-radius: 9px; background: var(--sep); }
+  label.row:hover *, label.row:has(:focus-visible) *, button.row:not(:disabled):hover *, button.row:focus-visible * {
+    color: var(--bg) !important;
+  }
+
+  /* This page: the one thing at full contrast. */
+  .status { display: block; padding: 6px 16px; color: var(--fg); }
+  .status .line { display: block; font-size: 15px; line-height: 1.35; font-weight: 500; }
+  html.ios .status .line { font-size: 18px; }
+  .status .sub { display: block; margin-top: 2px; color: var(--muted); }
+  /* A second note about the page (shorts caught by the backup check) stays at body size. */
+  .status + .status .line { font-size: 1em; font-weight: normal; }
+  /* Handled: what was answered is struck through, on a flat rose field. */
+  .status.done { background: var(--done); color: var(--done-fg); padding: 10px 16px; }
+  .status.done .line { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  .status.done .sub { color: var(--done-fg); opacity: .72; }
+
+  /* The site choice: the one pill. */
+  .segmented { display: flex; margin: 2px 16px 0; padding: 2px; border: 1px solid var(--line); border-radius: 999px; }
   .segmented button {
-    flex: 1; border: 0; border-radius: 7px; padding: 6px 4px; background: none; color: inherit; font: inherit; font-size: .9em; cursor: pointer;
+    flex: 1; padding: 4px; border: 0; border-radius: 999px; background: none; color: var(--muted); font: inherit;
+    cursor: pointer;
   }
-  .segmented button[aria-pressed="true"] { background: var(--card); box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
-  .note { margin: 6px 12px 0; color: var(--muted); font-size: .8em; }
-  input.switch:checked::after { transform: translateX(16px); }
-  html.ios input.switch:checked::after { transform: translateX(20px); }
+  html.ios .segmented button { padding: 9px 4px; }
+  .segmented button:hover { color: var(--fg); }
+  /* Owner's call 2026-11-20 (arena-eval round 2, option 2): soft fill at rest so the status stays the one loud thing;
+     full ink on hover or focus. */
+  .segmented button[aria-pressed="true"] { background: var(--line); color: var(--fg); }
+  .segmented button[aria-pressed="true"]:hover, .segmented button[aria-pressed="true"]:focus-visible { background: var(--fg); color: var(--bg); }
+  .segmented button:focus-visible { outline: 2px solid var(--fg); outline-offset: 1px; }
+
+  .note { margin: 6px 0 0; padding: 0 16px; color: var(--muted); }
 </style>
 </head>
 <body>
   <header><h1><img src="d.svg" alt="" class="logo">declutter</h1><span id="host"></span></header>
 
-  <div class="group">
-    <label class="row"><span class="label">hide shorts</span><input type="checkbox" class="switch" id="shorts"></label>
-    <label class="row"><span class="label">hide posts in feeds</span><input type="checkbox" class="switch" id="posts"></label>
-    <label class="row"><span class="label">hide playables</span><input type="checkbox" class="switch" id="playables"></label>
-    <label class="row"><span class="label">answer cookie banners</span><input type="checkbox" class="switch" id="consent"></label>
+  <div id="toggles">
+    <label class="row"><span class="label">hide shorts</span><button type="button" role="switch" class="toggle" id="shorts"><span aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></button></label>
+    <label class="row"><span class="label">hide posts in feeds</span><button type="button" role="switch" class="toggle" id="posts"><span aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></button></label>
+    <label class="row"><span class="label">hide playables</span><button type="button" role="switch" class="toggle" id="playables"><span aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></button></label>
+    <label class="row"><span class="label">answer cookie banners</span><button type="button" role="switch" class="toggle" id="consent"><span aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></button></label>
   </div>
 
-  <div id="pageSection" hidden>
+  <section id="pageSection" hidden>
     <p class="caption">this page</p>
-    <div class="group" id="status"></div>
-  </div>
+    <div id="status"></div>
+  </section>
 
-  <div id="siteSection" hidden>
+  <section id="siteSection" hidden>
     <p class="caption">cookie banners on this site</p>
-    <div class="group"><div class="row"><div class="segmented" id="siteMode">
+    <div class="segmented" id="siteMode">
       <button data-mode="refuse">refuse</button><button data-mode="accept">accept</button><button data-mode="ignore">leave</button>
-    </div></div></div>
-  </div>
+    </div>
+  </section>
 
-  <div class="gap"></div>
-  <div class="group" id="actions">
+  <section id="actions">
     <button class="row action wall" id="acceptWall" hidden><span class="label">accept this wall (souhlasím)</span></button>
     <button class="row action" id="reload" hidden><span class="label">reload page</span></button>
-    <button class="row action" id="report" hidden><span class="label">report: not handled right</span></button>
-    <button class="row action" id="send" hidden><span class="label">send to developer</span></button>
+    <button class="row action" id="report" hidden><span class="label">send to developer: not handled right</span></button>
     <button class="row" id="settings"><span class="label">settings</span><span class="chevron">›</span></button>
-  </div>
+  </section>
 
-  <p class="note" id="reported" hidden>saved to settings → reported sites</p>
   <p class="note" id="sendNote" hidden></p>
   <script src="popup.js"></script>
 </body>

@@ -1,0 +1,135 @@
+{
+ "grader": "claude-opus-5-5",
+ "results": [
+  {
+   "id": 19335916,
+   "criterion": "must: each toggle's state is shown as a word (on / off), not as a switch, slider or pill control",
+   "verdict": "pass",
+   "seen": "All four toggle rows end in '[on] / off' text (posts-off screens show 'on / [off]'); no switch anywhere, where today has green iOS switches.",
+   "fix": ""
+  },
+  {
+   "id": 19335916,
+   "criterion": "must: the state words line up in one column on the right, like the values of a menu",
+   "verdict": "pass",
+   "seen": "The '[on] / off' words sit flush right in one column across all four rows, like the VHS menu's ON/OFF column.",
+   "fix": ""
+  },
+  {
+   "id": 19335916,
+   "criterion": "must: the current (hovered or focused) row is marked by one solid colour band across the whole row",
+   "verdict": "pass",
+   "seen": "Hover (row 2) and keyboard focus (row 1) show a full-width solid ink band edge to edge with reversed white text, as the VHS menu's red band does.",
+   "fix": ""
+  },
+  {
+   "id": 19335916,
+   "criterion": "must: the toggles read as a plain list of text rows, not rows inside a rounded card",
+   "verdict": "pass",
+   "seen": "Toggles are bare text rows on the popup background, with no card, border or dividers.",
+   "fix": ""
+  },
+  {
+   "id": 19335916,
+   "criterion": "must_not: a switch or pill-shaped control on any toggle row",
+   "verdict": "pass",
+   "seen": "No switch or pill on any toggle row in light, dark, hover, focus or posts-off states.",
+   "fix": ""
+  },
+  {
+   "id": 19335916,
+   "criterion": "must_not: system green or blue",
+   "verdict": "pass",
+   "seen": "No green or blue anywhere; the toggle rows use grey and ink only, and the old blue focus ring is gone.",
+   "fix": ""
+  },
+  {
+   "id": 11379889,
+   "criterion": "must: refuse / accept / leave is one outlined pill with the chosen side filled: a soft grey fill at rest, full ink with reversed text on hover or focus",
+   "verdict": "pass",
+   "seen": "A single thin-outlined pill; 'refuse' has a soft grey rounded fill at rest (light and dark) and turns full ink with white text in the hover-pill screenshot.",
+   "fix": ""
+  },
+  {
+   "id": 11379889,
+   "criterion": "must: the unchosen sides are plain text on the background",
+   "verdict": "pass",
+   "seen": "'accept' and 'leave' are plain grey text on the popup background inside the outline, with no fill.",
+   "fix": ""
+  },
+  {
+   "id": 11379889,
+   "criterion": "must_not: a grey track with a white raised thumb",
+   "verdict": "pass",
+   "seen": "No grey track and no white raised thumb; the track is the page background with an outline, and the chosen fill is grey (rest) or ink (hover).",
+   "fix": ""
+  },
+  {
+   "id": 11379889,
+   "criterion": "must_not: system blue",
+   "verdict": "pass",
+   "seen": "No blue in the pill or anywhere in the popup.",
+   "fix": ""
+  },
+  {
+   "id": 20770715,
+   "criterion": "must: when a banner was handled, the main status line names the handled thing struck through, at full text size",
+   "verdict": "pass",
+   "seen": "'cookie banner' is the status line, struck through, in a darker, slightly heavier weight a bit larger than the body text, with 'refused · onetrust' below.",
+   "fix": ""
+  },
+  {
+   "id": 20770715,
+   "criterion": "must: the handled row is set apart as a filled row (a colour field), the way done items are in the reference",
+   "verdict": "pass",
+   "seen": "The handled row is a full-width flat rose field (deep rose in dark mode) behind the struck line, like the reference's filled done rows.",
+   "fix": ""
+  },
+  {
+   "id": 20770715,
+   "criterion": "must_not: the strike only on a small grey prefix while the line is carried by an unstruck word",
+   "verdict": "pass",
+   "seen": "The strike covers the whole main line 'cookie banner'. The unstruck 'refused · onetrust' is a smaller secondary line below it.",
+   "fix": ""
+  },
+  {
+   "id": 2092684,
+   "criterion": "must: one thing is at full contrast (this page's status); the rest of the popup is visibly quieter",
+   "verdict": "pass",
+   "seen": "Only the struck status line is in full ink on the rose field. Toggle labels, footer and pill text are mid-grey, and the captions and 'off' words are lighter still.",
+   "fix": ""
+  },
+  {
+   "id": 2092684,
+   "criterion": "must_not: several accents competing at full strength (coloured dots, filled pills, ink buttons)",
+   "verdict": "pass",
+   "seen": "The green dot, blue link and white-thumb pill are gone. At rest the only colour field is the rose status row. The pill fill is soft grey, and ink appears only on hover or focus.",
+   "fix": ""
+  },
+  {
+   "id": 31399571,
+   "criterion": "must: text is set in Martian Mono",
+   "verdict": "pass",
+   "seen": "Wide, squarish monospace letterforms throughout match the Martian Mono specimen. The popup loads bundled Martian Mono woff2 files.",
+   "fix": ""
+  },
+  {
+   "id": 31399571,
+   "criterion": "must: Martian Mono at its natural width; the layout makes room for it",
+   "verdict": "pass",
+   "seen": "The popup is about 352px wide, up from 300px. Rows like 'answer cookie banners [on] / off' fit on one line without clipping, and the text is at normal width.",
+   "fix": ""
+  },
+  {
+   "id": 31399571,
+   "criterion": "must_not: the typeface condensed (font-stretch below 100%) to fit today's rows",
+   "verdict": "pass",
+   "seen": "Glyphs are not narrowed, and the popup's font-stretch is 100%.",
+   "fix": ""
+  }
+ ],
+ "conflicts": [],
+ "round_plan": [],
+ "not_applied": [],
+ "extra": []
+}

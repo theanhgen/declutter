@@ -1,0 +1,258 @@
+{
+  "project": "declutter",
+  "board": "https://claude.ai/artifact/HLAonFUjg8iZ9a2SW3H1Up",
+  "notes": "research/arena-ui-2026-11-17.md",
+  "picked": "2026-11-18",
+  "status": "draft",
+  "draft_by": "agent 2026-11-20 from the owner's picks and the board's reasons; owner to confirm or rewrite the checks",
+  "picks": [
+    {
+      "id": 19335916,
+      "name": "VHS menu",
+      "applies_to": "popup: feature toggles",
+      "replaces": "iOS green switches in rounded grouped cards",
+      "take": "ON / OFF as words in a column, the current row in one colour. The settings page already does this; the popup should too.",
+      "must": [
+        "each toggle's state is shown as a word (on / off), not as a switch, slider or pill control",
+        "the state words line up in one column on the right, like the values of a menu",
+        "the current (hovered or focused) row is marked by one solid colour band across the whole row",
+        "the toggles read as a plain list of text rows, not rows inside a rounded card"
+      ],
+      "must_not": [
+        "a switch or pill-shaped control on any toggle row",
+        "system green or blue"
+      ],
+      "open": [
+        "band colour: ink or rose",
+        "upper case like the VHS menu or lower case like the settings page",
+        "one word (on) or both words with the current one marked ([on] / off) like the settings page"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261005/board/img/19335916.jpg"
+    },
+    {
+      "id": 11379889,
+      "name": "B/W pill controls",
+      "applies_to": "popup: site choice (refuse / accept / leave)",
+      "replaces": "iOS segmented control (grey track, white raised thumb)",
+      "take": "refuse / accept / leave as a two-tone segmented pill, chosen side filled in ink. No system blue, no iOS green.",
+      "must": [
+        "refuse / accept / leave is one outlined pill with the chosen side filled: a soft grey fill at rest, full ink with reversed text on hover or focus",
+        "the unchosen sides are plain text on the background"
+      ],
+      "must_not": [
+        "a grey track with a white raised thumb",
+        "system blue"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261117/check/11379889.jpg"
+    },
+    {
+      "id": 20770715,
+      "name": "Struck-through done items",
+      "applies_to": "popup: this-page status",
+      "replaces": "dot + plain sentence ('cookies refused')",
+      "take": "'Handled' shown by taking away: what was answered is struck through.",
+      "must": [
+        "when a banner was handled, the main status line names the handled thing struck through, at full text size",
+        "the handled row is set apart as a filled row (a colour field), the way done items are in the reference"
+      ],
+      "must_not": [
+        "the strike only on a small grey prefix while the line is carried by an unstruck word"
+      ],
+      "open": [
+        "fill colour of the handled row"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261117/check/20770715.jpg"
+    },
+    {
+      "id": 2092684,
+      "name": "iA Writer Focus Mode",
+      "applies_to": "popup: attention",
+      "replaces": "every row at the same weight; green, amber, red dots and filled pills all at full strength",
+      "take": "Dim everything except what matters.",
+      "must": [
+        "one thing is at full contrast (this page's status); the rest of the popup is visibly quieter"
+      ],
+      "must_not": [
+        "several accents competing at full strength (coloured dots, filled pills, ink buttons)"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/pensieve-20261004/board/img/2092684.png"
+    },
+    {
+      "id": 31399571,
+      "name": "Martian Mono",
+      "applies_to": "all: type",
+      "replaces": "ui-monospace (differs per OS)",
+      "take": "Bundle one open-licence mono with italic and caps so every OS renders the same.",
+      "must": [
+        "text is set in Martian Mono",
+        "Martian Mono at its natural width; the layout makes room for it"
+      ],
+      "must_not": [
+        "the typeface condensed (font-stretch below 100%) to fit today's rows"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261004/board/img/31399571.jpg"
+    },
+    {
+      "id": 4224362,
+      "name": "Atlas Typewriter",
+      "kind": "benchmark",
+      "applies_to": "all: type",
+      "take": "the quality bar, not the font",
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261117/check/4224362.jpg"
+    },
+    {
+      "id": 20367516,
+      "name": "Dot + name + count rows",
+      "applies_to": "settings: stats",
+      "replaces": "nothing: new",
+      "take": "Settings stats (banners answered, Shorts hidden) as rows of coloured dot, label and number.",
+      "must": [
+        "each stat is one row: coloured dot, label, number right-aligned"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261117/check/20367516.jpg"
+    },
+    {
+      "id": 35206392,
+      "name": "doodad.dev support panel",
+      "applies_to": "settings: tip jar",
+      "replaces": "'declutter is free. if it saves you clicks, leave a tip.'",
+      "take": "Inside the tool's own panel, mono, one warm accent, one thank-you line. Never pitch the tip.",
+      "must": [
+        "the tip sits inside the tool's own panel, mono, with one warm accent"
+      ],
+      "must_not": [
+        "any line that argues for tipping (\"if it saves you clicks\")",
+        "prompts or nagging about the tip"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261117/check/35206392.jpg"
+    },
+    {
+      "id": 8317096,
+      "name": "Inaccessible Twitter",
+      "applies_to": "site: hero",
+      "replaces": "old 2026-09-24 screenshots",
+      "take": "The product shot is a known page minus something (Shorts shelf, banner).",
+      "must": [
+        "the hero shows a recognisable page with the cluttered part removed"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261117/check/8317096.jpg"
+    },
+    {
+      "id": 1558803,
+      "name": "Charlesworth erased newspaper",
+      "applies_to": "site: hero",
+      "replaces": "old 2026-09-24 screenshots",
+      "take": "The page with the noise removed is the hero image.",
+      "must": [
+        "the layout of the page stays; only the clutter is gone"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261004/board/img/1558803.jpg"
+    },
+    {
+      "id": 674263,
+      "name": "Blank billboard",
+      "applies_to": "site: hero",
+      "replaces": "nothing: new",
+      "take": "The space an ad used to fill.",
+      "must": [
+        "the empty space where the clutter was is visible and left empty"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261004/board/img/674263.jpg"
+    },
+    {
+      "id": 12286641,
+      "name": "Bloomberg pay box",
+      "kind": "anti",
+      "applies_to": "chip: look",
+      "take": "The chip never borrows a banner's colour, size or buttons.",
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261117/check/12286641.jpg"
+    },
+    {
+      "id": 45050308,
+      "name": "Stretching blob",
+      "applies_to": "chip: motion",
+      "replaces": "text swap 'answering…' → done",
+      "take": "Morph from 'answering…' to ✓ instead of swapping text.",
+      "must": [
+        "the chip changes shape continuously from the working state to the done state"
+      ],
+      "must_not": [
+        "the chip's size, colour or buttons resemble a cookie or pay banner"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261005/board/img/45050308.jpg"
+    },
+    {
+      "id": 23756206,
+      "name": "Cut-out letters",
+      "applies_to": "brand: wordmark",
+      "replaces": "plain mono 'declutter'",
+      "take": "A mono 'declutter' that loses parts but still reads; low volume.",
+      "must": [
+        "letters of 'declutter' have parts missing and the word still reads"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261004/board/img/23756206.jpg"
+    },
+    {
+      "id": 32960273,
+      "name": "hush",
+      "kind": "benchmark",
+      "applies_to": "brand: wordmark",
+      "take": "low volume",
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261004/board/img/32960273.png"
+    },
+    {
+      "id": 21814234,
+      "name": "Knocked-out mono in brackets",
+      "kind": "benchmark",
+      "applies_to": "brand: wordmark",
+      "take": "mono, letters knocked out",
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261005/board/img/21814234.png"
+    },
+    {
+      "id": 5319806,
+      "name": "Black type on rose",
+      "applies_to": "brand: colour",
+      "replaces": "rose only in the small d",
+      "take": "Rose as a warm field, not a gradient.",
+      "must": [
+        "rose appears as a flat field behind black type"
+      ],
+      "must_not": [
+        "a rose gradient"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261004/board/img/5319806.jpg"
+    },
+    {
+      "id": 31160643,
+      "name": "Bust with the top cut away",
+      "applies_to": "brand: icon",
+      "replaces": "flat rose d",
+      "take": "An object icon whose subject is a missing part.",
+      "must": [
+        "the icon is an object with a visible part missing"
+      ],
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261005/board/img/31160643.jpg"
+    },
+    {
+      "id": 13717484,
+      "name": "Self-censoring font extension",
+      "kind": "benchmark",
+      "applies_to": "site: about",
+      "take": "lineage, for copy",
+      "image": "/Users/nguyentheanh/.cache/arena-research/declutter-20261005/board/img/13717484.png"
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-11-20",
+      "round": 2,
+      "element": "site-choice pill",
+      "chose": "soft fill at rest, ink on hover",
+      "over": [
+        "keep full ink",
+        "outline at rest, fill on hover"
+      ],
+      "why": "B/W pill vs iA Focus Mode: the status stays the one loud thing"
+    }
+  ]
+}

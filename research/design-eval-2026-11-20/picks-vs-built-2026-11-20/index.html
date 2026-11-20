@@ -1,0 +1,13 @@
+<!doctype html><meta charset=utf-8><title>declutter: picks vs built</title><style>
+body{font:13px/1.45 ui-monospace,Menlo,monospace;margin:24px;background:#f5f5f4;color:#1a1a1a}
+h1{font-size:18px;font-weight:normal}.top{display:flex;gap:24px;align-items:flex-start;margin-bottom:32px}
+.top figure{margin:0}figcaption{color:#666;margin-top:6px}img{border:1px solid #ddd;background:#fff}
+table{border-collapse:collapse;width:100%}td{border-top:1px solid #ddd;padding:12px 10px;vertical-align:top}
+td img{max-width:360px;max-height:220px}.FAIL{color:#c0392b}.PASS{color:#2f7d4f}.PARTIAL{color:#b9770e}.NOT{color:#888}
+</style><h1>declutter popup — your picks vs what was built (uncommitted, 2026-11-18)</h1>
+<div class=top>
+<figure><img src="popup-light.png" width=300><figcaption>today (15d82ad)</figcaption></figure>
+<figure><img src="popup-new-light.png" width=300><figcaption>built (uncommitted)</figcaption></figure>
+<figure><img src="popup-new-dark.png" width=300><figcaption>built, dark</figcaption></figure>
+<figure><img src="options-light.png" width=420><figcaption>settings page — already "[on] / off" text; the popup was meant to match</figcaption></figure>
+</div><table><tr><td><b>VHS menu · 19335916</b></td><td><img src="ref-19335916.jpg"></td><td>ON/OFF as words in a right column, current row = one solid colour band, no controls, no cards</td><td class="FAIL">FAIL — on|off pill per row inside iOS cards</td></tr><tr><td><b>B/W pill · 11379889</b></td><td><img src="ref-11379889.jpg"></td><td>refuse / accept / leave as two-tone pill, chosen side in ink</td><td class="PASS">PASS for site choice · but also reused on every toggle, displacing VHS</td></tr><tr><td><b>Struck-through done · 20770715</b></td><td><img src="ref-20770715.jpg"></td><td>the whole handled row struck and filled with colour</td><td class="PARTIAL">PARTIAL — small grey "~~cookie banner~~" prefix only</td></tr><tr><td><b>Dot + name + count · 20367516</b></td><td><img src="ref-20367516.jpg"></td><td>settings stats as dot / label / number rows</td><td class="NOT">NOT APPLIED (settings untouched)</td></tr><tr><td><b>iA Focus Mode · 2092684</b></td><td><img src="ref-2092684.jpg"></td><td>dim everything except what matters</td><td class="PARTIAL">PARTIAL — only off rows dimmed; cards, grey bg, coloured dots stay</td></tr><tr><td><b>Martian Mono · 31399571</b></td><td><img src="ref-31399571.jpg"></td><td>a mono with character, bundled</td><td class="PARTIAL">PARTIAL — bundled, but squeezed to 81% to fit the old layout</td></tr></table>

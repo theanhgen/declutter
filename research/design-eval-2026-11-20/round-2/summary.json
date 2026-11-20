@@ -1,0 +1,69 @@
+{
+  "round": 2,
+  "pass": false,
+  "checks": 18,
+  "failing": 2,
+  "next": {
+    "who": "owner",
+    "text": "your call below, then round 3."
+  },
+  "draft_contract": true,
+  "conflicts": [
+    {
+      "picks": [
+        11379889,
+        2092684
+      ],
+      "source": "grader round 2, extra[0]; moved to conflicts by the orchestrator when report.py learned conflicts",
+      "checks": [
+        "must: one thing is at full contrast (this page's status); the rest of the popup is visibly quieter",
+        "must_not: several accents competing at full strength (coloured dots, filled pills, ink buttons)"
+      ],
+      "what": "The B/W pill wants the chosen site option filled in ink; Focus Mode wants the status to be the only full-strength element. The always-on ink 'refuse' fill (near-white in dark mode) competes with the status.",
+      "options": [
+        "keep full ink (named deviation)",
+        "soft fill at rest, ink on hover",
+        "outline at rest, fill on hover"
+      ],
+      "recommend": 2,
+      "element": "site-choice pill"
+    }
+  ],
+  "invalid_conflicts": [],
+  "ungraded": [],
+  "by_pick": {
+    "19335916": [
+      "pass",
+      "pass",
+      "pass",
+      "pass",
+      "pass",
+      "pass"
+    ],
+    "11379889": [
+      "pass",
+      "pass",
+      "pass",
+      "pass"
+    ],
+    "20770715": [
+      "pass",
+      "pass",
+      "pass"
+    ],
+    "2092684": [
+      "partial",
+      "partial"
+    ],
+    "31399571": [
+      "pass",
+      "pass",
+      "pass"
+    ]
+  },
+  "not_applied": [],
+  "extra": [
+    "The B/W pill pick (ink-filled chosen segment) and the Focus Mode pick (no full-strength filled pills) pull against each other in this design: the always-on ink 'refuse' fill is the main thing that keeps the status from being the single full-contrast element.",
+    "Dark mode inverts the site-choice fill to near-white, which is the brightest element in the dark popup and outshines the maroon status field."
+  ]
+}

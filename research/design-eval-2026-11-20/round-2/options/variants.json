@@ -1,0 +1,14 @@
+[
+  {
+    "name": "opt-1",
+    "css": ""
+  },
+  {
+    "name": "opt-2",
+    "css": ".segmented button[aria-pressed=\"true\"]{background:var(--line);color:var(--fg)} .segmented button[aria-pressed=\"true\"]:hover{background:var(--fg);color:var(--bg)}"
+  },
+  {
+    "name": "opt-3",
+    "css": ".segmented button[aria-pressed=\"true\"]{background:none;color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)} .segmented button[aria-pressed=\"true\"]:hover{background:var(--fg);color:var(--bg);box-shadow:none}"
+  }
+]

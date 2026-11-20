@@ -1,0 +1,43 @@
+{
+  "round": 3,
+  "pass": true,
+  "checks": 18,
+  "failing": 0,
+  "next": {
+    "who": "done",
+    "text": "every check passes."
+  },
+  "conflicts": [],
+  "by_pick": {
+    "19335916": [
+      "pass",
+      "pass",
+      "pass",
+      "pass",
+      "pass",
+      "pass"
+    ],
+    "11379889": [
+      "pass",
+      "pass",
+      "pass",
+      "pass"
+    ],
+    "20770715": [
+      "pass",
+      "pass",
+      "pass"
+    ],
+    "2092684": [
+      "pass",
+      "pass"
+    ],
+    "31399571": [
+      "pass",
+      "pass",
+      "pass"
+    ]
+  },
+  "not_applied": [],
+  "extra": []
+}

@@ -1,0 +1,168 @@
+{
+  "grader": "claude-opus-5-5",
+  "results": [
+    {
+      "id": 19335916,
+      "criterion": "must: each toggle's state is shown as a word (on / off), not as a switch, slider or pill control",
+      "verdict": "pass",
+      "seen": "All four toggle rows end in '[on] / off' text (posts-off screens show 'on / [off]'); no switch anywhere, unlike today's green iOS switches.",
+      "fix": "None."
+    },
+    {
+      "id": 19335916,
+      "criterion": "must: the state words line up in one column on the right, like the values of a menu",
+      "verdict": "pass",
+      "seen": "The '[on] / off' values are right-aligned in one column at the popup's right edge, like the VHS menu's ON/OFF column.",
+      "fix": "None."
+    },
+    {
+      "id": 19335916,
+      "criterion": "must: the current (hovered or focused) row is marked by one solid colour band across the whole row",
+      "verdict": "pass",
+      "seen": "Hover (row 2) and keyboard focus (row 1) both show a solid ink band edge to edge with reversed light text, like the VHS red bar. Only light mode is shown for these states.",
+      "fix": "None; optionally capture the dark-mode hover/focus state."
+    },
+    {
+      "id": 19335916,
+      "criterion": "must: the toggles read as a plain list of text rows, not rows inside a rounded card",
+      "verdict": "pass",
+      "seen": "Toggles are bare text rows on the page background with no card, border or dividers.",
+      "fix": "None."
+    },
+    {
+      "id": 19335916,
+      "criterion": "must_not: a switch or pill-shaped control on any toggle row",
+      "verdict": "pass",
+      "seen": "No switch or pill on any toggle row in any screenshot.",
+      "fix": "None."
+    },
+    {
+      "id": 19335916,
+      "criterion": "must_not: system green or blue",
+      "verdict": "pass",
+      "seen": "No green or blue anywhere; today's blue 'report: not handled right' link is now plain grey text.",
+      "fix": "None."
+    },
+    {
+      "id": 11379889,
+      "criterion": "must: refuse / accept / leave is one outlined pill with the chosen side filled in ink and its text reversed",
+      "verdict": "pass",
+      "seen": "One thin-outlined pill holds refuse / accept / leave; 'refuse' is a filled ink capsule with white text in light mode, and inverted (light fill, dark text) in dark mode.",
+      "fix": "None."
+    },
+    {
+      "id": 11379889,
+      "criterion": "must: the unchosen sides are plain text on the background",
+      "verdict": "pass",
+      "seen": "'accept' and 'leave' are plain grey text on the page background inside the outline, with no track fill.",
+      "fix": "None."
+    },
+    {
+      "id": 11379889,
+      "criterion": "must_not: a grey track with a white raised thumb",
+      "verdict": "pass",
+      "seen": "No grey track or shadowed thumb. In dark mode the chosen fill is near-white, but it sits flat on the dark background inside an outline, with no grey track.",
+      "fix": "None."
+    },
+    {
+      "id": 11379889,
+      "criterion": "must_not: system blue",
+      "verdict": "pass",
+      "seen": "No blue in the control or anywhere else.",
+      "fix": "None."
+    },
+    {
+      "id": 20770715,
+      "criterion": "must: when a banner was handled, the main status line names the handled thing struck through, at full text size",
+      "verdict": "pass",
+      "seen": "'cookie banner' in bold, struck through, as the status headline, with a smaller 'refused · onetrust' below. Today's 'dot + no known cookie banner found' sentence is gone.",
+      "fix": "None."
+    },
+    {
+      "id": 20770715,
+      "criterion": "must: the handled row is set apart as a filled row (a colour field), the way done items are in the reference",
+      "verdict": "pass",
+      "seen": "The status block is a full-width flat field: pale rose in light mode, deep maroon in dark. It reads as the reference's filled done row.",
+      "fix": "None."
+    },
+    {
+      "id": 20770715,
+      "criterion": "must_not: the strike only on a small grey prefix while the line is carried by an unstruck word",
+      "verdict": "pass",
+      "seen": "The struck word is the headline itself; nothing unstruck carries the line.",
+      "fix": "None."
+    },
+    {
+      "id": 2092684,
+      "criterion": "must: one thing is at full contrast (this page's status); the rest of the popup is visibly quieter",
+      "verdict": "partial",
+      "seen": "The status headline is the darkest text, and 'off', 'this page' and section labels are dimmed. But the toggle labels, '[on]', 'report' and 'settings' are only slightly lighter mid-grey, and the ink-filled 'refuse' segment is as strong as the status. In dark mode the white 'refuse' fill is the brightest thing on screen, brighter than the status field.",
+      "fix": "Drop all non-status text (toggle labels, [on], report, settings, pill text) to one clearly dimmer grey, about 50-60% contrast. Quiet the site-choice pill when it is not hovered or focused (for example a softer ink or grey fill, full ink only on interaction), so the status field is the single full-strength element, especially in dark mode."
+    },
+    {
+      "id": 2092684,
+      "criterion": "must_not: several accents competing at full strength (coloured dots, filled pills, ink buttons)",
+      "verdict": "partial",
+      "seen": "The coloured dots and green switches are gone, but two full-strength accents remain: the rose/maroon status field and the solid ink (dark mode: white) 'refuse' pill, plus the ink hover band when hovering.",
+      "fix": "Keep the status field as the only full-strength accent: give the chosen pill segment a lower-contrast fill at rest (or an outline-only chosen state), and keep full ink for hover and focus."
+    },
+    {
+      "id": 31399571,
+      "criterion": "must: text is set in Martian Mono",
+      "verdict": "pass",
+      "seen": "The popup glyphs are Martian Mono's (wide squarish 'a', 'e', flat-topped 'f', square brackets), clearly different from today's SF Mono. Only the popup is in the screenshots; settings and welcome aren't shown.",
+      "fix": "None for the popup. Bundle the same face in options.html and welcome.html, which the code still sets in ui-monospace, and capture them."
+    },
+    {
+      "id": 31399571,
+      "criterion": "must: Martian Mono at its natural width; the layout makes room for it",
+      "verdict": "pass",
+      "seen": "Text is at the face's normal width, and the longest row ('answer cookie banners [on] / off') fits on one line with room to spare, without truncation.",
+      "fix": "None."
+    },
+    {
+      "id": 31399571,
+      "criterion": "must_not: the typeface condensed (font-stretch below 100%) to fit today's rows",
+      "verdict": "pass",
+      "seen": "Letterforms look at their normal width with no squeezed look (CSS confirms font-stretch: 100%).",
+      "fix": "None."
+    }
+  ],
+  "not_applied": [],
+  "extra": [
+    "The B/W pill pick (ink-filled chosen segment) and the Focus Mode pick (no full-strength filled pills) pull against each other in this design: the always-on ink 'refuse' fill is the main thing that keeps the status from being the single full-contrast element.",
+    "Dark mode inverts the site-choice fill to near-white, which is the brightest element in the dark popup and outshines the maroon status field."
+  ],
+  "conflicts": [
+    {
+      "picks": [
+        11379889,
+        2092684
+      ],
+      "source": "grader round 2, extra[0]; moved to conflicts by the orchestrator when report.py learned conflicts",
+      "checks": [
+        "must: one thing is at full contrast (this page's status); the rest of the popup is visibly quieter",
+        "must_not: several accents competing at full strength (coloured dots, filled pills, ink buttons)"
+      ],
+      "what": "The B/W pill wants the chosen site option filled in ink; Focus Mode wants the status to be the only full-strength element. The always-on ink 'refuse' fill (near-white in dark mode) competes with the status.",
+      "options": [
+        "keep full ink (named deviation)",
+        "soft fill at rest, ink on hover",
+        "outline at rest, fill on hover"
+      ],
+      "recommend": 2,
+      "element": "site-choice pill"
+    }
+  ],
+  "round_plan": [
+    {
+      "element": "toggle rows, report, settings",
+      "change": "dim to one quieter grey"
+    },
+    {
+      "element": "site-choice pill",
+      "change": "per your call"
+    }
+  ],
+  "round_plan_source": "orchestrator, condensed from this grader's fix text (round_plan added to the grader after round 2)"
+}
