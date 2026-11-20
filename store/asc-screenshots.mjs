@@ -24,7 +24,9 @@ async function upload(type, relName, relType, relId, file) {
     attributes: { uploaded: true, sourceFileChecksum: crypto.createHash('md5').update(bytes).digest('hex') } } });
 }
 
-const versions = (await asc('GET', `/v1/apps/${APP}/appStoreVersions`)).data;
+// VERSION=1.2: only that version (released versions refuse edits), and leave the tips' review screenshots alone.
+const only = process.env.VERSION;
+const versions = (await asc('GET', `/v1/apps/${APP}/appStoreVersions`)).data.filter((v) => !only || v.attributes.versionString === only);
 for (const v of versions) {
   const loc = (await asc('GET', `/v1/appStoreVersions/${v.id}/appStoreVersionLocalizations`)).data.find((l) => l.attributes.locale === 'en-US');
   const sets = (await asc('GET', `/v1/appStoreVersionLocalizations/${loc.id}/appScreenshotSets`)).data;
@@ -39,7 +41,7 @@ for (const v of versions) {
   }
 }
 
-const iaps = (await asc('GET', `/v1/apps/${APP}/inAppPurchasesV2?limit=50`)).data;
+const iaps = only ? [] : (await asc('GET', `/v1/apps/${APP}/inAppPurchasesV2?limit=50`)).data;
 for (const iap of iaps) {
   const cur = await asc('GET', `/v2/inAppPurchases/${iap.id}/appStoreReviewScreenshot`).catch(() => null);
   if (cur?.data) await asc('DELETE', `/v1/inAppPurchaseAppStoreReviewScreenshots/${cur.data.id}`);
