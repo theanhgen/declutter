@@ -7,7 +7,10 @@
     "who": "done",
     "text": "every check passes."
   },
+  "draft_contract": false,
   "conflicts": [],
+  "invalid_conflicts": [],
+  "ungraded": [],
   "by_pick": {
     "19335916": [
       "pass",
@@ -39,5 +42,47 @@
     ]
   },
   "not_applied": [],
-  "extra": []
+  "extra": [],
+  "not_in_scope": [
+    [
+      20367516,
+      "settings: stats"
+    ],
+    [
+      35206392,
+      "settings: tip jar"
+    ],
+    [
+      8317096,
+      "site: hero"
+    ],
+    [
+      1558803,
+      "site: hero"
+    ],
+    [
+      674263,
+      "site: hero"
+    ],
+    [
+      12286641,
+      "chip: look"
+    ],
+    [
+      45050308,
+      "chip: motion"
+    ],
+    [
+      23756206,
+      "brand: wordmark"
+    ],
+    [
+      5319806,
+      "brand: colour"
+    ],
+    [
+      31160643,
+      "brand: icon"
+    ]
+  ]
 }

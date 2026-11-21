@@ -3,8 +3,16 @@
   "board": "https://claude.ai/artifact/HLAonFUjg8iZ9a2SW3H1Up",
   "notes": "research/arena-ui-2026-11-17.md",
   "picked": "2026-11-18",
-  "status": "draft",
+  "status": "confirmed",
   "draft_by": "agent 2026-11-20 from the owner's picks and the board's reasons; owner to confirm or rewrite the checks",
+  "confirmed": "2026-11-20 by the owner (checks as drafted, plus the site-choice pill decision)",
+  "surfaces": [
+    "popup",
+    "settings",
+    "site",
+    "chip",
+    "brand"
+  ],
   "picks": [
     {
       "id": 19335916,

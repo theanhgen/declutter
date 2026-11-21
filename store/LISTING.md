@@ -143,11 +143,11 @@ handling ("send to developer" only). The full text is in App Store Connect; cont
 
 ## Submissions
 
-| Store | State (2026-11-20) | Notes |
+| Store | State (2026-11-21) | Notes |
 |---|---|---|
-| App Store (macOS + iOS) | 1.1.1 (8) live; 1.2 (11) Waiting for Review, submitted 2026-11-20 | App `6816072545`. App Privacy: Data Not Collected. 1.2: popup redesign (Martian Mono, [on] / off rows, haptic switches on iOS), one-press "send to developer", Shoptet/Inspire/archa-plus rules, sharp Safari toolbar icon. Builds 9 and 10 were pulled from review and replaced the same day. Review recording `dist/declutter-app-review-ios.mp4` re-attached (attachments don't carry over). |
+| App Store (macOS + iOS) | 1.2 (11) live (submitted 2026-11-20, confirmed live 2026-11-21) | App `6816072545`. App Privacy: Data Not Collected. 1.2: popup redesign (Martian Mono, [on] / off rows, haptic switches on iOS), one-press "send to developer", Shoptet/Inspire/archa-plus rules, sharp Safari toolbar icon. Builds 9 and 10 were pulled from review and replaced the same day. Review recording `dist/declutter-app-review-ios.mp4` re-attached (attachments don't carry over). |
 | Firefox AMO | 1.2.0 approved and listed 2026-11-20 (1.1 never went to AMO) | Listing name `declutter: shorts & cookies`, slug `declutter-shorts-and-cookies`, version id `6738193`. Compatible: Firefox + Firefox for Android. Source zip, release notes and build notes on the version page. Categories: Privacy & Security; Photos, Music & Videos. MIT. |
-| Chrome Web Store | 1.0.0 live; 1.2.0 Pending review 2026-11-20, publishes automatically when approved | Item `ipggncgnmnbfbdkpgkollcpdjabfonim`, publisher `be12818b-259a-4c0a-860f-5e5ffc0fb652`. Category Tools, language English. Data usage: Web history only. Free, Public. Listing still has one 1.0 screenshot: upload `site/screenshots/*.png` (1280x800, no alpha) once 1.2.0 is published, not while it is pending. |
+| Chrome Web Store | 1.2.0 live (submitted 2026-11-20, confirmed live 2026-11-21) | Item `ipggncgnmnbfbdkpgkollcpdjabfonim`, publisher `be12818b-259a-4c0a-860f-5e5ffc0fb652`. Category Tools, language English. Data usage: Web history only. Free, Public. Listing still has one 1.0 screenshot: upload `site/screenshots/*.png` (1280x800, no alpha) now that 1.2.0 is published. |
 | Edge Add-ons | Not started | Partner Center account has no Edge developer enrolment yet. |
 | Opera, Whale | Not started | Same chrome zip; each needs its own developer account. |
 

@@ -1,6 +1,6 @@
 # Design feedback, round 3 (declutter)
 
-18 of 18 checks pass. All pass: show the owner the comparison page.
+18 of 18 checks pass. Next: every check passes.
 
 Rules for this revision:
 - Read each reference image below before changing anything. Words describe the reference; the image is the reference.

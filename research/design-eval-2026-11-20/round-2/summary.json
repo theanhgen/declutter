@@ -65,5 +65,47 @@
   "extra": [
     "The B/W pill pick (ink-filled chosen segment) and the Focus Mode pick (no full-strength filled pills) pull against each other in this design: the always-on ink 'refuse' fill is the main thing that keeps the status from being the single full-contrast element.",
     "Dark mode inverts the site-choice fill to near-white, which is the brightest element in the dark popup and outshines the maroon status field."
+  ],
+  "not_in_scope": [
+    [
+      20367516,
+      "settings: stats"
+    ],
+    [
+      35206392,
+      "settings: tip jar"
+    ],
+    [
+      8317096,
+      "site: hero"
+    ],
+    [
+      1558803,
+      "site: hero"
+    ],
+    [
+      674263,
+      "site: hero"
+    ],
+    [
+      12286641,
+      "chip: look"
+    ],
+    [
+      45050308,
+      "chip: motion"
+    ],
+    [
+      23756206,
+      "brand: wordmark"
+    ],
+    [
+      5319806,
+      "brand: colour"
+    ],
+    [
+      31160643,
+      "brand: icon"
+    ]
   ]
 }

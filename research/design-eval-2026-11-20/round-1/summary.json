@@ -47,5 +47,47 @@
     "Today's rounded grouped cards with hairline separators are kept for every group (toggles, status, site choice, report/settings); only colours and type changed.",
     "This-page status keeps today's 'dot + sentence' structure (now a green dot), the thing 20770715 replaces.",
     "Thin outlined 'on|off' capsules repeat on four rows plus the site choice, adding five filled accents where 2092684 asks for one."
+  ],
+  "not_in_scope": [
+    [
+      20367516,
+      "settings: stats"
+    ],
+    [
+      35206392,
+      "settings: tip jar"
+    ],
+    [
+      8317096,
+      "site: hero"
+    ],
+    [
+      1558803,
+      "site: hero"
+    ],
+    [
+      674263,
+      "site: hero"
+    ],
+    [
+      12286641,
+      "chip: look"
+    ],
+    [
+      45050308,
+      "chip: motion"
+    ],
+    [
+      23756206,
+      "brand: wordmark"
+    ],
+    [
+      5319806,
+      "brand: colour"
+    ],
+    [
+      31160643,
+      "brand: icon"
+    ]
   ]
 }
