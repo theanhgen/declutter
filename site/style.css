@@ -86,7 +86,7 @@ h1 { font-size: 60px; line-height: 1.15; letter-spacing: -3px; }
 .hero-note { margin-top: 14px; color: var(--muted); }
 .install { margin-top: 44px; }
 .eyebrow { margin-bottom: 12px; color: var(--muted); font-size: 12px; }
-.browser-links { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; padding: 0; margin: 0; list-style: none; }
+.browser-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0; margin: 0; list-style: none; }
 .browser-links a {
   display: flex;
   justify-content: space-between;
@@ -178,7 +178,6 @@ h1 { font-size: 60px; line-height: 1.15; letter-spacing: -3px; }
   h1 { font-size: 42px; letter-spacing: -2px; }
   .pitch { font-size: 19px; letter-spacing: -.3px; margin-top: 24px; }
   .install { margin-top: 32px; }
-  .browser-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .text-section, .section-heading { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .text-section, .screenshots-section { padding-block: 32px; }
   .section-heading { gap: 8px; margin-bottom: 22px; }
