@@ -13,6 +13,9 @@
   "detectPopup": [
     {
       "visible": "#rejectAllQuick"
+    },
+    {
+      "exists": ".consent-input.new-recipient"
     }
   ],
   "optIn": [
@@ -32,5 +35,5 @@
       "timeout": 3000
     }
   ],
-  "_comment": "No closing check: the page reloads after the click and destroys this frame first."
+  "_comment": "No closing check: the page reloads after the click and destroys this frame first. Once answered, the dialog stays loaded in a display:none iframe that WebKit still reports as visible, so Safari refused (and reloaded) on every page; T-Mobile marks undecided recipients .new-recipient, and only then is there anything to answer."
 }
