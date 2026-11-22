@@ -1,0 +1,53 @@
+{
+  "name": "harvest-cookiewall",
+  "_comment": "Harvest consent monitor's cookie wall (.harvest-cookiewall-*, storage.googleapis.com/harvest-consent-monitor-assets; user report mocomuseum.com 2026-11-21). No reject button: 'More info' opens the categories (Marketing off by default), then 'Accept selection'.",
+  "detectCmp": [
+    {
+      "exists": "#harvest-cookiewall-box #harvest-cookiewall-managepre"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#harvest-cookiewall-box"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#harvest-cookiewall-box .harvest-cookiewall-agree-all"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#harvest-cookiewall-managepre"
+    },
+    {
+      "waitForVisible": "#harvest-cookiewall-agree-selected",
+      "timeout": 3000
+    },
+    {
+      "if": {
+        "exists": "#harvest-cookiewall-permission-marketing:checked"
+      },
+      "then": [
+        {
+          "click": "#harvest-cookiewall-permission-marketing"
+        }
+      ]
+    },
+    {
+      "click": "#harvest-cookiewall-agree-selected"
+    },
+    {
+      "waitForVisible": "#harvest-cookiewall-box",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#harvest-cookiewall-box",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

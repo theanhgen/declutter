@@ -612,6 +612,10 @@
   {
    "host": "www.archa-plus.cz",
    "expect": "done"
+  },
+  {
+   "host": "www.mocomuseum.com",
+   "expect": "done"
   }
  ]
 }
