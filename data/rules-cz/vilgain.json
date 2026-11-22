@@ -1,0 +1,39 @@
+{
+  "name": "vilgain",
+  "_comment": "Vilgain's own cookie modal (Nette modalStack; user report vilgain.cz 2026-11-22). Refuse is 'Přijmout pouze nezbytné' (data-pwid=btn_cookie_decline, an ajax POST that closes the modal). Same shop on other country domains.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*vilgain\\.[a-z]+/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#snippet-modalStack-cookieModal-snModal button[data-pwid=\"btn_cookie_decline\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#snippet-modalStack-cookieModal-snModal.mw--visible"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#snippet-modalStack-cookieModal-snModal button[data-pwid=\"btn_cookie_accept\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#snippet-modalStack-cookieModal-snModal button[data-pwid=\"btn_cookie_decline\"]"
+    },
+    {
+      "waitForVisible": "#snippet-modalStack-cookieModal-snModal.mw--visible",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#snippet-modalStack-cookieModal-snModal.mw--visible",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

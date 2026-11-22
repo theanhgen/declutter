@@ -616,6 +616,10 @@
   {
    "host": "www.mocomuseum.com",
    "expect": "done"
+  },
+  {
+   "host": "vilgain.cz",
+   "expect": "done"
   }
  ]
 }
