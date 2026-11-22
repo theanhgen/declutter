@@ -10,8 +10,9 @@ const SITES = [
     ok: (v) => v === JSON.stringify({ analytics: true, ads: false }) },
   { host: 'stackoverflow.com', cmp: 'onetrust', read: () => window.OnetrustActiveGroups ?? '',
     ok: (v) => /C0002/.test(v) && /C0003/.test(v) && !/C0004/.test(v) },
-  { host: 'www.ceskatelevize.cz', cmp: 'cookieconsent-v3', read: () => JSON.stringify(window.CookieConsent?.getUserPreferences?.().acceptedCategories ?? []),
-    ok: (v) => /analyt|perform|stat/i.test(v) && !/ad|market|target/i.test(v) },
+  { host: 'www.ceskatelevize.cz', cmp: 'cookieconsent-v3', // cc_cookie, not window.CookieConsent: ČT bundles cookieconsent v3 without exposing it.
+    read: () => { const c = document.cookie.split('; ').find((x) => x.startsWith('cc_cookie=')); return JSON.stringify(c ? JSON.parse(decodeURIComponent(c.slice(10))).categories : []); },
+    ok: (v) => /analyt|perform|stat/i.test(v) && /prefer/i.test(v) && !/ad|market|target/i.test(v) },
 ];
 
 const { results, check } = reporter();
