@@ -143,21 +143,22 @@ handling ("send to developer" only). The full text is in App Store Connect; cont
 
 ## Submissions
 
-| Store | State (2026-11-21) | Notes |
+| Store | State (2026-11-22) | Notes |
 |---|---|---|
-| App Store (macOS + iOS) | 1.2 (11) live (submitted 2026-11-20, confirmed live 2026-11-21) | App `6816072545`. App Privacy: Data Not Collected. 1.2: popup redesign (Martian Mono, [on] / off rows, haptic switches on iOS), one-press "send to developer", Shoptet/Inspire/archa-plus rules, sharp Safari toolbar icon. Builds 9 and 10 were pulled from review and replaced the same day. Review recording `dist/declutter-app-review-ios.mp4` re-attached (attachments don't carry over). |
-| Firefox AMO | 1.2.0 approved and listed 2026-11-20 (1.1 never went to AMO) | Listing name `declutter: shorts & cookies`, slug `declutter-shorts-and-cookies`, version id `6738193`. Compatible: Firefox + Firefox for Android. Source zip, release notes and build notes on the version page. Categories: Privacy & Security; Photos, Music & Videos. MIT. |
-| Chrome Web Store | 1.2.0 live (submitted 2026-11-20, confirmed live 2026-11-21) | Item `ipggncgnmnbfbdkpgkollcpdjabfonim`, publisher `be12818b-259a-4c0a-860f-5e5ffc0fb652`. Category Tools, language English. Data usage: Web history only. Free, Public. Screenshots: the 1.0 one replaced by the five `site/screenshots/*.png` (1.2 popup), submitted 2026-11-21 (listing change, Pending review, publishes automatically). Google Analytics 4 opted in for the store listing (2026-11-21, owner's choice). |
+| App Store (macOS + iOS) | 1.2.1 (12) waiting for review (submitted 2026-11-22); 1.2 (11) live | App `6816072545`. App Privacy: Data Not Collected. 1.2: popup redesign (Martian Mono, [on] / off rows, haptic switches on iOS), one-press "send to developer", Shoptet/Inspire/archa-plus rules, sharp Safari toolbar icon. Builds 9 and 10 were pulled from review and replaced the same day. Review recording `dist/declutter-app-review-ios.mp4` re-attached (attachments don't carry over). |
+| Firefox AMO | 1.2.1 submitted 2026-11-22 (version id `6746042`, source zip attached, validated with no warnings); 1.2.0 listed until it is approved | Listing name `declutter: shorts & cookies`, slug `declutter-shorts-and-cookies`, version id `6738193`. Compatible: Firefox + Firefox for Android. Source zip, release notes and build notes on the version page. Categories: Privacy & Security; Photos, Music & Videos. MIT. |
+| Chrome Web Store | 1.2.1 pending review (submitted 2026-11-22, publishes automatically); 1.2.0 live | Item `ipggncgnmnbfbdkpgkollcpdjabfonim`, publisher `be12818b-259a-4c0a-860f-5e5ffc0fb652`. Category Tools, language English. Data usage: Web history only. Free, Public. Screenshots: the 1.0 one replaced by the five `site/screenshots/*.png` (1.2 popup), submitted 2026-11-21 (listing change, Pending review, publishes automatically). Google Analytics 4 opted in for the store listing (2026-11-21, owner's choice). |
 | Edge Add-ons | Not started | Partner Center account has no Edge developer enrolment yet. |
 | Opera, Whale | Not started | Same chrome zip; each needs its own developer account. |
 
-The 1.2.0 Chrome, Firefox and source zips were built from commit `b264897`.
+The 1.2.0 Chrome, Firefox and source zips were built from commit `b264897`; the 1.2.1 ones (and App Store build 12) from `7c56fbb`. 1.2.1: T-Mobile hidden-dialog loop in Safari, Harvest cookie wall and vilgain.cz rules, cookieconsent v3 category choice through the preferences modal (ceskatelevize.cz).
 
 Automation limits found on 2026-10-01: Google refuses sign-in in an automated browser; Chrome lets no extension
 (including Claude's) read or script the Web Store dashboard; AMO's forms can be filled through the Claude extension.
 Since 2026-11-20 both dashboards are driven over CDP in the agent Chrome (`chrome-agent` skill): CDP is not an
 extension, so the Web Store dashboard works. Google asks the owner to "Verify it's you" and Mozilla for a 2FA code
 when the session is old; both are the owner's step.
+Automation note (2026-11-22): the Web Store "Upload new package" dialog's "Select file" opens a native chooser; set the file on its `input[accept=".zip,.crx"]` directly (`agent-browser upload`). The "Submit for review" confirmation needs a second click on the header button before the dialog renders.
 
 ## Before submitting (checklist)
 
