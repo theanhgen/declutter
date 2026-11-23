@@ -1,0 +1,12 @@
+(() => {
+  const g = (k) => { try { return typeof window[k] !== 'undefined'; } catch { return false; } };
+  const cmp = [['Cookiebot','Cookiebot'],['OneTrust','OneTrust'],['Didomi','Didomi'],['orestbida CookieConsent','CookieConsent'],['cookie-script','CookieScript'],['Usercentrics','UC_UI'],['tarteaucitron','tarteaucitron'],['klaro','klaro'],['CookieYes','getCkyConsent'],['consentmanager','__cmp'],['Complianz','complianz'],['iubenda','_iub'],['CommandersAct','tC'],['cookieconsent2 (osano)','cookieconsent'],['Funding Choices','googlefc'],['CPEx','cpexSubs']].filter(([,k]) => g(k)).map(([n]) => n);
+  const all = []; const walk = (r) => { for (const e of r.querySelectorAll('*')) { all.push(e); if (e.shadowRoot) walk(e.shadowRoot); } }; walk(document.body || document);
+  let box = null;
+  for (const e of all) { const cs = getComputedStyle(e); if ((cs.position==='fixed'||cs.position==='sticky'||e.matches('[role=dialog],dialog[open]')) && e.offsetHeight>40 && cs.display!=='none' && cs.visibility!=='hidden') { const t=(e.innerText||'').replace(/\s+/g,' '); if (/cookie|souhlas|soukromí|consent/i.test(t) && t.length>=40 && t.length<5000) { box = e; break; } } }
+  const sel = (e) => e.id ? '#' + CSS.escape(e.id) : e.tagName.toLowerCase() + (e.className && typeof e.className==='string' ? '.' + e.className.trim().split(/\s+/).slice(0,2).map(c=>CSS.escape(c)).join('.') : '');
+  const path = (e) => { const p=[]; for (let x=e; x && x!==document.body && p.length<3; x=x.parentElement) { p.unshift(sel(x)); if (x.id) break; } return p.join(' > '); };
+  const btns = box ? [...box.querySelectorAll('button, a, [role=button], input[type=button], input[type=submit]')].filter(b => b.getClientRects().length).map(b => ({ text: (b.innerText||b.value||'').replace(/\s+/g,' ').trim().slice(0,50), sel: path(b), attrs: [...b.attributes].filter(a=>/^(data-|id|name|aria-label)/.test(a.name)).map(a=>a.name+'='+a.value.slice(0,40)).join(' ') })) : [];
+  const scripts = [...document.scripts].map(s=>s.src).filter(s=>/cookie|consent|cmp|gdpr|privacy|didomi|onetrust|cookiebot|usercentrics/i.test(s)).map(s=>s.slice(0,100));
+  return JSON.stringify({ cmp, box: box ? path(box) : null, boxText: box ? box.innerText.replace(/\s+/g,' ').slice(0,160) : null, btns: btns.slice(0,12), scripts: scripts.slice(0,5) });
+})()

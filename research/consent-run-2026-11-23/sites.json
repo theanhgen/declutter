@@ -1,0 +1,1618 @@
+{
+ "source": "Tranco list 8PW6V (tranco-list.eu, downloaded 2026-11-23), .cz domains in rank order; filtered (see README); final host = where https://www.<domain>/ redirects (curl)",
+ "excluded": {
+  "infra": "google.cz cra.cz imedia.cz sdn.cz szn.cz 257.cz anycastdns.cz grdns.cz arubadns.cz jyxo.cz jyxo-tls.cz superapi.cz r2b2.cz performax.cz cpex.cz im9.cz 1gr.cz ehub.cz inpage.cz stable.cz nos-avg.cz acrobits.cz cetin.cz cesnet.cz nic.cz or.cz eint.cz inecnet.cz erpid.cz riomedia.cz toplist.cz smartemailing.cz livebox.cz iinfo.cz cncenter.cz mafra.cz virusfree.cz supportbox.cz one.cz netio.cz unas.cz lkq.cz gapagroup.cz dupe.cz ucw.cz bluetone.cz",
+  "hosting": "wedos.cz forpsi.cz web4u.cz webglobe.cz ignum.cz active24.cz regzone.cz wz.cz master.cz vshosting.cz websupport.cz vedos.cz antee.cz nethost.cz edrive-hosting.cz gigaserver.cz onebit.cz vas-hosting.cz web4ce.cz webhouse.cz unihost.cz superhosting.cz zserver.cz svethostingu.cz hys.cz sweb.cz ic.cz webzdarma.cz netservis.cz vas-server.cz poda.cz iol.cz thinline.cz banan.cz blogspot.cz",
+  "adult": "freevideo.cz pvideo.cz jenporno.cz pornuj.cz dlouha-videa.cz iboys.cz dobryprivat.cz e-kondomy.cz elitedate.cz",
+  "foreignPiracy": "anikoto.cz animesuge.cz hurawatch.cz"
+ },
+ "droppedDead": [
+  "pizzatropea.cz",
+  "nipez.cz",
+  "8u.cz",
+  "eco-mx.cz",
+  "4fan.cz"
+ ],
+ "sites": [
+  {
+   "n": 1,
+   "trancoRank": 842,
+   "domain": "seznam.cz",
+   "host": "www.seznam.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 2,
+   "trancoRank": 1357,
+   "domain": "novinky.cz",
+   "host": "www.novinky.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 3,
+   "trancoRank": 1685,
+   "domain": "livescore.cz",
+   "host": "www.livescore.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 4,
+   "trancoRank": 2312,
+   "domain": "idnes.cz",
+   "host": "www.idnes.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 5,
+   "trancoRank": 4618,
+   "domain": "cuni.cz",
+   "host": "www.cuni.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 6,
+   "trancoRank": 5024,
+   "domain": "muni.cz",
+   "host": "www.muni.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 7,
+   "trancoRank": 5750,
+   "domain": "alza.cz",
+   "host": "www.alza.cz",
+   "curl": 403,
+   "inCanary": true
+  },
+  {
+   "n": 8,
+   "trancoRank": 6227,
+   "domain": "allegro.cz",
+   "host": "allegro.cz",
+   "curl": 403,
+   "inCanary": true
+  },
+  {
+   "n": 9,
+   "trancoRank": 6602,
+   "domain": "nova.cz",
+   "host": "tv.nova.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 10,
+   "trancoRank": 6849,
+   "domain": "centrum.cz",
+   "host": "www.centrum.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 11,
+   "trancoRank": 6870,
+   "domain": "blesk.cz",
+   "host": "www.blesk.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 12,
+   "trancoRank": 6951,
+   "domain": "seznamzpravy.cz",
+   "host": "www.seznamzpravy.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 13,
+   "trancoRank": 7015,
+   "domain": "csfd.cz",
+   "host": "www.csfd.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 14,
+   "trancoRank": 7197,
+   "domain": "windguru.cz",
+   "host": "www.windguru.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 15,
+   "trancoRank": 7758,
+   "domain": "sport.cz",
+   "host": "www.sport.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 16,
+   "trancoRank": 7980,
+   "domain": "super.cz",
+   "host": "www.super.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 17,
+   "trancoRank": 7993,
+   "domain": "bazos.cz",
+   "host": "www.bazos.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 18,
+   "trancoRank": 8143,
+   "domain": "livesport.cz",
+   "host": "www.livesport.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 19,
+   "trancoRank": 8735,
+   "domain": "allwyn.cz",
+   "host": "www.allwyn.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 20,
+   "trancoRank": 8841,
+   "domain": "kupi.cz",
+   "host": "www.kupi.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 21,
+   "trancoRank": 9012,
+   "domain": "idos.cz",
+   "host": "idos.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 22,
+   "trancoRank": 10297,
+   "domain": "cvut.cz",
+   "host": "www.cvut.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 23,
+   "trancoRank": 11919,
+   "domain": "cas.cz",
+   "host": "www.avcr.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 24,
+   "trancoRank": 12549,
+   "domain": "ceskatelevize.cz",
+   "host": "www.ceskatelevize.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 25,
+   "trancoRank": 13669,
+   "domain": "vinted.cz",
+   "host": "www.vinted.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 26,
+   "trancoRank": 13676,
+   "domain": "datart.cz",
+   "host": "www.datart.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 27,
+   "trancoRank": 14045,
+   "domain": "mapy.cz",
+   "host": "mapy.com",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 28,
+   "trancoRank": 14066,
+   "domain": "prehrajto.cz",
+   "host": "prehrajto.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 29,
+   "trancoRank": 14484,
+   "domain": "phoca.cz",
+   "host": "www.phoca.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 30,
+   "trancoRank": 15931,
+   "domain": "heureka.cz",
+   "host": "www.heureka.cz",
+   "curl": 403,
+   "inCanary": true
+  },
+  {
+   "n": 31,
+   "trancoRank": 16164,
+   "domain": "firmy.cz",
+   "host": "www.firmy.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 32,
+   "trancoRank": 17795,
+   "domain": "denik.cz",
+   "host": "www.denik.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 33,
+   "trancoRank": 18757,
+   "domain": "fio.cz",
+   "host": "www.fio.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 34,
+   "trancoRank": 19381,
+   "domain": "toprecepty.cz",
+   "host": "www.toprecepty.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 35,
+   "trancoRank": 19439,
+   "domain": "radio.cz",
+   "host": "english.radio.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 36,
+   "trancoRank": 19540,
+   "domain": "prozeny.cz",
+   "host": "www.prozeny.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 37,
+   "trancoRank": 19694,
+   "domain": "vodafone.cz",
+   "host": "www.vodafone.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 38,
+   "trancoRank": 19880,
+   "domain": "extra.cz",
+   "host": "www.extra.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 39,
+   "trancoRank": 19937,
+   "domain": "iprima.cz",
+   "host": "www.iprima.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 40,
+   "trancoRank": 20007,
+   "domain": "sportisimo.cz",
+   "host": "www.sportisimo.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 41,
+   "trancoRank": 20487,
+   "domain": "vutbr.cz",
+   "host": "www.vut.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 42,
+   "trancoRank": 21211,
+   "domain": "upol.cz",
+   "host": "www.upol.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 43,
+   "trancoRank": 21217,
+   "domain": "lidl.cz",
+   "host": "www.lidl.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 44,
+   "trancoRank": 21591,
+   "domain": "webnode.cz",
+   "host": "www.webnode.com",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 45,
+   "trancoRank": 21947,
+   "domain": "brnostavi.cz",
+   "host": "www.brnostavi.cz",
+   "curl": "fail",
+   "inCanary": false
+  },
+  {
+   "n": 46,
+   "trancoRank": 22701,
+   "domain": "zcu.cz",
+   "host": "www.zcu.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 47,
+   "trancoRank": 22830,
+   "domain": "hokej.cz",
+   "host": "www.hokej.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 48,
+   "trancoRank": 23505,
+   "domain": "stesti.cz",
+   "host": "www.stesti.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 49,
+   "trancoRank": 23612,
+   "domain": "rozhlas.cz",
+   "host": "portal.rozhlas.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 50,
+   "trancoRank": 23967,
+   "domain": "estranky.cz",
+   "host": "www.estranky.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 51,
+   "trancoRank": 24044,
+   "domain": "aktualne.cz",
+   "host": "www.aktualne.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 52,
+   "trancoRank": 24674,
+   "domain": "vse.cz",
+   "host": "www.vse.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 53,
+   "trancoRank": 24827,
+   "domain": "justice.cz",
+   "host": "msp.gov.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 54,
+   "trancoRank": 25382,
+   "domain": "vsb.cz",
+   "host": "www.vsb.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 55,
+   "trancoRank": 25395,
+   "domain": "tipsport.cz",
+   "host": "www.tipsport.cz",
+   "curl": 403,
+   "inCanary": true
+  },
+  {
+   "n": 56,
+   "trancoRank": 26518,
+   "domain": "tele3.cz",
+   "host": "www.tele3.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 57,
+   "trancoRank": 26909,
+   "domain": "pipni.cz",
+   "host": "pipni.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 58,
+   "trancoRank": 27389,
+   "domain": "jobs.cz",
+   "host": "www.jobs.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 59,
+   "trancoRank": 27808,
+   "domain": "o2.cz",
+   "host": "www.o2.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 60,
+   "trancoRank": 27842,
+   "domain": "blueboard.cz",
+   "host": "hosting.blueboard.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 61,
+   "trancoRank": 29136,
+   "domain": "tiscali.cz",
+   "host": "www.tiscali.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 62,
+   "trancoRank": 29282,
+   "domain": "lidovky.cz",
+   "host": "www.lidovky.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 63,
+   "trancoRank": 29734,
+   "domain": "aukro.cz",
+   "host": "aukro.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 64,
+   "trancoRank": 29877,
+   "domain": "megaknihy.cz",
+   "host": "www.megaknihy.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 65,
+   "trancoRank": 29907,
+   "domain": "kurzy.cz",
+   "host": "www.kurzy.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 66,
+   "trancoRank": 30540,
+   "domain": "skolaonline.cz",
+   "host": "www.skolaonline.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 67,
+   "trancoRank": 31721,
+   "domain": "ceskyflorbal.cz",
+   "host": "www.ceskyflorbal.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 68,
+   "trancoRank": 31907,
+   "domain": "cssz.cz",
+   "host": "www.cssz.gov.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 69,
+   "trancoRank": 32122,
+   "domain": "skok.cz",
+   "host": "www.skok.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 70,
+   "trancoRank": 32960,
+   "domain": "irozhlas.cz",
+   "host": "www.irozhlas.cz",
+   "curl": 403,
+   "inCanary": true
+  },
+  {
+   "n": 71,
+   "trancoRank": 33668,
+   "domain": "t-mobile.cz",
+   "host": "www.t-mobile.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 72,
+   "trancoRank": 34304,
+   "domain": "e15.cz",
+   "host": "www.e15.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 73,
+   "trancoRank": 34328,
+   "domain": "czu.cz",
+   "host": "www.czu.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 74,
+   "trancoRank": 34618,
+   "domain": "odkarla.cz",
+   "host": "www.odkarla.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 75,
+   "trancoRank": 34742,
+   "domain": "mpsv.cz",
+   "host": "mpsv.gov.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 76,
+   "trancoRank": 35481,
+   "domain": "chmi.cz",
+   "host": "www.chmi.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 77,
+   "trancoRank": 36642,
+   "domain": "mendelu.cz",
+   "host": "www.mendelu.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 78,
+   "trancoRank": 37063,
+   "domain": "csob.cz",
+   "host": "www.csob.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 79,
+   "trancoRank": 37198,
+   "domain": "cd.cz",
+   "host": "www.cd.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 80,
+   "trancoRank": 37457,
+   "domain": "divadloustolu.cz",
+   "host": "www.dianabedrichov.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 81,
+   "trancoRank": 37495,
+   "domain": "raby.cz",
+   "host": "historie.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 82,
+   "trancoRank": 37510,
+   "domain": "databazeknih.cz",
+   "host": "www.databazeknih.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 83,
+   "trancoRank": 37614,
+   "domain": "mzv.cz",
+   "host": "mzv.gov.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 84,
+   "trancoRank": 37661,
+   "domain": "zive.cz",
+   "host": "www.zive.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 85,
+   "trancoRank": 37675,
+   "domain": "utb.cz",
+   "host": "www.utb.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 86,
+   "trancoRank": 37788,
+   "domain": "uoou.cz",
+   "host": "uoou.gov.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 87,
+   "trancoRank": 38869,
+   "domain": "ceskenoviny.cz",
+   "host": "www.ceskenoviny.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 88,
+   "trancoRank": 39194,
+   "domain": "kudyznudy.cz",
+   "host": "www.kudyznudy.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 89,
+   "trancoRank": 39378,
+   "domain": "zbozi.cz",
+   "host": "www.zbozi.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 90,
+   "trancoRank": 39468,
+   "domain": "psp.cz",
+   "host": "www.psp.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 91,
+   "trancoRank": 40351,
+   "domain": "sreality.cz",
+   "host": "www.sreality.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 92,
+   "trancoRank": 41759,
+   "domain": "stream.cz",
+   "host": "www.stream.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 93,
+   "trancoRank": 42797,
+   "domain": "knihydobrovsky.cz",
+   "host": "www.knihydobrovsky.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 94,
+   "trancoRank": 43234,
+   "domain": "glami.cz",
+   "host": "www.glami.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 95,
+   "trancoRank": 43943,
+   "domain": "volny.cz",
+   "host": "volny.centrum.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 96,
+   "trancoRank": 44126,
+   "domain": "hn.cz",
+   "host": "hn.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 97,
+   "trancoRank": 44585,
+   "domain": "zalando.cz",
+   "host": "www.zalando.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 98,
+   "trancoRank": 44834,
+   "domain": "motorkari.cz",
+   "host": "www.motorkari.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 99,
+   "trancoRank": 44835,
+   "domain": "skoda-auto.cz",
+   "host": "www.skoda-auto.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 100,
+   "trancoRank": 45097,
+   "domain": "lovecpokladu.cz",
+   "host": "www.lovecpokladu.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 101,
+   "trancoRank": 45133,
+   "domain": "mfcr.cz",
+   "host": "mf.gov.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 102,
+   "trancoRank": 45613,
+   "domain": "fotbal.cz",
+   "host": "www.fotbal.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 103,
+   "trancoRank": 45841,
+   "domain": "sauto.cz",
+   "host": "www.sauto.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 104,
+   "trancoRank": 46066,
+   "domain": "karaoketexty.cz",
+   "host": "www.karaoketexty.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 105,
+   "trancoRank": 46201,
+   "domain": "shoptet.cz",
+   "host": "www.shoptet.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 106,
+   "trancoRank": 46367,
+   "domain": "denikn.cz",
+   "host": "denikn.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 107,
+   "trancoRank": 46635,
+   "domain": "slevomat.cz",
+   "host": "www.slevomat.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 108,
+   "trancoRank": 46671,
+   "domain": "parlamentnilisty.cz",
+   "host": "www.parlamentnilisty.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 109,
+   "trancoRank": 46902,
+   "domain": "nkp.cz",
+   "host": "www.nkp.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 110,
+   "trancoRank": 47190,
+   "domain": "cnb.cz",
+   "host": "www.cnb.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 111,
+   "trancoRank": 47674,
+   "domain": "echo24.cz",
+   "host": "www.echo24.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 112,
+   "trancoRank": 47757,
+   "domain": "cez.cz",
+   "host": "www.cez.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 113,
+   "trancoRank": 48204,
+   "domain": "zakonyprolidi.cz",
+   "host": "www.zakonyprolidi.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 114,
+   "trancoRank": 48796,
+   "domain": "smarty.cz",
+   "host": "www.smarty.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 115,
+   "trancoRank": 48841,
+   "domain": "jcu.cz",
+   "host": "www.jcu.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 116,
+   "trancoRank": 48877,
+   "domain": "ebikepartners.cz",
+   "host": "www.ebikepartners.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 117,
+   "trancoRank": 48922,
+   "domain": "sbazar.cz",
+   "host": "www.sbazar.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 118,
+   "trancoRank": 49333,
+   "domain": "lekarna.cz",
+   "host": "www.lekarna.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 119,
+   "trancoRank": 49626,
+   "domain": "coi.cz",
+   "host": "coi.gov.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 120,
+   "trancoRank": 49684,
+   "domain": "decathlon.cz",
+   "host": "www.decathlon.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 121,
+   "trancoRank": 49700,
+   "domain": "drmax.cz",
+   "host": "www.drmax.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 122,
+   "trancoRank": 50419,
+   "domain": "csas.cz",
+   "host": "www.csas.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 123,
+   "trancoRank": 50807,
+   "domain": "martinus.cz",
+   "host": "www.martinus.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 124,
+   "trancoRank": 51074,
+   "domain": "inara.cz",
+   "host": "inara.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 125,
+   "trancoRank": 51151,
+   "domain": "notino.cz",
+   "host": "www.notino.cz",
+   "curl": 403,
+   "inCanary": true
+  },
+  {
+   "n": 126,
+   "trancoRank": 51300,
+   "domain": "retrogames.cz",
+   "host": "www.retrogames.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 127,
+   "trancoRank": 51371,
+   "domain": "bandzone.cz",
+   "host": "bandzone.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 128,
+   "trancoRank": 51554,
+   "domain": "ujep.cz",
+   "host": "www.ujep.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 129,
+   "trancoRank": 51955,
+   "domain": "ifortuna.cz",
+   "host": "www.ifortuna.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 130,
+   "trancoRank": 53884,
+   "domain": "dpp.cz",
+   "host": "www.dpp.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 131,
+   "trancoRank": 54229,
+   "domain": "vscht.cz",
+   "host": "www.vscht.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 132,
+   "trancoRank": 54457,
+   "domain": "aboutyou.cz",
+   "host": "www.aboutyou.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 133,
+   "trancoRank": 54546,
+   "domain": "meteocentrum.cz",
+   "host": "www.meteocentrum.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 134,
+   "trancoRank": 55222,
+   "domain": "penize.cz",
+   "host": "www.penize.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 135,
+   "trancoRank": 55682,
+   "domain": "in-pocasi.cz",
+   "host": "www.in-pocasi.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 136,
+   "trancoRank": 55877,
+   "domain": "bistudio.cz",
+   "host": "www.bistudio.cz",
+   "curl": "fail",
+   "inCanary": false
+  },
+  {
+   "n": 137,
+   "trancoRank": 55946,
+   "domain": "drbna.cz",
+   "host": "www.drbna.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 138,
+   "trancoRank": 56057,
+   "domain": "chance.cz",
+   "host": "www.chance.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 139,
+   "trancoRank": 56116,
+   "domain": "favi.cz",
+   "host": "favi.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 140,
+   "trancoRank": 56343,
+   "domain": "dek.cz",
+   "host": "www.dek.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 141,
+   "trancoRank": 56474,
+   "domain": "emimino.cz",
+   "host": "www.emimino.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 142,
+   "trancoRank": 56626,
+   "domain": "bike-forum.cz",
+   "host": "www.bike-forum.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 143,
+   "trancoRank": 56721,
+   "domain": "ahaonline.cz",
+   "host": "www.ahaonline.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 144,
+   "trancoRank": 56894,
+   "domain": "ppl.cz",
+   "host": "www.ppl.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 145,
+   "trancoRank": 57296,
+   "domain": "im.cz",
+   "host": "www.im.cz",
+   "curl": "fail",
+   "inCanary": false
+  },
+  {
+   "n": 146,
+   "trancoRank": 57363,
+   "domain": "e-chalupy.cz",
+   "host": "www.e-chalupy.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 147,
+   "trancoRank": 57662,
+   "domain": "mvcr.cz",
+   "host": "mv.gov.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 148,
+   "trancoRank": 58906,
+   "domain": "knihobot.cz",
+   "host": "knihobot.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 149,
+   "trancoRank": 58920,
+   "domain": "cuzk.cz",
+   "host": "cuzk.gov.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 150,
+   "trancoRank": 59164,
+   "domain": "blog.cz",
+   "host": "tn.nova.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 151,
+   "trancoRank": 59226,
+   "domain": "fler.cz",
+   "host": "www.fler.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 152,
+   "trancoRank": 59457,
+   "domain": "eurofotbal.cz",
+   "host": "www.eurofotbal.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 153,
+   "trancoRank": 59720,
+   "domain": "benu.cz",
+   "host": "www.benu.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 154,
+   "trancoRank": 60054,
+   "domain": "itesco.cz",
+   "host": "www.itesco.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 155,
+   "trancoRank": 60070,
+   "domain": "forum24.cz",
+   "host": "www.forum24.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 156,
+   "trancoRank": 60504,
+   "domain": "invia.cz",
+   "host": "www.invia.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 157,
+   "trancoRank": 61415,
+   "domain": "jenprace.cz",
+   "host": "www.jenprace.cz",
+   "curl": 429,
+   "inCanary": false
+  },
+  {
+   "n": 158,
+   "trancoRank": 61574,
+   "domain": "akcniceny.cz",
+   "host": "www.akcniceny.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 159,
+   "trancoRank": 61601,
+   "domain": "avizo.cz",
+   "host": "www.avizo.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 160,
+   "trancoRank": 61628,
+   "domain": "drevostavitel.cz",
+   "host": "www.drevostavitel.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 161,
+   "trancoRank": 62039,
+   "domain": "tenisportal.cz",
+   "host": "www.tenisportal.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 162,
+   "trancoRank": 62120,
+   "domain": "slu.cz",
+   "host": "www.slu.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 163,
+   "trancoRank": 62135,
+   "domain": "oneplay.cz",
+   "host": "www.oneplay.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 164,
+   "trancoRank": 62701,
+   "domain": "garaz.cz",
+   "host": "www.garaz.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 165,
+   "trancoRank": 62885,
+   "domain": "mimibazar.cz",
+   "host": "www.mimibazar.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 166,
+   "trancoRank": 63207,
+   "domain": "tchibo.cz",
+   "host": "www.tchibo.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 167,
+   "trancoRank": 63253,
+   "domain": "auto.cz",
+   "host": "www.auto.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 168,
+   "trancoRank": 64341,
+   "domain": "reflex.cz",
+   "host": "www.reflex.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 169,
+   "trancoRank": 64400,
+   "domain": "kaufland.cz",
+   "host": "www.kaufland.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 170,
+   "trancoRank": 64661,
+   "domain": "kinobox.cz",
+   "host": "www.kinobox.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 171,
+   "trancoRank": 64766,
+   "domain": "osu.cz",
+   "host": "www.osu.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 172,
+   "trancoRank": 64885,
+   "domain": "astratex.cz",
+   "host": "www.astratex.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 173,
+   "trancoRank": 64937,
+   "domain": "edna.cz",
+   "host": "www.edna.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 174,
+   "trancoRank": 64967,
+   "domain": "modelbazar.cz",
+   "host": "www.modelbazar.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 175,
+   "trancoRank": 65118,
+   "domain": "upce.cz",
+   "host": "www.upce.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 176,
+   "trancoRank": 65762,
+   "domain": "soukop.cz",
+   "host": "www.soukop.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 177,
+   "trancoRank": 65876,
+   "domain": "seznamka.cz",
+   "host": "www.seznamka.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 178,
+   "trancoRank": 66325,
+   "domain": "aaaauto.cz",
+   "host": "www.aaaauto.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 179,
+   "trancoRank": 66723,
+   "domain": "vagonweb.cz",
+   "host": "www.vagonweb.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 180,
+   "trancoRank": 67006,
+   "domain": "tul.cz",
+   "host": "www.tul.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 181,
+   "trancoRank": 67082,
+   "domain": "obi.cz",
+   "host": "www.obi.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 182,
+   "trancoRank": 67130,
+   "domain": "sa.cz",
+   "host": "www.studentagency.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 183,
+   "trancoRank": 67203,
+   "domain": "zdopravy.cz",
+   "host": "zdopravy.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 184,
+   "trancoRank": 67294,
+   "domain": "hrad.cz",
+   "host": "www.hrad.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 185,
+   "trancoRank": 67405,
+   "domain": "postaonline.cz",
+   "host": "www.postaonline.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 186,
+   "trancoRank": 67595,
+   "domain": "lupa.cz",
+   "host": "www.lupa.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 187,
+   "trancoRank": 67673,
+   "domain": "expres.cz",
+   "host": "www.expres.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 188,
+   "trancoRank": 67878,
+   "domain": "prace.cz",
+   "host": "www.prace.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 189,
+   "trancoRank": 68257,
+   "domain": "rossmann.cz",
+   "host": "www.rossmann.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 190,
+   "trancoRank": 68687,
+   "domain": "geology.cz",
+   "host": "www.geology.cz",
+   "curl": "fail",
+   "inCanary": false
+  },
+  {
+   "n": 191,
+   "trancoRank": 68701,
+   "domain": "annonce.cz",
+   "host": "www.annonce.cz",
+   "curl": 403,
+   "inCanary": false
+  },
+  {
+   "n": 192,
+   "trancoRank": 69216,
+   "domain": "hornbach.cz",
+   "host": "www.hornbach.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 193,
+   "trancoRank": 69373,
+   "domain": "skyscanner.cz",
+   "host": "www.skyscanner.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 194,
+   "trancoRank": 69650,
+   "domain": "planeo.cz",
+   "host": "www.planeo.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 195,
+   "trancoRank": 69674,
+   "domain": "gymbeam.cz",
+   "host": "gymbeam.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 196,
+   "trancoRank": 69677,
+   "domain": "xchat.cz",
+   "host": "www.xchat.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 197,
+   "trancoRank": 70196,
+   "domain": "lide.cz",
+   "host": "www.lide.cz",
+   "curl": 200,
+   "inCanary": true
+  },
+  {
+   "n": 198,
+   "trancoRank": 70664,
+   "domain": "nyx.cz",
+   "host": "nyx.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 199,
+   "trancoRank": 70711,
+   "domain": "altisport.cz",
+   "host": "www.altisport.cz",
+   "curl": 200,
+   "inCanary": false
+  },
+  {
+   "n": 200,
+   "trancoRank": 70880,
+   "domain": "zalando-lounge.cz",
+   "host": "www.zalando-lounge.cz",
+   "curl": 200,
+   "inCanary": false
+  }
+ ]
+}
