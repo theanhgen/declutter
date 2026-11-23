@@ -54,7 +54,7 @@
   }
   html.ios .row { min-height: 44px; }
   .row .label { flex: 1; }
-  label.row, button.row { cursor: pointer; }
+  button.row { cursor: pointer; }
   button.row:disabled { cursor: default; }
   .chevron { color: var(--faint); }
 
@@ -62,19 +62,25 @@
      other is fainter. Both forms are ten characters, so the column holds. */
   .toggle { flex: none; white-space: pre; }
   .toggle .sep, .toggle .w { color: var(--faint); }
-  .hit:checked + .toggle .on, .hit:not(:checked) + .toggle .off { color: var(--muted); }
+  /* The word not chosen recedes further than the separator, in the plain row and the reversed one alike. */
+  .toggle .w { opacity: .45; }
+  .hit:checked + .toggle .on, .hit:not(:checked) + .toggle .off { color: var(--muted); opacity: 1; }
   .hit:checked + .toggle .on::before, .hit:not(:checked) + .toggle .off::before { content: "["; }
   .hit:checked + .toggle .on::after, .hit:not(:checked) + .toggle .off::after { content: "]"; }
-  /* Under the words, a real switch covering the whole row, invisible: iOS plays its haptic only when the finger
-     toggles a native switch (input type=checkbox switch). The words show its state. */
-  label.row { position: relative; }
-  label.row .hit { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  /* Under the words, a real switch, invisible: iOS plays its haptic only when the finger toggles a native switch
+     (input type=checkbox switch). The words show its state. It covers only the right-hand column (ten characters plus
+     the row's padding and a margin), so a finger scrolling the list over the labels doesn't flip anything. */
+  .row.switch { position: relative; }
+  .row.switch .hit {
+    position: absolute; top: 0; right: 0; bottom: 0; width: calc(10ch + 48px); height: 100%; margin: 0; padding: 0;
+    font: inherit; opacity: 0; cursor: pointer;
+  }
 
   /* The current row (pointer or keyboard): one ink band across the row, text reversed. */
-  label.row:hover, label.row:has(:focus-visible), button.row:not(:disabled):hover, button.row:focus-visible {
+  .row.switch:has(.hit:hover), .row.switch:has(:focus-visible), button.row:not(:disabled):hover, button.row:focus-visible {
     background: var(--fg); outline: none;
   }
-  label.row:hover *, label.row:has(:focus-visible) *, button.row:not(:disabled):hover *, button.row:focus-visible * {
+  .row.switch:has(.hit:hover) *, .row.switch:has(:focus-visible) *, button.row:not(:disabled):hover *, button.row:focus-visible * {
     color: var(--bg) !important;
   }
 
@@ -111,10 +117,10 @@
   <header><h1><img src="d.svg" alt="" class="logo">declutter</h1><span id="host"></span></header>
 
   <div id="toggles">
-    <label class="row"><span class="label">hide shorts</span><input type="checkbox" switch class="hit" id="shorts"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></label>
-    <label class="row"><span class="label">hide posts in feeds</span><input type="checkbox" switch class="hit" id="posts"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></label>
-    <label class="row"><span class="label">hide playables</span><input type="checkbox" switch class="hit" id="playables"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></label>
-    <label class="row"><span class="label">answer cookie banners</span><input type="checkbox" switch class="hit" id="consent"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></label>
+    <div class="row switch"><span class="label" id="shorts-label">hide shorts</span><input type="checkbox" switch class="hit" id="shorts" aria-labelledby="shorts-label"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></div>
+    <div class="row switch"><span class="label" id="posts-label">hide posts in feeds</span><input type="checkbox" switch class="hit" id="posts" aria-labelledby="posts-label"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></div>
+    <div class="row switch"><span class="label" id="playables-label">hide playables</span><input type="checkbox" switch class="hit" id="playables" aria-labelledby="playables-label"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></div>
+    <div class="row switch"><span class="label" id="consent-label">answer cookie banners</span><input type="checkbox" switch class="hit" id="consent" aria-labelledby="consent-label"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></div>
   </div>
 
   <section id="pageSection" hidden>
