@@ -1,6 +1,6 @@
 {
   "name": "declutter",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Hides YouTube Shorts and answers cookie banners the way you choose (Chrome, Safari, Firefox)",
   "scripts": {
     "build": "node build.mjs",
