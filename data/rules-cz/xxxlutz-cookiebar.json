@@ -1,0 +1,36 @@
+{
+  "name": "xxxlutz-cookiebar",
+  "_comment": "XXXLutz group shop platform consent modal (#modal, data-purpose attributes; www.moebelix.cz/.sk, user report www.moebelix.cz 2026-11-23). Odmítnout vše has no attribute of its own: it is the button in the div right after the accept button, in every language. Class names are build hashes.",
+  "detectCmp": [
+    {
+      "exists": "[data-purpose=\"modal.body\"] [data-purpose=\"cookieBar.button.accept\"] + div > button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[data-purpose=\"modal.body\"] [data-purpose=\"cookieBar.button.accept\"] + div > button"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[data-purpose=\"modal.body\"] [data-purpose=\"cookieBar.button.accept\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[data-purpose=\"modal.body\"] [data-purpose=\"cookieBar.button.accept\"] + div > button"
+    },
+    {
+      "waitForVisible": "[data-purpose=\"modal.body\"] [data-purpose=\"cookieBar.button.accept\"] + div > button",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "[data-purpose=\"modal.body\"] [data-purpose=\"cookieBar.button.accept\"] + div > button",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

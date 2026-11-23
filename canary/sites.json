@@ -792,6 +792,22 @@
   {
    "host": "www.parlamentnilisty.cz",
    "expect": "wall"
+  },
+  {
+   "host": "www.moebelix.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.moebelix.sk",
+   "expect": "done"
+  },
+  {
+   "host": "www.xxxlutz.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.linkedin.com",
+   "expect": "done"
   }
  ]
 }
