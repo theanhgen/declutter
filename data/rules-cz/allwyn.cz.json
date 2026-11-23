@@ -1,0 +1,39 @@
+{
+  "name": "allwyn.cz",
+  "_comment": "Allwyn own consent dialog (dialog.consent-dialog). POUZE NEZBYTNÉ = data-test consent-bar-necessary. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*allwyn\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "dialog.consent-dialog button[data-test=\"consent-bar-necessary\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "dialog.consent-dialog [data-test=\"consent-bar-necessary\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "dialog.consent-dialog button[data-test=\"consent-bar-accept\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "dialog.consent-dialog button[data-test=\"consent-bar-necessary\"]"
+    },
+    {
+      "waitForVisible": "dialog.consent-dialog [data-test=\"consent-bar-necessary\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "dialog.consent-dialog [data-test=\"consent-bar-necessary\"]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

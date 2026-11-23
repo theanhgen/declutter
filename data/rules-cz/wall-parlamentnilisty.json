@@ -1,0 +1,26 @@
+{
+  "name": "cz-wall-parlamentnilisty",
+  "_comment": "ParlamentníListy.cz consent-or-pay page (/nastaveni-souhlasu, consentmanager underneath): Souhlasím a vstupuji (free with ads), 15 Kč for 24 h, or a subscription. Accept only, never refused (D5). Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*parlamentnilisty\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".cookie-consent #cookie-consent button[data-pl-consent]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookie-consent button[data-pl-consent]",
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookie-consent button[data-pl-consent]",
+      "retry": 3,
+      "retryInterval": 800
+    }
+  ],
+  "optOut": []
+}

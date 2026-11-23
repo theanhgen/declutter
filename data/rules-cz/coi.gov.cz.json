@@ -1,0 +1,39 @@
+{
+  "name": "coi.gov.cz",
+  "_comment": "ČOI WordPress theme cookie banner (#cookie-banner, not the gov3 popup cz-gov matches). Odmítnout = #cookie-reject. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*coi\\.gov\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookie-banner #cookie-reject"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookie-banner #cookie-reject"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookie-banner #cookie-accept"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookie-banner #cookie-reject"
+    },
+    {
+      "waitForVisible": "#cookie-banner #cookie-reject",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookie-banner #cookie-reject",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

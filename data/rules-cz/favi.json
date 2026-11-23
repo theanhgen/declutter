@@ -1,0 +1,39 @@
+{
+  "name": "favi",
+  "_comment": "FAVI cookie wall (#cookie-wall; not consent-or-pay). Povolit nezbytné = span.accept-essential next to Nastavení. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*favi\\.[a-z]+/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookie-wall .partial-consent .accept-essential"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookie-wall .options"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookie-wall button.accept-all"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookie-wall .partial-consent .accept-essential"
+    },
+    {
+      "waitForVisible": "#cookie-wall .options",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookie-wall .options",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

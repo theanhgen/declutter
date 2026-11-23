@@ -1,0 +1,39 @@
+{
+  "name": "slu",
+  "_comment": "Slezská univerzita cookie toast (toastr). Pouze nutné = #allow-cookies-technical-button. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*slu\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#allow-cookies-technical-button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#allow-cookies-technical-button"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#allow-cookies-button"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#allow-cookies-technical-button"
+    },
+    {
+      "waitForVisible": "#allow-cookies-technical-button",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#allow-cookies-technical-button",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

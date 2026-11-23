@@ -1,0 +1,36 @@
+{
+  "name": "cookieconsent-accept-none",
+  "_comment": "Custom cookieconsent.js (#cookieconsent with .cookieconsent-accept-none; www.vse.cz WP theme). Odmítnout = accept-none. Top-200 CZ run 2026-11-23.",
+  "detectCmp": [
+    {
+      "exists": "#cookieconsent button.cookieconsent-accept-none"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookieconsent .cookieconsent-buttons"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookieconsent button.cookieconsent-accept-all"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookieconsent button.cookieconsent-accept-none"
+    },
+    {
+      "waitForVisible": "#cookieconsent .cookieconsent-buttons",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookieconsent .cookieconsent-buttons",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

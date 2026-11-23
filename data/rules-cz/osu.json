@@ -1,0 +1,41 @@
+{
+  "name": "osu",
+  "_comment": "Ostravská univerzita cookie bar (#souhlas). Buttons are spans: Odmítnout = #odmitnout_souhlas. Top-200 CZ run 2026-11-23. The banner shows a few seconds after load: detectPopup waits for it.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*osu\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#souhlas #odmitnout_souhlas"
+    }
+  ],
+  "detectPopup": [
+    {
+      "waitForVisible": "#souhlas #odmitnout_souhlas",
+      "timeout": 10000,
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#souhlas #povolit_souhlas"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#souhlas #odmitnout_souhlas"
+    },
+    {
+      "waitForVisible": "#souhlas #odmitnout_souhlas",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#souhlas #odmitnout_souhlas",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

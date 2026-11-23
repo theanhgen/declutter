@@ -1,0 +1,38 @@
+{
+  "name": "autox-cookiebar",
+  "_comment": "autoX cookiebar v2 (img.autox.cz; www.aaaauto.cz). Pouze nezbytné cookies = data-cookie-save=decline. Top-200 CZ run 2026-11-23. The banner shows a few seconds after load: detectPopup waits for it.",
+  "detectCmp": [
+    {
+      "exists": "#cookiebar button[data-cookie-save=\"decline\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "waitForVisible": "#cookiebar .cookiebar__footer-buttons",
+      "timeout": 10000,
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookiebar button[data-cookie-save=\"all\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookiebar button[data-cookie-save=\"decline\"]"
+    },
+    {
+      "waitForVisible": "#cookiebar .cookiebar__footer-buttons",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookiebar .cookiebar__footer-buttons",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

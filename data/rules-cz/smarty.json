@@ -1,0 +1,39 @@
+{
+  "name": "smarty",
+  "_comment": "Smarty own consent banner. Odmítnout vše = #consent-banner-disagree. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*smarty\\.(cz|sk)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#consent-banner-disagree"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#consent-banner-disagree"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#consent-banner-agree"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#consent-banner-disagree"
+    },
+    {
+      "waitForVisible": "#consent-banner-disagree",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#consent-banner-disagree",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "vscht",
+  "_comment": "VŠCHT cookie consent (Vue app, .csc-cookie-consent). Přijmout pouze nezbytné = last button in .cookie-content__action (the first is Vlastní nastavení). Top-200 CZ run 2026-11-23. The banner shows a few seconds after load: detectPopup waits for it.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*vscht\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".csc-cookie-consent .cookie-content__action button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "waitForVisible": ".csc-cookie-consent .cookie-content__action",
+      "timeout": 10000,
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".csc-cookie-consent .tac button.cta"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".csc-cookie-consent .cookie-content__action button:last-child"
+    },
+    {
+      "waitForVisible": ".csc-cookie-consent .cookie-content__action",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".csc-cookie-consent .cookie-content__action",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

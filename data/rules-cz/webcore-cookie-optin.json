@@ -1,0 +1,36 @@
+{
+  "name": "webcore-cookie-optin",
+  "_comment": "Webcore CMS cookie widget (#webcore-widget-cookieOptIn; www.czu.cz). Odmítnout vše and Nastavení share classes: matched by text. Top-200 CZ run 2026-11-23.",
+  "detectCmp": [
+    {
+      "exists": "#webcore-widget-cookieOptIn .btn-bar button.btn-success"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#webcore-widget-cookieOptIn .btn-bar"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#webcore-widget-cookieOptIn .btn-bar button.btn-success"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///*[@id='webcore-widget-cookieOptIn']//button[contains(normalize-space(.),'Odmítnout')]"
+    },
+    {
+      "waitForVisible": "#webcore-widget-cookieOptIn .btn-bar",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#webcore-widget-cookieOptIn .btn-bar",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

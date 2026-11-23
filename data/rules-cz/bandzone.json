@@ -1,0 +1,39 @@
+{
+  "name": "bandzone",
+  "_comment": "Bandzone cookie notice: no choice at all (\"Využíváním našich služeb s jejich používáním souhlasíte\"), only V pořádku and a close button. Nothing to refuse: the rule closes the notice with the X, never V pořádku. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*bandzone\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "button[aria-label=\"Zavřít cookie lištu\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "button[aria-label=\"Zavřít cookie lištu\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///button[@aria-label='Zavřít cookie lištu']/../button[contains(@class,'bz-btn-primary')]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "button[aria-label=\"Zavřít cookie lištu\"]"
+    },
+    {
+      "waitForVisible": "button[aria-label=\"Zavřít cookie lištu\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "button[aria-label=\"Zavřít cookie lištu\"]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

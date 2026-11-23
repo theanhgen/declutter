@@ -1,0 +1,36 @@
+{
+  "name": "kookiecheck",
+  "_comment": "kookiecheck cookie window (#kookiecheck__window; www.nkp.cz). Pouze nezbytné and Přijmout vše share classes: matched by text. Top-200 CZ run 2026-11-23.",
+  "detectCmp": [
+    {
+      "exists": "#kookiecheck__window button.kookiecheck__btn"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#kookiecheck__window"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///*[@id='kookiecheck__window']//button[contains(@class,'kookiecheck__btn')][contains(normalize-space(.),'Přijmout')]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///*[@id='kookiecheck__window']//button[contains(@class,'kookiecheck__btn')][contains(normalize-space(.),'nezbytné')]"
+    },
+    {
+      "waitForVisible": "#kookiecheck__window",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#kookiecheck__window",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

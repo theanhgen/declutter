@@ -1,0 +1,36 @@
+{
+  "name": "webnode",
+  "_comment": "Webnode cookie modal (#cbar-root, www.webnode.com; webnode.cz redirects there). Accept necessary = the footer button without .w-cookie-modal-accept-cookies. Top-200 CZ run 2026-11-23.",
+  "detectCmp": [
+    {
+      "exists": "#cbar-root .w-cookie-modal-footer a.w-button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cbar-root .w-cookie-modal-footer"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cbar-root .w-cookie-modal-footer a.w-button:has(.w-cookie-modal-accept-cookies)"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cbar-root .w-cookie-modal-footer a.w-button:not(:has(.w-cookie-modal-accept-cookies))"
+    },
+    {
+      "waitForVisible": "#cbar-root .w-cookie-modal-footer",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cbar-root .w-cookie-modal-footer",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

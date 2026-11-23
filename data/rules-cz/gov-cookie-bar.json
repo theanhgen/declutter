@@ -1,0 +1,36 @@
+{
+  "name": "cz-gov-cookie-bar",
+  "_comment": "Czech gov design system cookie bar (.gov-cookie-bar; www.cssz.gov.cz on Liferay, orestbida CookieConsent underneath, which autoconsent misses). ODMÍTNOUT VŠECHNY = gov-button--primary-outlined. Top-200 CZ run 2026-11-23.",
+  "detectCmp": [
+    {
+      "exists": ".gov-cookie-bar .gov-cookie-bar__actions-primary button.gov-button--primary-outlined"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".gov-cookie-bar .gov-cookie-bar__actions"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".gov-cookie-bar .gov-cookie-bar__actions-primary button.gov-button--primary:not(.gov-button--primary-outlined)"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".gov-cookie-bar .gov-cookie-bar__actions-primary button.gov-button--primary-outlined"
+    },
+    {
+      "waitForVisible": ".gov-cookie-bar .gov-cookie-bar__actions",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".gov-cookie-bar .gov-cookie-bar__actions",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

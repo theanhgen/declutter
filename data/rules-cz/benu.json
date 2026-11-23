@@ -1,0 +1,41 @@
+{
+  "name": "benu",
+  "_comment": "BENU lékárna cookie modal (.cookie-modal-window). Odmítnout vše = button[name=rejectAll]. Top-200 CZ run 2026-11-23. The banner shows a few seconds after load: detectPopup waits for it.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*benu\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".cookie-modal-window button[name=\"rejectAll\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "waitForVisible": ".cookie-modal-window button[name=\"rejectAll\"]",
+      "timeout": 10000,
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".cookie-modal-window button[name=\"acceptAll\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".cookie-modal-window button[name=\"rejectAll\"]"
+    },
+    {
+      "waitForVisible": ".cookie-modal-window button[name=\"rejectAll\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".cookie-modal-window button[name=\"rejectAll\"]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

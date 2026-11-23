@@ -1,0 +1,38 @@
+{
+  "name": "praguebest-cc",
+  "_comment": "Praguebest cookie consent (cookies.praguebest.cz, .cc-Popup with data-cc-* buttons; www.dpp.cz). ODMÍTNOUT = data-cc-reject-all. Top-200 CZ run 2026-11-23. The banner shows a few seconds after load: detectPopup waits for it.",
+  "detectCmp": [
+    {
+      "exists": ".cc-Popup button[data-cc-reject-all]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "waitForVisible": ".cc-Popup .cc-Popup-buttons",
+      "timeout": 10000,
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".cc-Popup button[data-cc-accept-all]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".cc-Popup button[data-cc-reject-all]"
+    },
+    {
+      "waitForVisible": ".cc-Popup .cc-Popup-buttons",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".cc-Popup .cc-Popup-buttons",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

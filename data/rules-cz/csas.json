@@ -1,0 +1,39 @@
+{
+  "name": "csas",
+  "_comment": "Česká spořitelna, Commanders Act / TrustCommander popin (#popin_tc_privacy). Button numbering is per site config: here _2 = Použít jen nezbytné cookies, so site-specific. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*csas\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#popin_tc_privacy #popin_tc_privacy_button_2"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#popin_tc_privacy"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#popin_tc_privacy #popin_tc_privacy_button"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#popin_tc_privacy #popin_tc_privacy_button_2"
+    },
+    {
+      "waitForVisible": "#popin_tc_privacy",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#popin_tc_privacy",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "jenprace",
+  "_comment": "Jenprace cookie bar (#cookie-bar-outer). No refuse on the first layer: Individuální nastavení opens per-category Povolit/Zakázáno; click every Zakázáno, then save the selection. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*jenprace\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookie-bar-outer #cookie-bar-button-open"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookie-bar-outer .cookie-bar__controls"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookie-bar-outer #cookie-bar-button-all"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookie-bar-button-open"
+    },
+    {
+      "waitForVisible": "#cookie-bar-button-save-selected",
+      "timeout": 5000
+    },
+    {
+      "click": "#cookie-bar-outer .cookiesInCont a.buttonDisable[data-value=\"0\"]",
+      "all": true
+    },
+    {
+      "waitForThenClick": "#cookie-bar-button-save-selected"
+    },
+    {
+      "waitForVisible": "#cookie-bar-outer .cookie-bar__controls",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookie-bar-outer .cookie-bar__controls",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

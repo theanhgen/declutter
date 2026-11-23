@@ -1,0 +1,42 @@
+{
+  "name": "fler",
+  "_comment": "Fler cookie dialog (#cookies_2022_content). Refusing is a link \"zde\" (confirm_minimum_panel), then Odmítnout (confirm_minimum) on the \"Opravdu chcete odmítnout?\" panel. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*fler\\.(cz|sk)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookies_2022_content [data-action=\"confirm_minimum_panel\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookies_2022_content #cookies_2022"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookies_2022_content [data-action=\"confirm_all\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookies_2022_content [data-action=\"confirm_minimum_panel\"]"
+    },
+    {
+      "waitForThenClick": "#cookies_2022_settings_minimum_panel [data-action=\"confirm_minimum\"]"
+    },
+    {
+      "waitForVisible": "#cookies_2022_content #cookies_2022",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookies_2022_content #cookies_2022",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

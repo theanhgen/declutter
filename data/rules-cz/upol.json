@@ -1,0 +1,61 @@
+{
+  "name": "upol",
+  "_comment": "UPOL TYPO3 ext \"cookies\" (SBTheke). First layer has only Povolit vše; Více... opens the category form, where Analytické can be pre-checked: untick it (and Propagační if ticked), then Potvrdit výběr (sets tx_cookies_type_essential=1 only). The panel loses .in at once, then the page reloads. Top-200 CZ run 2026-11-23. Exception to the end-with-a-check convention: the form's onsubmit reloads the page at once, so a check step never finishes and the result is lost; the reload itself shows the choice took (the banner is gone after it).",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*upol\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#tx_cookies #btn_xp_cookies"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#tx_cookies_inner.in #tx_cookies_accept"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#tx_cookies_accept input[type=\"submit\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#btn_xp_cookies"
+    },
+    {
+      "waitForVisible": "#tx_cookies_types_submit",
+      "timeout": 5000
+    },
+    {
+      "if": {
+        "exists": "#tx_cookies-type-analytics:checked"
+      },
+      "then": [
+        {
+          "click": "#tx_cookies-type-analytics"
+        }
+      ]
+    },
+    {
+      "if": {
+        "exists": "#tx_cookies-type-marketing:checked"
+      },
+      "then": [
+        {
+          "click": "#tx_cookies-type-marketing"
+        }
+      ]
+    },
+    {
+      "waitForThenClick": "#tx_cookies_types_submit"
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#tx_cookies_inner.in",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

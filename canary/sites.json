@@ -628,6 +628,170 @@
   {
    "host": "www.ovocnysvetozor.cz",
    "expect": "done"
+  },
+  {
+   "host": "www.muni.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.jcu.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.allwyn.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.cvut.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.upol.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.webnode.com",
+   "expect": "done"
+  },
+  {
+   "host": "www.vse.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.cssz.gov.cz",
+   "expect": "done"
+  },
+  {
+   "host": "mpsv.gov.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.czu.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.mendelu.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.nkp.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.zakonyprolidi.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.smarty.cz",
+   "expect": "done"
+  },
+  {
+   "host": "coi.gov.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.csas.cz",
+   "expect": "done"
+  },
+  {
+   "host": "bandzone.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.dpp.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.vscht.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.chance.cz",
+   "expect": "done"
+  },
+  {
+   "host": "favi.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.dek.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.bike-forum.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.fler.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.benu.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.jenprace.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.slu.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.osu.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.aaaauto.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.studentagency.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.postaonline.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.zbozi.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.sauto.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.sbazar.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.garaz.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.penize.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.ahaonline.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.auto.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "zdopravy.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.kurzy.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.parlamentnilisty.cz",
+   "expect": "wall"
   }
  ]
 }

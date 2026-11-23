@@ -1,0 +1,39 @@
+{
+  "name": "cvut",
+  "_comment": "ČVUT ctu-cookie-manager (#ctu-cm). Zakázat nepotřebné = button.negative. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*cvut\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#ctu-cm button.negative"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#ctu-cm button.negative"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#ctu-cm button.positive"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#ctu-cm button.negative"
+    },
+    {
+      "waitForVisible": "#ctu-cm button.negative",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#ctu-cm button.negative",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

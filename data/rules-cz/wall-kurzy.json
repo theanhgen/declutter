@@ -1,0 +1,26 @@
+{
+  "name": "cz-wall-kurzy",
+  "_comment": "Kurzy.cz: Google Funding Choices dialog (Souhlas / Spravovat možnosti). Refusing it brings up the site's own wall (#alia_force_ad_div: content only with ads), so the site is a wall: accept only, never refused (D5). Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https?://([a-z0-9-]+\\.)*kurzy\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".fc-consent-root .fc-cta-consent"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".fc-consent-root .fc-cta-consent",
+      "check": "any"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".fc-consent-root .fc-cta-consent",
+      "retry": 3,
+      "retryInterval": 800
+    }
+  ],
+  "optOut": []
+}

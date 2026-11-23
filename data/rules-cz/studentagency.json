@@ -1,0 +1,39 @@
+{
+  "name": "studentagency",
+  "_comment": "Student Agency (Next.js) consent banner. Class names are build hashes; the buttons carry title attributes: Odmítnout vše. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*studentagency\\.(cz|sk|eu)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "[class*=\"_buttons\"] > button[title=\"Odmítnout vše\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "[class*=\"_buttons\"] > button[title=\"Odmítnout vše\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "[class*=\"_buttons\"] > button[title=\"Přijmout vše\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "[class*=\"_buttons\"] > button[title=\"Odmítnout vše\"]"
+    },
+    {
+      "waitForVisible": "[class*=\"_buttons\"] > button[title=\"Odmítnout vše\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "[class*=\"_buttons\"] > button[title=\"Odmítnout vše\"]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

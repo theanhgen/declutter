@@ -1,0 +1,39 @@
+{
+  "name": "dek",
+  "_comment": "DEK vue-cookies-bar (#vue-cookies-bar). Odmítnout nepovinné = a.v-coo-b__button-white (Upravit nastavení is a.dek-button-white, a link to the settings page). Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*dek\\.(cz|sk)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#vue-cookies-bar .v-coo-b__buttons a.v-coo-b__button-white"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#vue-cookies-bar .v-coo-b__buttons"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#vue-cookies-bar .v-coo-b__buttons a.dek-button-green"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#vue-cookies-bar .v-coo-b__buttons a.v-coo-b__button-white"
+    },
+    {
+      "waitForVisible": "#vue-cookies-bar .v-coo-b__buttons",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#vue-cookies-bar .v-coo-b__buttons",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

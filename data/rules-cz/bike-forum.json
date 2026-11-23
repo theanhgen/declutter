@@ -1,0 +1,39 @@
+{
+  "name": "bike-forum",
+  "_comment": "bike-forum.cz cookie bar (Stimulus). Odmítnout vše = #cookie-consent-reject (settings 1|0|0). Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*bike-forum\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookie-consent-reject"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookie-consent-reject"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookie-consent-accept"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookie-consent-reject"
+    },
+    {
+      "waitForVisible": "#cookie-consent-reject",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookie-consent-reject",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

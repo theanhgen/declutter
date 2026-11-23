@@ -1,0 +1,36 @@
+{
+  "name": "muni-cookies",
+  "_comment": "Masaryk University cookie bar library (cdn.muni.cz, .muniweb-bar-cookies; www.muni.cz, www.jcu.cz). Jen nezbytné = a.mc-reject. Top-200 CZ run 2026-11-23. Refusing adds .muniweb-bar-cookies--hide (a fade to visibility:hidden, which the visible check does not see).",
+  "detectCmp": [
+    {
+      "exists": ".muniweb-bar-cookies .muniweb-bar-cookies__btn-wrap a.mc-reject"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".muniweb-bar-cookies:not(.muniweb-bar-cookies--hide) .muniweb-bar-cookies__btn-wrap"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".muniweb-bar-cookies .muniweb-bar-cookies__btn-wrap a.mc-accept"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".muniweb-bar-cookies .muniweb-bar-cookies__btn-wrap a.mc-reject"
+    },
+    {
+      "waitForVisible": ".muniweb-bar-cookies:not(.muniweb-bar-cookies--hide) .muniweb-bar-cookies__btn-wrap",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".muniweb-bar-cookies:not(.muniweb-bar-cookies--hide) .muniweb-bar-cookies__btn-wrap",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

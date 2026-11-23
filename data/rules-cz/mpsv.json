@@ -1,0 +1,39 @@
+{
+  "name": "mpsv",
+  "_comment": "MPSV cookie bar built from gov design system web components (gov-button > button.element; mpsv.gov.cz). Buttons have no distinguishing attributes: matched by text. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*mpsv\\.gov\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": ".mpsv__cookiebar .mpsv__cookiebar-actions gov-button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".mpsv__cookiebar .mpsv__cookiebar-actions"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "xpath///div[contains(@class,'mpsv__cookiebar-actions')]//button[contains(normalize-space(.),'Souhlasím')]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "xpath///div[contains(@class,'mpsv__cookiebar-actions')]//button[contains(normalize-space(.),'Odmítnout')]"
+    },
+    {
+      "waitForVisible": ".mpsv__cookiebar .mpsv__cookiebar-actions",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".mpsv__cookiebar .mpsv__cookiebar-actions",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "mendelu",
+  "_comment": "Mendelu cookie bar (#cookies-bar). Odmítnout vše = button.cookies-decline. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*mendelu\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookies-bar button.cookies-decline"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookies-bar button.cookies-decline"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookies-bar button.cookies-consent"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookies-bar button.cookies-decline"
+    },
+    {
+      "waitForVisible": "#cookies-bar button.cookies-decline",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookies-bar button.cookies-decline",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

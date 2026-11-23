@@ -1,0 +1,39 @@
+{
+  "name": "postaonline",
+  "_comment": "Česká pošta Liferay cookie banner (#cookie-banner). Odmítnout volitelné cookies = #decline-optional-cookies-button. Top-200 CZ run 2026-11-23. Refusing sets HideCookiesBar=on and slides the banner off-screen (style bottom: -1200px) instead of hiding it.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*postaonline\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#cookie-banner #decline-optional-cookies-button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#cookie-banner:not([style*=\"bottom: -\"]) #decline-optional-cookies-button"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#cookie-banner #allow-all-cookies-button"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#cookie-banner #decline-optional-cookies-button"
+    },
+    {
+      "waitForVisible": "#cookie-banner:not([style*=\"bottom: -\"]) #decline-optional-cookies-button",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#cookie-banner:not([style*=\"bottom: -\"]) #decline-optional-cookies-button",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "zakonyprolidi",
+  "_comment": "Zákony pro lidi own consent (ASP.NET). Nechci, nesouhlasím = #btnCPIntroNone. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*zakonyprolidi\\.cz/"
+  },
+  "detectCmp": [
+    {
+      "exists": "#btnCPIntroNone"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "#btnCPIntroNone"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "#btnCPIntroOk"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "#btnCPIntroNone"
+    },
+    {
+      "waitForVisible": "#btnCPIntroNone",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "#btnCPIntroNone",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

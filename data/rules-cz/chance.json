@@ -1,0 +1,39 @@
+{
+  "name": "chance",
+  "_comment": "Chance (Tipsport group) React consent banner. Odmítnout vše = data-atid consent-button-reject-all. Top-200 CZ run 2026-11-23.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*chance\\.(cz|sk)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "button[data-atid=\"consent-button-reject-all\"]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "button[data-atid=\"consent-button-reject-all\"]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "button[data-atid=\"consent-button-accept-all\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "button[data-atid=\"consent-button-reject-all\"]"
+    },
+    {
+      "waitForVisible": "button[data-atid=\"consent-button-reject-all\"]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "button[data-atid=\"consent-button-reject-all\"]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}
