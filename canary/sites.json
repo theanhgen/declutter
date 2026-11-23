@@ -808,6 +808,359 @@
   {
    "host": "www.linkedin.com",
    "expect": "done"
+  },
+  {
+   "host": "www.livescore.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.cuni.cz",
+   "expect": "done"
+  },
+  {
+   "host": "tv.nova.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.windguru.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.avcr.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.vinted.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.phoca.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.firmy.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.fio.cz",
+   "expect": "done"
+  },
+  {
+   "host": "english.radio.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.sportisimo.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.vut.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.lidl.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.brnostavi.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.zcu.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.hokej.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.stesti.cz",
+   "expect": "done"
+  },
+  {
+   "host": "portal.rozhlas.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.estranky.cz",
+   "expect": "done"
+  },
+  {
+   "host": "msp.gov.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.vsb.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.tiscali.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.lidovky.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "aukro.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.megaknihy.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.skolaonline.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.ceskyflorbal.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.e15.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.odkarla.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.chmi.cz",
+   "expect": "done"
+  },
+  {
+   "host": "historie.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.databazeknih.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.zive.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.utb.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.ceskenoviny.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.knihydobrovsky.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.glami.cz",
+   "expect": "done"
+  },
+  {
+   "host": "volny.centrum.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "hn.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.skoda-auto.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.lovecpokladu.cz",
+   "expect": "done"
+  },
+  {
+   "host": "mf.gov.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.karaoketexty.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.shoptet.cz",
+   "expect": "done"
+  },
+  {
+   "host": "denikn.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.cnb.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.echo24.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.cez.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.decathlon.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.drmax.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.martinus.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.retrogames.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.ujep.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.ifortuna.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.aboutyou.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.meteocentrum.cz",
+   "expect": "clear",
+   "note": "CPEx sites share one Didomi choice: after another CPEx site is refused in the same run, this one shows nothing. Refused when run alone (top-200 run 2026-11-23)."
+  },
+  {
+   "host": "www.in-pocasi.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.drbna.cz",
+   "expect": "clear",
+   "note": "CPEx sites share one Didomi choice: after another CPEx site is refused in the same run, this one shows nothing. Refused when run alone (top-200 run 2026-11-23)."
+  },
+  {
+   "host": "www.emimino.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.ppl.cz",
+   "expect": "done"
+  },
+  {
+   "host": "knihobot.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.eurofotbal.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.invia.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.akcniceny.cz",
+   "expect": "clear",
+   "note": "CPEx sites share one Didomi choice: after another CPEx site is refused in the same run, this one shows nothing. Refused when run alone (top-200 run 2026-11-23)."
+  },
+  {
+   "host": "www.avizo.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.drevostavitel.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.tenisportal.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.mimibazar.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.tchibo.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.reflex.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.kaufland.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.kinobox.cz",
+   "expect": "clear",
+   "note": "CPEx sites share one Didomi choice: after another CPEx site is refused in the same run, this one shows nothing. Refused when run alone (top-200 run 2026-11-23)."
+  },
+  {
+   "host": "www.astratex.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.edna.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.upce.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.tul.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.obi.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.expres.cz",
+   "expect": "wall"
+  },
+  {
+   "host": "www.prace.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.rossmann.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.annonce.cz",
+   "expect": "clear",
+   "note": "CPEx sites share one Didomi choice: after another CPEx site is refused in the same run, this one shows nothing. Refused when run alone (top-200 run 2026-11-23)."
+  },
+  {
+   "host": "www.hornbach.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.planeo.cz",
+   "expect": "done"
+  },
+  {
+   "host": "gymbeam.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.xchat.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.altisport.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.zalando-lounge.cz",
+   "expect": "done"
   }
  ]
 }
