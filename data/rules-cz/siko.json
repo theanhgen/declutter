@@ -1,0 +1,39 @@
+{
+  "name": "siko",
+  "_comment": "SIKO's own consent modal (SAP Spartacus component siko-b2c-consent-modal; user report www.siko.cz 2026-11-23). Buttons: Přijímám (data-test-id=accept-cookies-button), Vyberu si, Pouze nezbytné (last, no id). Refuse writes b2c-anonymous-consents with every template WITHDRAWN and removes the modal. Same on siko.sk.",
+  "runContext": {
+    "urlPattern": "^https://([a-z0-9-]+\\.)*siko\\.(cz|sk)/"
+  },
+  "detectCmp": [
+    {
+      "exists": "siko-b2c-consent-modal .consent-buttons button.consent-button"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": "siko-b2c-consent-modal .consent-buttons"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": "siko-b2c-consent-modal button[data-test-id=\"accept-cookies-button\"]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": "siko-b2c-consent-modal .consent-buttons button.consent-button:last-child:not([data-test-id])"
+    },
+    {
+      "waitForVisible": "siko-b2c-consent-modal .consent-buttons",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": "siko-b2c-consent-modal .consent-buttons",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

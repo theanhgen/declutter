@@ -620,6 +620,14 @@
   {
    "host": "vilgain.cz",
    "expect": "done"
+  },
+  {
+   "host": "www.siko.cz",
+   "expect": "done"
+  },
+  {
+   "host": "www.ovocnysvetozor.cz",
+   "expect": "done"
   }
  ]
 }

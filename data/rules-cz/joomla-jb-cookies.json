@@ -1,0 +1,36 @@
+{
+  "name": "joomla-jb-cookies",
+  "_comment": "JB Cookies, a Joomla module (div.jb.cookie with div.jb.accept / div.jb.reject; user report www.ovocnysvetozor.cz 2026-11-23). Reject sets enableGTA=0 and hides the bar (display:none), which stays hidden on later pages. Generic: any Joomla site with the module.",
+  "detectCmp": [
+    {
+      "exists": ".jb.cookie .jb.btns .jb.reject"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".jb.cookie.cookies"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".jb.cookie .jb.btns .jb.accept"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".jb.cookie .jb.btns .jb.reject"
+    },
+    {
+      "waitForVisible": ".jb.cookie.cookies",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".jb.cookie.cookies",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}
