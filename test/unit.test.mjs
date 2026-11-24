@@ -768,6 +768,14 @@ test('build: welcome page, GPC script and store-only URLs', () => {
   assert.ok(!bg.includes('theanhgen.github.io/declutter/data.json') && !bg.includes('bye.html'));
 });
 
+test('live test scripts build build/chrome first, so a stale build cannot fail (or pass) them', () => {
+  const { scripts } = JSON.parse(read('package.json'));
+  for (const [name, cmd] of Object.entries(scripts)) {
+    if (/^test:/.test(name)) assert.match(cmd, /^node build\.mjs chrome && /, name);
+  }
+  assert.match(scripts.canary, /canary\/run\.mjs --build/);
+});
+
 test('canary: baseline is the newest earlier day, never today (a rerun)', () => {
   const files = ['2026-09-25.json', '2026-09-27.json', '2026-09-30.json', 'notes.txt'];
   assert.equal(previousFile(files, '2026-09-30'), '2026-09-27.json');
