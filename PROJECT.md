@@ -215,6 +215,8 @@ reliably what the new element is, and a wrong guess hides the wrong content with
 
 ## Milestones
 
+As of 2026-11-24 all four are shipped: Chrome, Firefox and Safari (Mac + iPhone) builds have been in the stores since 1.0, and rule fixes ship as data through GitHub Pages. The table below is the original plan with its 2026-09-24 state. The canary's Telegram alert code exists (`canary/alert.mjs`); whether a chat is configured on the canary host isn't recorded here.
+
 | M | Scope | Done when | State 2026-09-24 |
 |---|---|---|---|
 | M0 | Scaffold: esbuild, manifest merge, xcodegen container app, signing on team 28DMV2MR8T | A no-op extension loads in Chrome (unpacked) and in Safari (signed), and **stays enabled after quitting Safari** | Chrome ✓. Safari built, signed, registered; **enable + restart check is yours** |
@@ -247,14 +249,14 @@ certificate; the team already has one for App Store work).
   `https://theanhgen.github.io/declutter/data.json`, built from `data/` by `.github/workflows/pages.yml` on every
   push that changes it. Store builds (`--store`) bake it in; personal builds don't. Users can remove it in settings.
   First store version with it: the one after 1.0.0.
-- **Which tip link** (`DECLUTTER_TIP_URL`). Parked 2026-09-24: fee research and leaning in
+- ~~**Which tip link**~~ **Safari: decided**, a StoreKit tip jar in the container apps, live since 1.1.1 (build 8). The web tip link is #26. Original note: (`DECLUTTER_TIP_URL`). Parked 2026-09-24: fee research and leaning in
   `research/tip-fees.md` (Revolut Business or Stripe link + Czech QR). Not decided.
 - ~~Can autoconsent take extra rules at runtime from our background script (for D6)?~~ **Answered
   2026-09-23**: yes, via the `initResp` message. See D6 above.
 - The second Mac: a development-signed build may not run there. The documented routes are Developer ID +
   notarization, or TestFlight.
 - Home, subscriptions and notifications selectors need a logged-in check (canary account not set up).
-- Firefox: not installed; unsigned installs need Developer Edition or Nightly. Deferred.
+- ~~Firefox: deferred.~~ Shipped: listed on AMO since 1.0 (1.2.1 listed, 1.2.2 submitted 2026-11-23).
 
 ## Gotchas
 

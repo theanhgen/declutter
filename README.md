@@ -31,6 +31,9 @@ Project status and decisions: `PROJECT.md`.
 | `research/toolchain.md` | Local toolchain, Safari/Chrome/Firefox packaging facts |
 | `research/consent-run-2026-09-21/` | Raw results + the original Playwright harness |
 | `research/shorts-probe/probe.js` | DevTools snippet: counts matches per Shorts selector |
+| `research/consent-run-2026-11-23/` | Top-200 Czech sites run (Tranco): classes, misses, rerun harness |
+| `research/design-eval-2026-11-20/`, `research/arena-*.md`, `research/direction-2026-11-18.json` | UI/brand research and design evaluation rounds |
+| `research/tip-fees.md` | Tip-jar payment options and fees |
 
 ## Key decisions
 
