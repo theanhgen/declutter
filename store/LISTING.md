@@ -54,7 +54,7 @@ settings, and elsewhere a mix is answered by refusing.
 • per site: refuse, accept, or leave the banner alone
 • works on sites worldwide: hundreds of consent platforms (via DuckDuckGo's open-source autoconsent) plus
   its own rules for sites autoconsent misses
-• pay walls ("agree to tracking or subscribe") are never hidden or refused; declutter shows a badge and
+• pay walls ("agree to tracking or pay") are never hidden or refused; declutter shows a badge and
   lets you decide, or agrees automatically if you turn that on
 • a short note in the corner says what was done ("cookies refused"), then goes away; it can be switched off
 • a counter of clicks saved, and a "not handled right" list you keep locally

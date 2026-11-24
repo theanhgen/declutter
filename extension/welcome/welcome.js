@@ -17,7 +17,7 @@ access();
 
 // The build's default (store builds: manual; local builds: auto).
 if (__WALLS_DEFAULT__ === 'auto') {
-  $('walls').textContent = '"agree or pay" walls are accepted for you (this build\'s default). To decide yourself, set settings → pay walls → manual.';
+  $('walls').textContent = 'pay walls ("agree to tracking or pay") are accepted for you (this build\'s default). To decide yourself, set settings → pay walls → manual.';
 }
 
 const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;

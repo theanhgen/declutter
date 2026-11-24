@@ -77,7 +77,7 @@ async function main() {
   else if (state.consent === 'choice') rows.push(handled('cookie banner', 'your choice applied', outcomeDetail(state)));
   else if (failed) rows.push(statusRow('bad', "declutter couldn't answer this banner", 'answer it yourself on the page. reporting it helps get it fixed.'));
   else if (state.consent === 'wall') {
-    rows.push(statusRow('wall', 'pay wall: agree or pay', state.looping
+    rows.push(statusRow('wall', 'pay wall: agree to tracking or pay', state.looping
       ? 'it came back twice within a minute after accepting, so auto-accept is paused in this tab'
       : 'there is no free refuse on this site'));
     $('acceptWall').hidden = false;
