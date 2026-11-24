@@ -1,4 +1,4 @@
-import { choiceMode, reportUrl, siteModePatch, siteMode, outcomeDetail } from '../lib.js';
+import { choiceMode, reportUrl, siteModePatch, siteMode, wallMode, wallModePatch, outcomeDetail } from '../lib.js';
 import { declutterSnippets } from '../consent/snippets.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
@@ -26,8 +26,8 @@ async function main() {
   api.runtime.sendMessage({ type: 'retrySends' }).catch(() => { /* worker busy starting; the alarm retries too */ });
 
   const { settings = {} } = await api.storage.local.get('settings');
-  const s = { shorts: true, posts: true, playables: true, consent: true, ...settings };
-  for (const k of ['exceptions', 'acceptSites']) if (!Array.isArray(s[k])) s[k] = [];
+  const s = { shorts: true, posts: true, playables: true, consent: true, walls: __WALLS_DEFAULT__, ...settings };
+  for (const k of ['exceptions', 'acceptSites', 'wallAskSites']) if (!Array.isArray(s[k])) s[k] = [];
   // Only the changed keys over what is stored now (never the defaults above, and Settings may be open too). A function
   // patch is computed from what is stored at the time of writing, not from this popup's copy.
   const save = async (patch) => {
@@ -103,22 +103,24 @@ async function main() {
   // Per-site choice: the global answer (refuse / your mix / accept, from Settings → your choice) / accept / leave alone.
   $('siteMode').querySelector('[data-mode=refuse]').textContent = { refuse: 'refuse', mix: 'your mix', accept: 'accept all' }[choiceMode(s.categories)];
   // Matched the way the background matches (lib.js): a choice made for a parent domain shows here. Changing it here
-  // sets this host only; the parent's other subdomains keep theirs.
-  const mode = siteMode(host, s);
-  for (const b of $('siteMode').querySelectorAll('button')) {
+  // sets this host only; the parent's other subdomains keep theirs. A pay wall can't be refused (D5), so a wall site
+  // gets its own control: agree for me / ask me / leave alone, defaulting to the global walls mode (wallMode).
+  const wall = await api.runtime.sendMessage({ type: 'wallSite', tabId: tab.id, url: tab.url }).catch(() => false);
+  const mode = wall ? wallMode(host, s) : siteMode(host, s);
+  for (const b of $(wall ? 'wallMode' : 'siteMode').querySelectorAll('button')) {
     b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
     b.onclick = async () => {
       const m = b.dataset.mode;
-      await save((current) => siteModePatch(host, m, current));
-      if (m === 'accept' && mode !== 'accept') await api.runtime.sendMessage({ type: 'reopen', tabId: tab.id });
+      await save((current) => (wall ? wallModePatch(host, m, current) : siteModePatch(host, m, current)));
+      if (!wall && m === 'accept' && mode !== 'accept') await api.runtime.sendMessage({ type: 'reopen', tabId: tab.id });
       api.tabs.reload(tab.id);
       window.close();
     };
   }
-  $('siteSection').hidden = false;
+  $(wall ? 'wallSection' : 'siteSection').hidden = false;
   // After a switch to accept the reload asks again a CMP DECLUTTER_REOPEN knows (not on a wall site, where only the
   // wall rules run). Any other change, and any other CMP, keeps the answer the site already has: say so before the press.
-  if (mode === 'accept' || /^(cz-)?wall-/.test(state.cmp ?? '')) $('siteNote').hidden = false;
+  if (wall) { /* the wall control has no refuse to undo */ } else if (mode === 'accept' || /^(cz-)?wall-/.test(state.cmp ?? '')) $('siteNote').hidden = false;
   else {
     api.scripting.executeScript({ target: { tabId: tab.id, frameIds: [0] }, world: 'MAIN', func: declutterSnippets.DECLUTTER_CAN_REOPEN })
       .then(([r] = []) => { $('siteNote').hidden = !!r?.result; }, () => { $('siteNote').hidden = false; });
