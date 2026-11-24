@@ -9,6 +9,7 @@
 //                                 plus upload zips in dist/ for chrome (+ Edge) and firefox
 //   node build.mjs --data-only -> build/data.json only (the Pages workflow publishes it as the rule list)
 import * as esbuild from 'esbuild';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
@@ -178,6 +179,23 @@ function png(size, { background = null, scale = 1, ss = 8 } = {}) {
   ]);
 }
 
+// Rendering is pure CPU (~30 s per target, minutes on a loaded machine), and the icons only change when the drawing
+// code or the glyph does. So each PNG is cached under node_modules/.cache, keyed by a hash of everything that draws it:
+// the rendering functions' source, the glyph polygons and the arguments. Shared by worktrees that share node_modules.
+const ICON_CACHE = path.join(root, 'node_modules/.cache/declutter-icons');
+const ICON_CODE = [flatten, inside, png].map(String).join('\n') + JSON.stringify([GLYPH, COUNTER]);
+function icon(size, opts = {}) {
+  const key = crypto.createHash('sha256').update(ICON_CODE).update(JSON.stringify([size, opts])).digest('hex').slice(0, 16);
+  const file = path.join(ICON_CACHE, `${key}.png`);
+  try { return fs.readFileSync(file); } catch {}
+  const buf = png(size, opts);
+  fs.mkdirSync(ICON_CACHE, { recursive: true });
+  const tmp = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, buf);
+  fs.renameSync(tmp, file); // atomic: a parallel build never reads half a file
+  return buf;
+}
+
 async function buildTarget(name, data) {
   const t = TARGETS[name];
   const out = path.join(root, 'build', name);
@@ -237,11 +255,11 @@ async function buildTarget(name, data) {
   // Toolbar sizes (16/32 and toolbar-*) fill the slot like Chrome's own icons; the grid's own margin is enough
   // (0.5625 left the glyph at ~44% of the slot, half the size of its neighbours). 48/128 are the store and
   // extension-page icons, which keep the usual padding. Safari's toolbar has its own image (TARGETS.safari).
-  for (const s of [16, 32, 48, 128]) fs.writeFileSync(path.join(out, `icons/${s}.png`), png(s, { scale: s <= 32 ? 1 : 0.75 }));
+  for (const s of [16, 32, 48, 128]) fs.writeFileSync(path.join(out, `icons/${s}.png`), icon(s, { scale: s <= 32 ? 1 : 0.75 }));
   // Safari draws the toolbar button larger than 16pt and on 2x/3x screens; from 32px alone it upscales and blurs.
-  for (const s of [48, 64, 96]) fs.writeFileSync(path.join(out, `icons/toolbar-${s}.png`), png(s));
+  for (const s of [48, 64, 96]) fs.writeFileSync(path.join(out, `icons/toolbar-${s}.png`), icon(s));
   // scale 1.26: the glyph spans 12.5 of the grid's 16 units; this fills the canvas with a hair for antialiasing.
-  if (name === 'safari') fs.writeFileSync(path.join(out, 'icons/toolbar-safari.png'), png(128, { scale: 1.26 }));
+  if (name === 'safari') fs.writeFileSync(path.join(out, 'icons/toolbar-safari.png'), icon(128, { scale: 1.26 }));
 
   const manifest = t.manifest({ ...readJson('extension/manifest.base.json'), version: pkg.version });
   fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2));
