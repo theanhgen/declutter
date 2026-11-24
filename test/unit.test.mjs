@@ -165,7 +165,7 @@ test('pay walls: one name and one definition everywhere, no Czech-only button', 
   assert.match(read('extension/popup/popup.html'), />agree to tracking on this site</);
   // user-facing copy; research and review notes keep their own words
   const copy = ['extension/popup/popup.html', 'extension/popup/popup.js', 'extension/options/options.html',
-    'extension/welcome/welcome.html', 'site/index.html', 'store/LISTING.md', 'store/asc-setup.mjs'];
+    'extension/welcome/welcome.html', 'extension/welcome/welcome.js', 'site/index.html', 'store/LISTING.md', 'store/asc-setup.mjs'];
   for (const f of copy) assert.doesNotMatch(read(f), /consent-or-pay|souhlasím|\bsubscribe\b|agree or pay" walls/i, f);
   for (const f of ['extension/welcome/welcome.html', 'site/index.html', 'store/LISTING.md', 'store/asc-setup.mjs']) {
     assert.match(read(f).replace(/[“”]/g, '"'), /pay walls \("agree to tracking or pay"\) are never hidden or refused/i, f);
