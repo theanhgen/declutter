@@ -345,14 +345,20 @@ export function choiceMode(categories = {}) {
 }
 
 // Merge a rule list over a base: rules by name, walls / selectors / disabled CMPs as unions. On a name clash the
-// newer side wins: a rule list built before this extension version must not undo a rule fixed in it, but its
-// new rules still apply.
+// newer rule wins: a rule list built before this extension version must not undo a rule fixed in it, but its
+// new rules still apply. Each rule is dated by the list it came from (ruleDates, kept in the result), not by the
+// merged data's `generated`: several rule lists merged together take the newest one's date, and an old list's
+// rule in that aggregate must still lose to a newer bundled fix.
 export function mergeData(base, extra) {
   if (!base) return extra;
   if (!extra) return base;
   const union = (a = [], b = []) => [...new Set([...a, ...b])];
-  const extraWins = extra.generated >= base.generated;
-  const names = new Set((extraWins ? extra : base).consent.rules.map((r) => r.name));
+  const dates = (d) => new Map(d.consent.rules.map((r) => [r.name, d.ruleDates?.[r.name] ?? d.generated]));
+  const baseDates = dates(base);
+  const extraDates = dates(extra);
+  const extraWins = (name) => extraDates.get(name) >= baseDates.get(name);
+  const fromBase = base.consent.rules.filter((r) => !extraDates.has(r.name) || !extraWins(r.name));
+  const fromExtra = extra.consent.rules.filter((r) => !baseDates.has(r.name) || extraWins(r.name));
   return {
     schema: 1,
     generated: extra.generated > base.generated ? extra.generated : base.generated,
@@ -361,10 +367,10 @@ export function mergeData(base, extra) {
     consent: {
       walls: union(base.consent.walls, extra.consent.walls),
       disabledCmps: union(base.consent.disabledCmps, extra.consent.disabledCmps),
-      rules: extraWins
-        ? [...base.consent.rules.filter((r) => !names.has(r.name)), ...extra.consent.rules]
-        : [...base.consent.rules, ...extra.consent.rules.filter((r) => !names.has(r.name))],
+      rules: [...fromBase, ...fromExtra],
     },
+    ruleDates: Object.fromEntries([...fromBase.map((r) => [r.name, baseDates.get(r.name)]),
+      ...fromExtra.map((r) => [r.name, extraDates.get(r.name)])]),
   };
 }
 
