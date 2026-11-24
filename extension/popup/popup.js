@@ -1,4 +1,4 @@
-import { choiceMode, reportUrl, siteModePatch, siteMode, wallMode, wallModePatch, outcomeDetail } from '../lib.js';
+import { choiceMode, reportUrl, siteModePatch, siteMode, wallMode, wallModePatch, outcomeDetail, REASONS, reasonsFor } from '../lib.js';
 import { declutterSnippets } from '../consent/snippets.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
@@ -132,7 +132,7 @@ async function main() {
   // One press saves the site on this device (settings → reported sites, with the page's full address) and sends it.
   // The note says exactly what goes out before the press.
   const sendUrl = reportUrl(tab.url);
-  $('sendNote').textContent = `sends ${sendUrl} (the site, not the page), what declutter saw here, and its version. nothing else.`;
+  $('sendNote').textContent = `sends ${sendUrl} (the site, not the page), what declutter saw here, and its version. nothing else. after sending, you can add what went wrong.`;
   $('sendNote').hidden = false;
   $('report').onclick = async () => {
     // Firefox: sending a page address is optional data collection, granted in its own prompt (from this click, so
@@ -150,6 +150,21 @@ async function main() {
     // The button label changes under the focus; say it too, for screen readers.
     $('announce').textContent = outcome;
     if (mayCollect && !sent) $('report').disabled = false;
+    // Optional, after the send: what went wrong, from fixed words that fit this page (lib.js REASONS).
+    if (sent) {
+      const choose = async (r) => {
+        const noted = await api.runtime.sendMessage({ type: 'sendReason', tabId: tab.id, url: sendUrl, reason: r });
+        const text = noted ? `noted: ${REASONS[r]}. thanks` : "couldn't add that";
+        $('reasons').replaceChildren(Object.assign(document.createElement('p'), { className: 'note', textContent: text }));
+        $('announce').textContent = text;
+      };
+      $('reasons').replaceChildren(...reasonsFor(state).map((r) => {
+        const b = Object.assign(document.createElement('button'), { className: 'row', type: 'button', onclick: () => choose(r) });
+        b.append(Object.assign(document.createElement('span'), { className: 'label', textContent: REASONS[r] }));
+        return b;
+      }));
+      $('reasonSection').hidden = false;
+    }
   };
 }
 main();

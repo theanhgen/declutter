@@ -45,7 +45,7 @@
   youtube.com. It does not record, store or transmit the pages you visit or their contents. For the toolbar
   menu, the status of each open tab (site name, what happened to its banner) is kept in session storage, which
   the browser clears when it closes. Site names are saved only when you choose a per-site setting or press
-  "report".</p>
+  "send to developer: not handled right".</p>
 
 <h2>network requests</h2>
 <p>declutter makes no requests of its own, except fetching rule lists (JSON files) and sending a report when you
@@ -65,7 +65,10 @@
 <p>The menu's "send to developer: not handled right" shows what it sends before you press it. Only if you press
   it, declutter sends: the site's address only (for example https://www.idnes.cz, never the page's path,
   query or fragment), what declutter saw on that page
-  (for example "failed" and the banner's platform name), the declutter version and the browser type. No account,
+  (for example "failed" and the banner's platform name), the declutter version and the browser type. After sending,
+  you can add what went wrong by picking one of four fixed answers ("banner still there", "site broke after declutter
+  answered", "shorts got through", "something else"; for Shorts, the kind of YouTube page, such as search, never its
+  address); that goes as a second report for the same site. No account,
   identifier, cookies, page content or other browsing is included. Reports are stored in a database hosted by
   Supabase (EU, Frankfurt) that only the developer can read, and are used only to fix how declutter handles
   those sites. Like any web request, it reveals your IP address to Supabase's servers, which keep request logs

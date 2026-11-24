@@ -196,6 +196,33 @@ export function chipFor(prev, next, last = {}, now = Date.now(), reloaded = fals
 }
 
 // What a newly found banner resets in the tab state (setTab merges, so the previous answer would otherwise show).
+// What went wrong, picked in the popup after a report is sent (#18): fixed words, never free text. The reports table
+// checks the same set (supabase/migrations/20261124000000_reports_reason.sql). The words here are the ones on
+// popup, settings, privacy.html and bye.html.
+export const REASONS = {
+  banner: 'banner still there',
+  broken: 'site broke after declutter answered',
+  shorts: 'shorts got through',
+  other: 'something else',
+};
+export const REASON_WORD = /^(banner|broken|other|shorts:(home|search|channel|watch|other))$/;
+// The reasons that fit what declutter saw on the page, most likely first.
+export function reasonsFor(state = {}) {
+  const answered = ['done', 'choice', 'acceptedSite', 'accepted'].includes(state.consent);
+  return [...new Set([
+    ...(state.shortsLeak > 0 ? ['shorts'] : []),
+    ...(answered ? ['broken', 'banner'] : ['banner']),
+    'other',
+  ])];
+}
+// The word that is sent: a Shorts report names the YouTube page type, never the path.
+export function reasonWord(reason, leakPath = '') {
+  if (reason !== 'shorts') return reason;
+  const type = leakPath === '/results' ? 'search' : leakPath === '/' || leakPath.startsWith('/feed') ? 'home'
+    : /^\/(@|channel\/|c\/|user\/)/.test(leakPath) ? 'channel' : leakPath === '/watch' ? 'watch' : 'other';
+  return `shorts:${type}`;
+}
+
 export const FRESH_OUTCOME = { kept: false, choiceFallback: false, clicks: 0, doneAt: 0, adapter: '', cosmetic: false };
 
 // The popup's line under an answered banner: which banner (and adapter, for your choice), the local time it was

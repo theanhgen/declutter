@@ -6,7 +6,7 @@ import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
 import { collectDates, videoIdOf } from '../extension/shorts/dates-lib.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord } from '../extension/lib.js';
 import { declutterSnippets } from '../extension/consent/snippets.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -67,6 +67,23 @@ test('per-site choice: popup, Settings and background all go through siteMode, a
     assert.match(read(p), /leave alone/, p);
     assert.doesNotMatch(read(p), /refuse \/ accept \/ leave[^ ]|choice-word">leave<|Set exceptions/, p);
   }
+});
+
+test('report reasons: fixed words that fit the page, same set as the database check', () => {
+  assert.deepEqual(reasonsFor({ consent: 'failed' }), ['banner', 'other']);
+  assert.deepEqual(reasonsFor({ consent: 'done' }), ['broken', 'banner', 'other']);
+  assert.deepEqual(reasonsFor({ shortsLeak: 2 }), ['shorts', 'banner', 'other']);
+  assert.equal(reasonWord('shorts', '/results'), 'shorts:search');
+  assert.equal(reasonWord('shorts', '/@somechannel/videos'), 'shorts:channel');
+  assert.equal(reasonWord('shorts', '/feed/subscriptions'), 'shorts:home');
+  assert.equal(reasonWord('shorts', '/playlist?list=x'), 'shorts:other');
+  assert.equal(reasonWord('broken'), 'broken');
+  for (const k of Object.keys(REASONS)) assert.ok(REASON_WORD.test(reasonWord(k, '/')), k);
+  assert.ok(!REASON_WORD.test('free text') && !REASON_WORD.test('shorts:/watch?v=x'));
+  // The migration's check constraint is the same pattern.
+  const sql = read('supabase/migrations/20261124000000_reports_reason.sql');
+  assert.ok(sql.includes(`reason ~ '${REASON_WORD.source}'`), 'migration check = REASON_WORD');
+  for (const p of ['site/privacy.html', 'site/bye.html']) for (const w of ['banner still there', 'shorts got through']) assert.match(read(p), new RegExp(w), p);
 });
 
 test('hostMatches: exact host and subdomains only', () => {

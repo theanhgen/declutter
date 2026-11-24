@@ -1,7 +1,9 @@
-import { siteHost, siteMode, siteModePatch, ruleListLine, updateOutcome } from '../lib.js';
+import { siteHost, siteMode, siteModePatch, ruleListLine, updateOutcome, REASONS } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
+// A sent reason word ("shorts:search") in the popup's words ("shorts got through (search)").
+const reasonLabel = (w) => { const [k, t] = w.split(':'); return `· ${REASONS[k] ?? k}${t ? ` (${t})` : ''}`; };
 
 // Each setting is a line of words; the current one is shown as [word], the others are dimmed links.
 const ONOFF = [[true, 'on'], [false, 'off']];
@@ -149,7 +151,7 @@ async function render() {
   ] : []));
 
   // reported sites
-  const lines = reports.map((r) => `${new Date(r.at).toISOString().slice(0, 16).replace('T', ' ')}  ${r.url}  [${r.consent}${r.cmp ? ' ' + r.cmp : ''}]`);
+  const lines = reports.map((r) => `${new Date(r.at).toISOString().slice(0, 16).replace('T', ' ')}  ${r.url}  [${r.consent}${r.cmp ? ' ' + r.cmp : ''}]${r.reason ? ` ${reasonLabel(r.reason)}` : ''}`);
   const actions = el('p', { className: 'bullet', style: '--dot:#8d8d8d' });
   actions.append(link('copy list', async () => { await navigator.clipboard.writeText(lines.join('\n')); actions.firstChild.textContent = 'copied'; }), ' / ',
     link('clear', () => api.storage.local.set({ reports: [] }).then(render)));
