@@ -20,7 +20,11 @@ struct DeclutterApp: App {
 
 struct ContentView: View {
     private let extensionID = "com.theanhgen.declutter.extension"
-    @State private var enabled: Bool?
+    @State private var safari: SafariState = .checking
+    // Set when a check finds it on after one found it off: the user just turned it on, so say what is left.
+    @State private var justTurnedOn = false
+
+    private enum SafariState { case checking, on, off, unknown }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -32,7 +36,9 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             Button("Open Safari Extensions Settings…") {
-                SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionID) { _ in }
+                SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionID) { _ in
+                    Task { await refresh() }
+                }
             }
             Divider().padding(.vertical, 4)
             TipJarView()
@@ -41,18 +47,31 @@ struct ContentView: View {
         .padding(24)
         .frame(width: 380)
         .task { await refresh() }
+        // The user turns it on in Safari and switches back here: check again, or the text stays "off".
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            Task { await refresh() }
+        }
     }
 
     private var status: String {
-        switch enabled {
-        case .some(true): "The extension is on. For cookie banners, allow it on every website."
-        case .some(false): "The extension is off. Turn on declutter in Safari Settings → Extensions."
-        case .none: "Checking Safari…"
+        switch safari {
+        case .on where justTurnedOn:
+            "declutter is on. Last step: Always Allow on Every Website, or cookie banners won't be answered."
+        case .on: "The extension is on. For cookie banners, allow it on every website."
+        case .off: "The extension is off. Turn on declutter in Safari Settings → Extensions."
+        case .unknown: "Couldn't ask Safari. Open Safari Settings → Extensions to check."
+        case .checking: "Checking Safari…"
         }
     }
 
     private func refresh() async {
-        let state = try? await SFSafariExtensionManager.stateOfSafariExtension(withIdentifier: extensionID)
-        enabled = state?.isEnabled ?? false
+        // A failed check is not "off": saying so would send the user to turn on something that may be on.
+        do {
+            let isOn = try await SFSafariExtensionManager.stateOfSafariExtension(withIdentifier: extensionID).isEnabled
+            justTurnedOn = isOn && (safari == .off || justTurnedOn)
+            safari = isOn ? .on : .off
+        } catch {
+            safari = .unknown
+        }
     }
 }
