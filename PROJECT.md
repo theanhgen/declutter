@@ -8,7 +8,7 @@
 
 | | State |
 |---|---|
-| Version | **1.2.2 (build 13)**, submitted everywhere 2026-11-23: App Store (macOS + iOS, app `6816072545`) waiting for review, 1.2.1 live; Chrome Web Store pending, 1.2.1 live; Firefox AMO submitted, 1.2.1 listed. Details: `store/LISTING.md` → Submissions |
+| Version | **1.3.0 (build 14)**, App Store (macOS + iOS, app `6816072545`) submitted 2026-11-24, waiting for review; 1.2.2 (13) live there. Other stores at **1.2.2**, submitted 2026-11-23: Chrome Web Store pending, 1.2.1 live; Firefox AMO submitted, 1.2.1 listed. Details: `store/LISTING.md` → Submissions |
 | Czech coverage | Top-200 CZ run (Tranco, 2026-11-23, `research/consent-run-2026-11-23/`): 110 refused, 28 no banner, 21 walls left alone, **31 misses + 10 unrecognised walls → rules and wall entries added** (`ea38b2d`), nothing accepted wrongly. 114 files in `data/rules-cz/`, 39 wall domains. The canary now also covers the other 87 top-200 sites with a banner or wall (`d661dc6`) |
 | User reports | Insert-only Supabase table, checked with `scripts/reports.mjs --open`; `archive.sh` refuses while any are open. 3 open on 2026-11-24 (facebook.com, work.meta.com, app.revolut.com), being handled |
 | Competitor check | Super Agent (super-agent.com, v4.7.4, read statically 2026-11-24): a remote hand-curated rule base, no CMP code, no walls, no Shorts, 10 banners/week free, then paid with an account. Czech UI since 2026-10-20. Takeaways went into #9, #18, #19, #33 and #10; "clear cookies" and a rule-authoring bridge were rejected in dual review |
