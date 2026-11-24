@@ -1,4 +1,4 @@
-import { siteHost, siteMode, siteModePatch, ruleListLine, updateOutcome, REASONS, UNDO_MS, restoreItem, restoreReports, restoreStats, shortsStatsText } from '../lib.js';
+import { siteHost, siteMode, siteModePatch, ruleListLine, updateOutcome, REASONS, UNDO_MS, restoreItem, restoreReports, restoreStats, shortsStatsText, aboutSummary } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -178,11 +178,14 @@ async function render() {
   // about
   const n = (k) => stats[k] ?? 0;
   $('shortsStats').textContent = shortsStatsText(stats);
-  $('clicksSaved').textContent = n('clicks');
+  const summary = aboutSummary(stats);
+  $('summary').textContent = summary.headline;
+  $('clicksSaved').textContent = summary.clicks;
+  $('stats').hidden = !stats.since;
   $('stats').textContent = stats.since
     ? `${n('refused')} banners refused, ${n('choice')} answered with your mix, ${n('accepted')} accepted, ${n('walls')} pay walls accepted, ` +
-      `${n('shorts')} shorts sent to the normal player — since ${new Date(stats.since).toLocaleDateString()}.`
-    : 'nothing yet.';
+      `${n('shorts')} shorts sent to the normal player.`
+    : '';
   const rows = Object.entries(stats.byCmp ?? {}).sort((a, b) => b[1].filled - a[1].filled);
   // Clears what is stored at the click (the background may have counted since this render), and offers that back.
   const clearStats = async () => {

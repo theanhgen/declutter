@@ -326,6 +326,17 @@ export function shortsSummary({ shortsHidden = 0, shortsRedirects = 0 } = {}) {
 export const shortsStatsText = ({ shortsHidden = 0, shortsPages = 0 } = {}) =>
   shortsHidden ? `${counted(shortsHidden, 'short')} hidden on ${counted(shortsPages, 'youtube page')}` : 'no shorts hidden yet.';
 
+// Settings → about: banners answered (a banner a cosmetic rule only hid is in `refused` too) and shorts hidden first,
+// clicks saved beneath. Only what declutter did, never a "trackers blocked" figure. A fresh install says what to try.
+// shortsHidden is the YouTube counter (shorts.js counts each hidden short once per page; background.js bumps it).
+export function aboutSummary(stats = {}, locale = undefined) {
+  if (!stats.since) return { headline: 'nothing yet. open a site with a cookie banner (bbc.com) or a YouTube search, and it shows up here.', clicks: '' };
+  const n = (k) => stats[k] ?? 0;
+  const banners = n('refused') + n('choice') + n('accepted') + n('walls');
+  const since = new Date(stats.since).toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+  return { headline: `since ${since}: ${banners} banners answered, ${n('shortsHidden')} shorts hidden`, clicks: `${n('clicks')} clicks saved` };
+}
+
 // Consent-O-Matic's categories -> how to answer: all off = refuse, all on = accept, anything else = mix.
 export const CATEGORY_KEYS = ['A', 'B', 'D', 'E', 'F', 'X'];
 export function choiceMode(categories = {}) {
