@@ -127,6 +127,10 @@ function refreshRemoteData() {
   return refreshing;
 }
 
+async function refreshesDone() {
+  while (refreshing ?? queued) await (queued ?? refreshing).catch(() => {});
+}
+
 async function doRefreshRemoteData() {
   const urls = ruleListUrls(await getSettings());
   const { remoteStatus = {}, remoteLists: previous } = await api.storage.local.get(['remoteStatus', 'remoteLists']);
@@ -562,7 +566,9 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
   if (fromExtension && msg.type === 'updateData') {
-    refreshRemoteData().then(() => sendResponse(true), () => sendResponse(false));
+    // Answer once every queued refresh has run too: a list removed meanwhile queues one, and the settings page
+    // re-reads storage on this answer, so answering after the older run alone shows the removed list again (#54).
+    refreshRemoteData().then(refreshesDone).then(() => sendResponse(true), () => sendResponse(false));
     return true;
   }
   if (!sender.tab) return;

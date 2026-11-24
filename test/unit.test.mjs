@@ -904,3 +904,64 @@ test('background: concurrent tab-state and counter updates keep every field (#50
   assert.equal(state.consent, 'failed');
   assert.equal(bg.chrome.storage.local.data.stats.shorts, 2);
 });
+
+// #54: refreshes overlap (a list removed while one is fetching). background.js in a vm with a fake chrome API; fetch(url) is the caller's. Returns local storage and a function that
+// sends updateData the way the settings page does (resolves when the background responds).
+async function loadRefreshBackground(settings, fetch) {
+  const vm = await import('node:vm');
+  const local = { settings };
+  const session = {};
+  const ev = () => { const fns = []; return { addListener: (f) => fns.push(f), fns }; };
+  const onChanged = ev();
+  const onMessage = ev();
+  const get = (store) => async (keys) => Object.fromEntries([].concat(keys).filter((k) => k in store).map((k) => [k, store[k]]));
+  const set = (store, area) => async (obj) => {
+    const changes = {};
+    for (const [k, v] of Object.entries(obj)) { changes[k] = { oldValue: store[k], newValue: v }; store[k] = v; }
+    for (const f of onChanged.fns) f(changes, area);
+  };
+  const noop = async () => {};
+  const chrome = {
+    storage: { local: { get: get(local), set: set(local, 'local') }, session: { get: get(session), set: set(session, 'session'), remove: noop }, onChanged },
+    runtime: { onMessage, onInstalled: ev(), onStartup: ev(), getURL: (p) => `chrome-extension://x/${p}`, getManifest: () => ({ version: '0' }) },
+    alarms: { onAlarm: ev(), create: noop, get: noop, clear: noop },
+    tabs: { onRemoved: ev(), sendMessage: noop, get: noop, create: noop },
+    action: { setBadgeText: noop, setBadgeBackgroundColor: noop, setTitle: noop },
+    declarativeNetRequest: { updateDynamicRules: noop, updateEnabledRulesets: noop },
+    scripting: { getRegisteredContentScripts: async () => [], unregisterContentScripts: noop, registerContentScripts: noop, executeScript: noop },
+  };
+  vm.runInContext(read('build/chrome/background.js'), vm.createContext({ chrome, fetch, console, setTimeout, clearTimeout, URL, AbortSignal }));
+  const updateData = () => new Promise((r) => onMessage.fns[0]({ type: 'updateData' }, { url: 'chrome-extension://x/options/options.html' }, r));
+  return { local, setLocal: chrome.storage.local.set, updateData };
+}
+// A rule list holding one rule named after its host.
+const ruleList = (url) => ({ ok: true, status: 200, json: async () => ({ schema: 1, generated: '2099-01-01', shorts: { hide: [], cards: [] },
+  consent: { walls: [], disabledCmps: [], rules: [{ name: `rule-${new URL(url).hostname}` }] } }) });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+test('refreshRemoteData: a list removed while an older refresh is still fetching stays removed', async () => {
+  // The first refresh's fetches are slow, later ones instant.
+  let delay = 200;
+  const { local, setLocal, updateData } = await loadRefreshBackground({ dataUrls: ['https://a/', 'https://b/'] },
+    async (url) => { await sleep(delay); return ruleList(url); });
+  const firstDone = updateData();
+  await sleep(10);
+  delay = 0;
+  await setLocal({ settings: { dataUrls: ['https://a/'] } }); // removing b queues a second refresh
+  await firstDone; // the response waits for the queued refresh too
+  assert.deepEqual(local.remoteData.consent.rules.map((r) => r.name), ['rule-a']);
+  assert.deepEqual(Object.keys(local.remoteLists), ['https://a/']);
+  assert.deepEqual(Object.keys(local.remoteStatus), ['https://a/']);
+});
+
+test('refreshRemoteData: a newer refresh that fails keeps what an older overlapping one fetched', async () => {
+  let calls = 0;
+  const { local, updateData } = await loadRefreshBackground({ dataUrls: ['https://a/'] }, async (url) => {
+    if (++calls > 1) throw new Error('offline');
+    await sleep(100);
+    return ruleList(url);
+  });
+  await Promise.all([updateData(), updateData()]);
+  assert.deepEqual(local.remoteData.consent.rules.map((r) => r.name), ['rule-a']);
+  assert.equal(local.remoteStatus['https://a/'].ok, false, 'the newest attempt is what the status shows');
+});
