@@ -4,7 +4,18 @@
 > (2) answers cookie-consent banners, with Czech sites as the coverage target. One product, one extension.
 > Firefox is nice-to-have. Working name, rename freely. Started 2026-09-21.
 
-## Status (2026-09-24)
+## Status (2026-11-24)
+
+| | State |
+|---|---|
+| Version | **1.2.2 (build 13)**, submitted everywhere 2026-11-23: App Store (macOS + iOS, app `6816072545`) waiting for review, 1.2.1 live; Chrome Web Store pending, 1.2.1 live; Firefox AMO submitted, 1.2.1 listed. Details: `store/LISTING.md` → Submissions |
+| Czech coverage | Top-200 CZ run (Tranco, 2026-11-23, `research/consent-run-2026-11-23/`): 110 refused, 28 no banner, 21 walls left alone, **31 misses + 10 unrecognised walls → rules and wall entries added** (`ea38b2d`), nothing accepted wrongly. 114 files in `data/rules-cz/`, 39 wall domains. The canary now also covers the other 87 top-200 sites with a banner or wall (`d661dc6`) |
+| User reports | Insert-only Supabase table, checked with `scripts/reports.mjs --open`; `archive.sh` refuses while any are open. 3 open on 2026-11-24 (facebook.com, work.meta.com, app.revolut.com), being handled |
+| Competitor check | Super Agent (super-agent.com, v4.7.4, read statically 2026-11-24): a remote hand-curated rule base, no CMP code, no walls, no Shorts, 10 banners/week free, then paid with an account. Czech UI since 2026-10-20. Takeaways went into #9, #18, #19, #33 and #10; "clear cookies" and a rule-authoring bridge were rejected in dual review |
+| Open work (2026-11-24) | Bugs #50–#56 (from the dual review; read, not reproduced) and #31; 13 premium-UX PRs #37–#49 (all conflicting with main) plus branch `hig-fixes-2026-11` (10 commits, incl. #31) and `fix/23-per-site-settings`; premium-UX issues without a PR (#8–#32, incl. #24 visual language and #25 Czech UI); #57 Safari check of async `applyCategories` |
+| Release plan | Two App Store releases, each submitted for review: bug fixes first, then the premium-UX batch. Chrome/AMO uploads only with the owner's yes |
+
+## Status at first build (2026-09-24)
 
 Built and passing in Chrome; Safari app built, signed and registered, **waiting on the manual Safari checks**
 (see *Safari checklist*). One source tree, one data folder, one command per target:
