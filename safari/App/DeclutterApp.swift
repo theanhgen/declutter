@@ -33,12 +33,13 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Image("Logo").resizable().scaledToFit().frame(width: 28, height: 28)
+                    .accessibilityHidden(true)  // repeats the name next to it
                 Text("declutter").font(Martian.font(.title2, weight: 600))
             }
             Text(status)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-            Button("Open Safari Extensions Settings…") {
+            Button("open Safari extensions settings…") {
                 SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionID) { _ in
                     Task { await refresh() }
                 }
@@ -59,11 +60,11 @@ struct ContentView: View {
     private var status: String {
         switch safari {
         case .on where justTurnedOn:
-            "declutter is on. Last step: Always Allow on Every Website, or cookie banners won't be answered."
-        case .on: "The extension is on. For cookie banners, allow it on every website."
-        case .off: "The extension is off. Turn on declutter in Safari Settings → Extensions."
-        case .unknown: "Couldn't ask Safari. Open Safari Settings → Extensions to check."
-        case .checking: "Checking Safari…"
+            "declutter is on. last step: Always Allow on Every Website, or cookie banners won't be answered."
+        case .on: "the extension is on. for cookie banners, allow it on every website."
+        case .off: "the extension is off. turn on declutter in Safari Settings → Extensions."
+        case .unknown: "couldn't ask Safari. open Safari Settings → Extensions to check."
+        case .checking: "checking Safari…"
         }
     }
 

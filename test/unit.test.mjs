@@ -782,8 +782,8 @@ test('macOS app: re-checks Safari on activate and after Settings, and an error i
   assert.match(app, /\.onReceive\(NotificationCenter\.default\.publisher\(for: NSApplication\.didBecomeActiveNotification\)\)[^}]*await refresh\(\)/);
   assert.match(app, /showPreferencesForExtension\(withIdentifier: extensionID\) \{ _ in\s+Task \{ await refresh\(\) \}/);
   assert.doesNotMatch(app, /try\? await SFSafariExtensionManager/, 'a failed check must not read as off');
-  assert.ok(app.includes("Couldn't ask Safari. Open Safari Settings → Extensions to check."));
-  assert.ok(app.includes("declutter is on. Last step: Always Allow on Every Website, or cookie banners won't be answered."));
+  assert.ok(app.includes("couldn't ask Safari. open Safari Settings → Extensions to check."));
+  assert.ok(app.includes("declutter is on. last step: Always Allow on Every Website, or cookie banners won't be answered."));
   // Checks overlap (launch, Settings button, activate): only the newest sets the state, on the main actor.
   assert.match(app, /@MainActor private func refresh\(\) async \{\s+checks \+= 1\s+let check = checks/);
   assert.match(app, /guard check == checks else \{ return \}\s+justTurnedOn = /);
