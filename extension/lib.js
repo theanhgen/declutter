@@ -134,6 +134,7 @@ export function badgeFor(state, now = Date.now()) {
   if (state.consent === 'failed' || stuck) return { text: '!', color: '#d93025', title: 'declutter: cookie banner not answered — answer it on the page' };
   if (state.consent === 'wall') return { text: currencyFor(state.host), color: '#e37400', title: 'declutter: pay wall — agree or pay, from this menu' };
   if (state.consent === 'choice') return { text: '', color: '#1e8e3e', title: `declutter: applied your choice (${state.adapter})` };
+  if (state.consent === 'acceptedSite') return { text: '', color: '#1e8e3e', title: `declutter: cookies accepted on this site (${state.cmp})` };
   if (state.consent === 'accepted') return { text: '', color: '#777', title: `declutter: accepted the pay wall (${state.cmp})` };
   if (state.consent === 'done') return { text: '', color: '#1e8e3e', title: `declutter: ${state.cosmetic ? 'hid' : 'refused'} ${state.cmp}` };
   // Shorts the backup check caught are already hidden: worth a line, not an alarm.

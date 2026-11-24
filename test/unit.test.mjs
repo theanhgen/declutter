@@ -107,6 +107,14 @@ test('badgeFor: problems are red, everything else is quiet', () => {
   assert.equal(badgeFor({ consent: 'accepted', cmp: 'x' }).text, '');
 });
 
+test('badgeFor: a site set to accept says so, not the plain idle state', () => {
+  const b = badgeFor({ consent: 'acceptedSite', cmp: 'x' });
+  assert.equal(b.text, '');
+  assert.equal(b.color, '#1e8e3e');
+  assert.match(b.title, /cookies accepted on this site \(x\)/);
+  assert.notDeepEqual(b, badgeFor({}));
+});
+
 test('chipFor: once per outcome, not on a reload of the same site', () => {
   assert.deepEqual(chipFor({ consent: 'working' }, { consent: 'done', host: 'a.cz' }), { text: 'cookies refused', tone: 'ok' });
   assert.equal(chipFor({}, { consent: 'acceptedSite' }).text, 'cookies accepted');
