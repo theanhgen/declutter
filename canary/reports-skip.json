@@ -10,5 +10,17 @@
   "maleneglintborg.com": {
     "reason": "WordPress Cookie Notice with only an 'Ok' (accept) button and no refuse: left alone by design (cookie-notice-wp handles it only when the site enables refuse).",
     "through": "2026-11-22"
+  },
+  "www.facebook.com": {
+    "reason": "Reported 2026-11-24 (Chrome 1.2.2, state none). Not reproduced: in fresh profiles autoconsent's facebook rule refused Meta's dialog (state done) in 2 of 3 runs; the dialog renders ~6 s after load. One canary-style run missed it with an empty tab state. The host stays in canary/sites.json (expect done), which tracks the flake.",
+    "through": "2026-11-24"
+  },
+  "work.meta.com": {
+    "reason": "Meta's essential-only cookie notice with a single 'Potvrdit použití souborů cookie' (confirm) button and no refuse: left alone by design, like maleneglintborg.com. Checked 2026-11-24.",
+    "through": "2026-11-24"
+  },
+  "app.revolut.com": {
+    "reason": "Reported 2026-11-23 (Chrome 1.2.2, state none). Not reproduced: a fresh profile (cs-CZ) on 2026-11-24 showed the login page with no cookie banner.",
+    "through": "2026-11-24"
   }
 }

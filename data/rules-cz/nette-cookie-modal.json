@@ -1,0 +1,36 @@
+{
+  "name": "cz-nette-cookie-modal",
+  "_comment": "Nette cookiePopUp consent modal (div.cookie-modal.js-cookie-consent, form #frm-cookiePopUp-consentForm-form, buttons data-cookie-consent-reject-all / -accept-all, submitted over ajax). User report www.megapixel.cz 2026-11-24. Generic: the form id is the Nette component name, so other sites built on it match too.",
+  "detectCmp": [
+    {
+      "exists": ".js-cookie-consent form[id^=frm-cookiePopUp] button[data-cookie-consent-reject-all]"
+    }
+  ],
+  "detectPopup": [
+    {
+      "visible": ".js-cookie-consent form[id^=frm-cookiePopUp]"
+    }
+  ],
+  "optIn": [
+    {
+      "waitForThenClick": ".js-cookie-consent form[id^=frm-cookiePopUp] .std-box:not(.ca-box) button[data-cookie-consent-accept-all]"
+    }
+  ],
+  "optOut": [
+    {
+      "waitForThenClick": ".js-cookie-consent form[id^=frm-cookiePopUp] .std-box:not(.ca-box) button[data-cookie-consent-reject-all]"
+    },
+    {
+      "waitForVisible": ".js-cookie-consent form[id^=frm-cookiePopUp]",
+      "check": "none",
+      "timeout": 5000
+    }
+  ],
+  "test": [
+    {
+      "waitForVisible": ".js-cookie-consent form[id^=frm-cookiePopUp]",
+      "check": "none",
+      "timeout": 3000
+    }
+  ]
+}

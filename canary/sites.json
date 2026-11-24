@@ -1161,6 +1161,11 @@
   {
    "host": "www.zalando-lounge.cz",
    "expect": "done"
+  },
+  {
+   "host": "www.megapixel.cz",
+   "expect": "done",
+   "note": "user report 2026-11-24 (cz-nette-cookie-modal)"
   }
  ]
 }
