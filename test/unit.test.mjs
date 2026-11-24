@@ -652,3 +652,65 @@ test('settings undo: every removal and both clear links offer one, shown where i
     assert.ok(js.includes(shown), shown);
   }
 });
+
+// The background loaded as built, with an in-memory extension API whose storage answers asynchronously like the real one.
+async function loadBackground({ settings = {}, session = {} } = {}) {
+  const vm = await import('node:vm');
+  const tick = () => new Promise((r) => setTimeout(r, 1));
+  const area = (data) => ({
+    data,
+    async get(keys) {
+      await tick();
+      const list = keys == null ? Object.keys(data) : [keys].flat();
+      return JSON.parse(JSON.stringify(Object.fromEntries(list.filter((k) => k in data).map((k) => [k, data[k]]))));
+    },
+    async set(items) { await tick(); Object.assign(data, JSON.parse(JSON.stringify(items))); },
+    async remove(keys) { await tick(); for (const k of [keys].flat()) delete data[k]; },
+  });
+  const listeners = {};
+  const on = (name) => ({ addListener: (fn) => { (listeners[name] ??= []).push(fn); } });
+  const sent = [];
+  const chrome = {
+    storage: { local: area({ settings }), session: area(session), onChanged: on('storage') },
+    runtime: { onMessage: on('message'), onInstalled: on('installed'), onStartup: on('startup'),
+      getURL: (p) => `chrome-extension://x/${p}`, getManifest: () => ({ version: '0' }) },
+    tabs: { onRemoved: on('removed'), sendMessage: async (tabId, msg, opts) => { sent.push({ tabId, msg, frameId: opts?.frameId }); } },
+    action: { setBadgeText: async () => {}, setBadgeBackgroundColor: async () => {}, setTitle: async () => {} },
+    alarms: { onAlarm: on('alarm'), create() {}, clear() {}, get: async () => null },
+  };
+  vm.runInNewContext(read('build/chrome/background.js'), { chrome, console, setTimeout, clearTimeout, URL, fetch });
+  const send = (msg, sender) => listeners.message.forEach((fn) => fn(msg, sender, () => {}));
+  // Until done() holds, then a little longer for any write still in flight (5 s at most).
+  const settle = async (done) => {
+    for (const end = Date.now() + 5000; !done() && Date.now() < end;) await new Promise((r) => setTimeout(r, 10));
+    await new Promise((r) => setTimeout(r, 100));
+  };
+  return { chrome, sent, send, settle };
+}
+
+test('background: a sub-frame on the new site gets the new site\'s choice, not the previous one\'s (#50)', async () => {
+  // a.cz is accepted; the tab navigates to b.cz (refused) and its CMP iframe inits before frame 0 has recorded b.cz.
+  const bg = await loadBackground({ settings: { acceptSites: ['a.cz'] }, session: { 'tab-7': { host: 'a.cz' } } });
+  const tab = { id: 7, url: 'https://a.cz/' };
+  bg.send({ type: 'init' }, { tab, frameId: 0, url: 'https://b.cz/' });
+  bg.send({ type: 'init' }, { tab, frameId: 3, url: 'https://cmp.example/frame' });
+  await bg.settle(() => bg.sent.filter((m) => m.msg.type === 'initResp').length === 2);
+  const action = (frameId) => bg.sent.find((m) => m.frameId === frameId && m.msg.type === 'initResp').msg.config.autoAction;
+  assert.equal(action(0), 'optOut');
+  assert.equal(action(3), 'optOut');
+});
+
+test('background: concurrent tab-state and counter updates keep every field (#50)', async () => {
+  const bg = await loadBackground();
+  const sender = { tab: { id: 7, url: 'https://b.cz/' }, frameId: 0, url: 'https://b.cz/' };
+  bg.send({ type: 'shortsLeak', count: 2, path: '/x' }, sender);
+  bg.send({ type: 'optOutResult', result: false, cmp: 'c' }, sender);
+  bg.send({ type: 'shortsRedirect' }, sender);
+  bg.send({ type: 'shortsRedirect' }, sender);
+  await bg.settle(() => bg.chrome.storage.local.data.stats?.shorts === 2 && bg.chrome.storage.session.data['tab-7']?.shortsLeak === 2
+    && bg.chrome.storage.session.data['tab-7']?.consent === 'failed');
+  const state = bg.chrome.storage.session.data['tab-7'];
+  assert.equal(state.shortsLeak, 2);
+  assert.equal(state.consent, 'failed');
+  assert.equal(bg.chrome.storage.local.data.stats.shorts, 2);
+});
