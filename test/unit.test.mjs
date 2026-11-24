@@ -475,6 +475,47 @@ test('wall sites: agree for me / ask me / leave alone per site, never refuse (#1
   assert.deepEqual([...wallButtons.matchAll(/data-mode="(\w+)"/g)].map((m) => m[1]), ['agree', 'ask', 'ignore']);
 });
 
+test('walls: a pending teaser accept carries over to its own consent page only, not to another wall', async () => {
+  // The background as built, with an in-memory extension API. Manual mode: walls wait for "Accept" in the popup.
+  const store = { local: { settings: { walls: 'manual', chip: false } }, session: {} };
+  const area = (s) => ({
+    get: async (k) => Object.fromEntries([k].flat().filter((x) => x in s).map((x) => [x, structuredClone(s[x])])),
+    set: async (o) => { Object.assign(s, structuredClone(o)); },
+    remove: async (k) => { for (const x of [k].flat()) delete s[x]; },
+  });
+  const sent = [];
+  let onMessage;
+  const on = { addListener: () => {} };
+  const chrome = {
+    storage: { local: area(store.local), session: area(store.session), onChanged: on },
+    runtime: { onMessage: { addListener: (f) => { onMessage = f; } }, onInstalled: on, onStartup: on, getURL: (p) => `chrome-extension://x/${p}` },
+    tabs: { onRemoved: on, sendMessage: async (tabId, msg, opts) => { sent.push(msg); } },
+    action: { setBadgeText: async () => {}, setBadgeBackgroundColor: async () => {}, setTitle: async () => {} },
+    alarms: { onAlarm: on },
+  };
+  vm.runInNewContext(read('build/chrome/background.js'), { chrome, console, URL, setTimeout, structuredClone });
+  const settle = () => new Promise((r) => setTimeout(r, 20));
+  const fromPage = async (url, msg) => { onMessage(msg, { tab: { id: 1 }, frameId: 0, url }, () => {}); await settle(); };
+  const tab = () => store.session['tab-1'];
+  const init = async (url) => { sent.length = 0; await fromPage(url, { type: 'init' }); return sent.find((m) => m.type === 'initResp').config; };
+
+  // Seznam's bottom bar, accepted from the popup: its consent page may accept on its own for 30 s.
+  assert.equal((await init('https://www.novinky.cz/')).autoAction, null);
+  await fromPage('https://www.novinky.cz/', { type: 'popupFound', cmp: 'cz-wall-seznam-teaser' });
+  assert.equal(tab().consent, 'wall');
+  await new Promise((r) => onMessage({ type: 'acceptWall', tabId: 1 }, { url: 'chrome-extension://x/popup/popup.html' }, r));
+  assert.equal((await init('https://cmp.seznam.cz/nastaveni-souhlasu?service=novinky')).autoAction, 'optIn');
+  await fromPage('https://cmp.seznam.cz/nastaveni-souhlasu?service=novinky', { type: 'popupFound', cmp: 'cz-wall-seznam-page' });
+  assert.equal(tab().consent, 'accepting');
+
+  // Same accept, but the hand-off is interrupted and the tab reaches a CPEx wall within the 30 s: not accepted.
+  await fromPage('https://www.novinky.cz/', { type: 'popupFound', cmp: 'cz-wall-seznam-teaser' });
+  await new Promise((r) => onMessage({ type: 'acceptWall', tabId: 1 }, { url: 'chrome-extension://x/popup/popup.html' }, r));
+  assert.equal((await init('https://www.blesk.cz/')).autoAction, null, 'another wall family gets no optIn at init');
+  await fromPage('https://www.blesk.cz/', { type: 'popupFound', cmp: 'cz-wall-cpex' });
+  assert.equal(tab().consent, 'wall', 'and stays a wall when found');
+});
+
 test('choiceMode: all off refuses, all on accepts, anything else is a mix', () => {
   assert.equal(choiceMode({}), 'refuse');
   assert.equal(choiceMode({ A: false, B: false, D: false, E: false, F: false, X: false }), 'refuse');

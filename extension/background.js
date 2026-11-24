@@ -295,7 +295,8 @@ async function onConsentMessage(msg, sender) {
       const wallRules = data.consent.rules.filter((r) => isWallRule(r.name));
       const families = wallRules.filter((r) => pattern(r.runContext?.urlPattern).test(senderUrl)).map((r) => wallFamily(r.name));
       const looping = wall && await isLooping(tabId, families);
-      const acceptPending = prev.acceptUntil > Date.now() && !looping;
+      // Only for the wall family that was accepted (Seznam's page after Seznam's bar), never another wall reached meanwhile.
+      const acceptPending = prev.acceptUntil > Date.now() && families.includes(prev.acceptFamily) && !looping;
       const reopenPending = prev.reopenUntil > Date.now();
       if (frameId === 0) {
         // Many sites reload themselves after the choice is saved; keep showing that it was refused, marked as kept
@@ -304,7 +305,7 @@ async function onConsentMessage(msg, sender) {
         const kept = ['done', 'acceptedSite', 'choice', 'accepted'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
           ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter,
             clicks: prev.clicks, choiceFallback: prev.choiceFallback, kept: true } : {};
-        await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil }),
+        await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil, acceptFamily: prev.acceptFamily }),
           ...(reopenPending && { reopenUntil: prev.reopenUntil }), ...(excepted ? { consent: 'paused' } : reopenPending ? {} : kept) }, true);
       }
       const logs = { lifecycle: settings.debug, rulesteps: settings.debug, detectionsteps: settings.debug, evals: settings.debugEvals, errors: true };
@@ -356,7 +357,8 @@ async function onConsentMessage(msg, sender) {
         // Mirrors the autoAction chosen at init: "agree for me" on this site (unless looping) or a pending accept.
         const settings = await getSettings();
         const looping = await isLooping(tabId, [wallFamily(msg.cmp)]);
-        const accepting = (wallMode(tabHost, settings) === 'agree' && !looping) || (await getTab(tabId)).acceptUntil > Date.now();
+        const { acceptUntil, acceptFamily } = await getTab(tabId);
+        const accepting = (wallMode(tabHost, settings) === 'agree' && !looping) || (acceptUntil > Date.now() && acceptFamily === wallFamily(msg.cmp));
         if (accepting) await logAutoAccept(tabId, msg.cmp);
         await setTab(tabId, accepting
           ? { ...FRESH_OUTCOME, consent: 'accepting', cmp: msg.cmp, wallFrame: frameId }
@@ -436,8 +438,9 @@ async function applyChoice(tabId, frameId, cmp, categories) {
 async function acceptWall(tabId) {
   const state = await getTab(tabId);
   if (state.consent !== 'wall') return false;
-  // A bottom-bar rule only opens the consent page; let that page accept too (and nothing else later).
-  await setTab(tabId, { consent: 'accepting', ...(state.cmp.endsWith('-teaser') && { acceptUntil: Date.now() + 30000 }) });
+  // A bottom-bar rule only opens the consent page; let that page accept too (and nothing else later: same family only).
+  await setTab(tabId, { consent: 'accepting',
+    ...(state.cmp.endsWith('-teaser') && { acceptUntil: Date.now() + 30000, acceptFamily: wallFamily(state.cmp) }) });
   await api.tabs.sendMessage(tabId, { type: 'optIn' }, { frameId: state.wallFrame ?? 0 });
   return true;
 }
