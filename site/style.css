@@ -99,9 +99,7 @@ h1 { font-size: 60px; line-height: 1.15; letter-spacing: -3px; }
   background: var(--surface);
   text-decoration: none;
 }
-.browser-links a span,
-.browser-links .soon { color: var(--muted); }
-.browser-links .soon span { font-size: 12px; }
+.browser-links a span { color: var(--muted); }
 .browser-links a:hover { border-color: var(--muted); background: var(--hover); }
 .compatibility { margin-top: 16px; }
 
