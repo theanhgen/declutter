@@ -1,10 +1,12 @@
 // The chip: a small pill that says what declutter did with the banner, then goes away. Top frame only.
 // No stylesheet and no innerHTML: a page's CSP or Trusted Types can block both, so everything is set through the
 // DOM, element.style and element.animate(). A closed shadow root keeps the page's CSS out.
+import { PALETTE } from '../palette.js';
+
 const SVG = 'http://www.w3.org/2000/svg';
 // The glyph from popup/d.svg.
 const GLYPH = 'M11.3 1.5L14 1.5L14 14L7.65 14C3.7 14 1.5 11.95 1.5 8.95C1.5 5.95 3.6 4 6.7 4C8.1 4 9.25 4.45 10.1 5.2L10.1 2.7C10.1 1.9 10.5 1.5 11.3 1.5ZM7.8 7C9.3 7 10.15 7.8 10.15 9.1L10.15 11.05L7.8 11.05C6.2 11.05 5.4 10.25 5.4 9.05C5.4 7.85 6.25 7 7.8 7Z';
-const MARK = { ok: ['✓', '#4cc38a'], bad: ['✕', '#ff6369'], wait: ['', ''] };
+const MARK = { ok: ['✓', PALETTE.ok], bad: ['✕', PALETTE.bad], wall: ['', ''] };
 const IN_MS = 450, HOLD_MS = 1500, OUT_MS = 300;
 let timer, shown;
 
@@ -21,7 +23,7 @@ function logo() {
   Object.assign(svg.style, { width: '14px', height: '14px', flex: 'none' });
   const path = document.createElementNS(SVG, 'path');
   path.setAttribute('fill-rule', 'evenodd');
-  path.setAttribute('fill', '#e5899a');
+  path.setAttribute('fill', PALETTE.accentOnDark);
   path.setAttribute('d', GLYPH);
   svg.append(path);
   return svg;
@@ -40,7 +42,7 @@ export function showChip({ text, tone, host: site }) {
   });
   const pill = el('div', {
     display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '7px', boxSizing: 'border-box', height: '32px',
-    padding: '0 12px', borderRadius: '16px', overflow: 'hidden', whiteSpace: 'nowrap', background: '#1c1c1e', color: '#f2f2f2',
+    padding: '0 12px', borderRadius: '16px', overflow: 'hidden', whiteSpace: 'nowrap', background: PALETTE.pill, color: PALETTE.pillText,
     font: '12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace', boxShadow: '0 2px 10px rgba(0,0,0,.28)',
   });
   // Nothing on the host names declutter or the outcome: the page can't read either from the closed root.
@@ -49,7 +51,7 @@ export function showChip({ text, tone, host: site }) {
   // the outcome is read once.
   pill.setAttribute('role', 'status');
   pill.setAttribute('aria-live', 'polite');
-  const [mark, color] = MARK[tone] ?? MARK.wait;
+  const [mark, color] = MARK[tone] ?? MARK.wall;
   const visible = el('span', { display: 'flex', alignItems: 'center', gap: '7px' });
   visible.setAttribute('aria-hidden', 'true');
   visible.append(logo(), el('span', {}, text), ...(mark ? [el('span', { color, fontWeight: '700' }, mark)] : []));

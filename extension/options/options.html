@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
 <title>declutter</title>
+<link rel="stylesheet" href="../tokens.css">
 <style>
   /* Plain-text look after mattdesl.com: monospace, one column, lowercase headings, dot bullets. Martian Mono at its
      natural width, as in the popup. */
@@ -52,7 +53,7 @@
   .bullet { position: relative; margin-left: 23px; overflow-wrap: anywhere; }
   .bullet::before {
     content: " "; position: absolute; left: -20px; top: 8px;
-    width: 5px; height: 5px; border-radius: 100%; background: var(--dot, currentColor);
+    width: 5px; height: 5px; border-radius: 100%; background: var(--dot, var(--neutral));
   }
   .muted { color: var(--muted); }
   .footnote { margin-top: 4em; font-size: 10px; color: var(--muted); }
@@ -82,13 +83,13 @@
 
   <section data-tab="youtube">
   <h2>youtube</h2>
-  <p class="bullet" style="--dot:#e5484d">hide shorts: <span class="choice" data-choice="shorts"></span></p>
+  <p class="bullet">hide shorts: <span class="choice" data-choice="shorts"></span></p>
   <p class="desc" id="shortsStats"></p>
-  <p class="bullet" style="--dot:#e5484d">hide posts in feeds: <span class="choice" data-choice="posts"></span></p>
+  <p class="bullet">hide posts in feeds: <span class="choice" data-choice="posts"></span></p>
   <p class="desc">community posts (pictures, polls, text) between the videos on home and subscriptions. a channel's own posts tab stays.</p>
-  <p class="bullet" style="--dot:#e5484d">hide playables: <span class="choice" data-choice="playables"></span></p>
+  <p class="bullet">hide playables: <span class="choice" data-choice="playables"></span></p>
   <p class="desc">the YouTube Playables (games) shelf on home and its menu entry. the playables page itself stays.</p>
-  <p class="bullet" style="--dot:#e5484d">show upload dates on mobile: <span class="choice" data-choice="dates"></span></p>
+  <p class="bullet">show upload dates on mobile: <span class="choice" data-choice="dates"></span></p>
   <p class="desc">m.youtube.com lists the videos under the player without their date; declutter adds it where youtube sends it (the first dozen or so).</p>
 
   </section>
@@ -99,15 +100,15 @@
     banner's own settings where declutter knows how (Cookiebot, Didomi, OneTrust, cookieconsent, consentmanager,
     Usercentrics); on other
     banners a mix is answered by refusing everything.</p>
-  <p class="bullet" style="--dot:#3e63dd">answer cookie banners: <span class="choice" data-choice="consent"></span></p>
+  <p class="bullet">answer cookie banners: <span class="choice" data-choice="consent"></span></p>
   <div id="categories"></div>
-  <p class="bullet" style="--dot:#30a46c">per site:</p>
+  <p class="bullet">per site:</p>
   <p class="desc">the same choice as the toolbar menu on that site: refuse / accept / leave alone. a site covers its
     subdomains unless a subdomain has its own line.</p>
   <div id="sites"></div>
-  <p class="bullet" style="--dot:#8d8d8d">add a site: <input type="url" id="newSite" placeholder="idnes.cz">
+  <p class="bullet">add a site: <input type="url" id="newSite" placeholder="idnes.cz">
     <span class="choice"><a href="#" id="addAccept">accept</a> / <a href="#" id="addIgnore">leave alone</a></span></p>
-  <p class="bullet" style="--dot:#3e63dd">send Global Privacy Control: <span class="choice" data-choice="gpc"></span></p>
+  <p class="bullet">send Global Privacy Control: <span class="choice" data-choice="gpc"></span></p>
   <p class="desc">tells every site "do not sell or share my data" (the Sec-GPC signal), before any banner. some
     consent platforms then refuse on their own; most sites in Europe ignore it so far. not sent to sites you accept or
     leave alone, nor to pay walls. it makes your browser a little easier to tell apart, so it is off by default.</p>
@@ -119,9 +120,9 @@
   <p>These sites offer only "agree to tracking" or "pay"; refusing is not possible, and declutter never hides
     them. <span class="muted">auto</span> clicks "agree" for you; <span class="muted">manual</span>
     shows a currency badge (Kč, €, £…) and waits for you.</p>
-  <p class="bullet" style="--dot:#f76b15">mode: <span class="choice" data-choice="walls"></span></p>
-  <p class="bullet" style="--dot:#8e4ec6">sites: <span id="wallSites" class="muted"></span></p>
-  <p class="bullet" style="--dot:#f76b15">ask me on: <span id="wallAskSites"></span></p>
+  <p class="bullet">mode: <span class="choice" data-choice="walls"></span></p>
+  <p class="bullet">sites: <span id="wallSites" class="muted"></span></p>
+  <p class="bullet">ask me on: <span id="wallAskSites"></span></p>
   <p class="desc">set per site from the toolbar menu: agree for me / ask me / leave alone. "agree for me" lists the
     site under always accept on, "leave alone" under leave alone on.</p>
 
@@ -129,9 +130,9 @@
 
   <section data-tab="display">
   <h2>display</h2>
-  <p class="bullet" style="--dot:#12a594">while a banner is being answered: <span class="choice" data-choice="display"></span></p>
+  <p class="bullet">while a banner is being answered: <span class="choice" data-choice="display"></span></p>
   <p class="desc">hide: the banner is kept out of sight while declutter clicks through it. show: you see it happen.</p>
-  <p class="bullet" style="--dot:#12a594">say what was done: <span class="choice" data-choice="chip"></span></p>
+  <p class="bullet">say what was done: <span class="choice" data-choice="chip"></span></p>
   <p class="desc">a small note in the corner of the page for a second or two: cookies refused, accepted, or a pay wall left for you to decide.</p>
 
   </section>
@@ -141,9 +142,9 @@
   <p>declutter's own rules are built in. Rule lists (a data.json URL) bring fixes without an update; they are
     checked every 12 hours. Store versions start with declutter's own list; remove it to use only the built-in rules.</p>
   <div id="ruleLists"></div>
-  <p class="bullet" style="--dot:#8d8d8d"><input type="url" id="newList" placeholder="https://…/data.json"> <a href="#" id="addList">add list</a></p>
+  <p class="bullet"><input type="url" id="newList" placeholder="https://…/data.json"> <a href="#" id="addList">add list</a></p>
   <p class="desc" id="newListError" hidden>must start with https://</p>
-  <p class="bullet" style="--dot:#12a594" id="data"></p>
+  <p class="bullet" id="data"></p>
 
   </section>
 
@@ -151,10 +152,10 @@
   <h2>about</h2>
   <p id="summary"></p>
   <p class="muted" id="clicksSaved"></p>
-  <p class="bullet" style="--dot:#c96575" id="tip" hidden>declutter is free. If it saves you clicks, <a id="tipLink" target="_blank" rel="noopener">a tip</a> keeps the rules up to date.</p>
-  <p class="bullet" style="--dot:#3e63dd" id="stats"></p>
+  <p class="bullet" id="tip" hidden>declutter is free. If it saves you clicks, <a id="tipLink" target="_blank" rel="noopener">a tip</a> keeps the rules up to date.</p>
+  <p class="bullet" id="stats"></p>
   <div id="byCmp"></div>
-  <p class="bullet" style="--dot:#8d8d8d"><a href="https://theanhgen.github.io/declutter/" target="_blank" rel="noopener">website</a>
+  <p class="bullet"><a href="https://theanhgen.github.io/declutter/" target="_blank" rel="noopener">website</a>
     / <a href="https://theanhgen.github.io/declutter/privacy.html" target="_blank" rel="noopener">privacy</a>
     / <a href="https://github.com/theanhgen/declutter" target="_blank" rel="noopener">source and issues</a></p>
 
@@ -168,9 +169,9 @@
 
   <section data-tab="dev">
   <h2>dev</h2>
-  <p class="bullet" style="--dot:#ffc53d">log each rule step to the page console: <span class="choice" data-choice="debug"></span></p>
-  <p class="bullet" style="--dot:#ffc53d">log page-world evals: <span class="choice" data-choice="debugEvals"></span></p>
-  <p class="bullet" style="--dot:#ffc53d">pause before each click (watch it work): <span class="choice" data-choice="clickDelay"></span></p>
+  <p class="bullet">log each rule step to the page console: <span class="choice" data-choice="debug"></span></p>
+  <p class="bullet">log page-world evals: <span class="choice" data-choice="debugEvals"></span></p>
+  <p class="bullet">pause before each click (watch it work): <span class="choice" data-choice="clickDelay"></span></p>
 
   </section>
 
