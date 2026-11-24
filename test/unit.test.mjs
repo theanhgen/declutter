@@ -7,7 +7,7 @@ import vm from 'node:vm';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
 import { collectDates, videoIdOf } from '../extension/shorts/dates-lib.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules, restoreItem, restoreReports, restoreStats, bannerSuspected, countNewlyHidden, shortsStatsText, shortsSummary } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules, restoreItem, restoreReports, restoreStats, bannerSuspected, countNewlyHidden, shortsStatsText, shortsSummary, aboutSummary } from '../extension/lib.js';
 import { declutterSnippets } from '../extension/consent/snippets.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -113,6 +113,19 @@ test('shorts popup row and Settings line say what was hidden and redirected', ()
   assert.equal(shortsStatsText({ shortsHidden: 1204, shortsPages: 57 }), '1,204 shorts hidden on 57 youtube pages');
   assert.equal(shortsStatsText({ shortsHidden: 1, shortsPages: 1 }), '1 short hidden on 1 youtube page');
   assert.equal(shortsStatsText({}), 'no shorts hidden yet.');
+});
+
+test('aboutSummary: leads with banners answered and shorts hidden; a fresh install gets guidance, not "0"', () => {
+  const empty = aboutSummary({});
+  assert.equal(empty.headline, 'nothing yet. open a site with a cookie banner (bbc.com) or a YouTube search, and it shows up here.');
+  assert.equal(empty.clicks, '');
+  // A banner a cosmetic rule only hid saves no clicks but is still answered (autoconsentDone counts it in `refused`).
+  const s = aboutSummary({ since: Date.UTC(2026, 9, 3, 12), refused: 40, choice: 1, walls: 1, shortsHidden: 310, shorts: 2, clicks: 0 }, 'en-US');
+  assert.equal(s.headline, 'since Oct 3: 42 banners answered, 310 shorts hidden');
+  assert.equal(s.clicks, '0 clicks saved');
+  assert.doesNotMatch(JSON.stringify([empty, s]), /tracker|block/i);
+  // One shorts counter: the about line reads the one YouTube keeps (#14), nothing counts them a second time.
+  assert.equal((read('extension/background.js').match(/bump\(\{ shortsHidden:/g) ?? []).length, 1);
 });
 
 test('hostMatches: exact host and subdomains only', () => {
