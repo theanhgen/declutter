@@ -3,7 +3,7 @@ import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import compactRulesText from '@duckduckgo/autoconsent/rules/compact-rules.json' with { type: 'text' };
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, validData } from './lib.js';
+import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, siteMode, validData } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -31,9 +31,11 @@ const DEFAULT_SETTINGS = {
   // Dev: autoconsent's eval log and a delay before each click (to watch it work).
   debugEvals: false,
   clickDelay: false,
-  // Per-site choices: banners left alone (exceptions) or accepted (acceptSites). Everywhere else: refused.
+  // Per-site choices (siteMode in lib.js): banners left alone (exceptions) or accepted (acceptSites); refuseSites
+  // overrides a parent domain on either. Everywhere else: refused.
   exceptions: [],
   acceptSites: [],
+  refuseSites: [],
   // Consent-or-pay walls: 'auto' (default; 'manual' in store builds, see build.mjs --store) = accept (Souhlasím) automatically; 'manual' = detect, show a currency
   // badge, accept only when asked from the popup. Walls are never refused or hidden either way.
   walls: __WALLS_DEFAULT__,
@@ -77,7 +79,7 @@ api.storage.onChanged.addListener((changes, area) => {
 
 // Per-site lists must be arrays: hostMatches on anything else throws and silently stops every frame's init.
 const normalise = (s) => ({ ...s, exceptions: Array.isArray(s.exceptions) ? s.exceptions : [],
-  acceptSites: Array.isArray(s.acceptSites) ? s.acceptSites : [] });
+  acceptSites: Array.isArray(s.acceptSites) ? s.acceptSites : [], refuseSites: Array.isArray(s.refuseSites) ? s.refuseSites : [] });
 
 function getSettings() {
   settingsCache ??= api.storage.local.get('settings').then(({ settings }) => normalise({ ...DEFAULT_SETTINGS, ...settings }));
@@ -206,6 +208,7 @@ async function report(tabId) {
 async function applyGpc() {
   const [s, data] = await Promise.all([getSettings(), getData()]);
   const on = s.gpc && s.consent;
+  // A refuseSites override under an accepted or left-alone parent still gets no GPC: the exclusions cover subdomains.
   const skip = [...new Set([...(s.acceptSites ?? []), ...s.exceptions, ...data.consent.walls])];
   try {
     await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds: [GPC_RULE_ID], ...(on && { addRules: [gpcRule(skip)] }) });
@@ -246,8 +249,8 @@ async function onConsentMessage(msg, sender) {
     case 'init': {
       const [settings, data] = await Promise.all([getSettings(), getData()]);
       const wall = hostMatches(tabHost, data.consent.walls);
-      const excepted = hostMatches(tabHost, settings.exceptions);
-      const accepting = hostMatches(tabHost, settings.acceptSites ?? []);
+      const excepted = siteMode(tabHost, settings) === 'ignore';
+      const accepting = siteMode(tabHost, settings) === 'accept';
       const prev = await getTab(tabId);
       // "Accept" on Seznam's/Mafra's bottom bar navigates to their consent page; accept there too.
       const wallRules = data.consent.rules.filter((r) => isWallRule(r.name));
@@ -314,7 +317,7 @@ async function onConsentMessage(msg, sender) {
         await setTab(tabId, { consent: 'working', cmp: msg.cmp, since });
         watchStuck(tabId, since);
         const settings = await getSettings();
-        const siteAccepted = hostMatches(tabHost, settings.acceptSites ?? []);
+        const siteAccepted = siteMode(tabHost, settings) === 'accept';
         if (!siteAccepted && choiceMode(settings.categories) === 'mix') await applyChoice(tabId, frameId, msg.cmp, settings.categories);
       }
       break;
@@ -323,7 +326,7 @@ async function onConsentMessage(msg, sender) {
       if (!msg.result) await setTab(tabId, { consent: 'failed', cmp: msg.cmp });
       break;
     case 'autoconsentDone': {
-      const siteAccepted = hostMatches(tabHost, (await getSettings()).acceptSites ?? []);
+      const siteAccepted = siteMode(tabHost, await getSettings()) === 'accept';
       const mode = siteAccepted ? 'accept' : choiceMode((await getSettings()).categories);
       // What is recorded is what was done: accepted (this site, or every category switched on), refused, or, for a
       // cosmetic rule, only hidden.

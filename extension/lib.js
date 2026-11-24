@@ -5,6 +5,40 @@ export const STUCK_AFTER_MS = 15000;
 export const hostMatches = (host, domains) =>
   domains.some((d) => host === d || host.endsWith('.' + d));
 
+// Per-site choice for cookie banners, one model for the popup, Settings and the background. Three lists of domains:
+// acceptSites (accept), exceptions (leave alone) and refuseSites (refuse; only needed to override a parent domain on
+// one of the other two, absent in older settings). A domain covers its subdomains; the most specific entry that
+// covers a host wins; no entry means refuse (or "your mix" from Settings → your choice).
+const SITE_LISTS = [['acceptSites', 'accept'], ['exceptions', 'ignore'], ['refuseSites', 'refuse']];
+const SITE_LIST_OF = Object.fromEntries(SITE_LISTS.map(([key, mode]) => [mode, key]));
+export function siteEntry(host, s = {}) {
+  let best = null;
+  for (const [key, mode] of SITE_LISTS) {
+    for (const domain of s[key] ?? []) {
+      if (hostMatches(host, [domain]) && (!best || domain.length > best.domain.length)) best = { domain, mode };
+    }
+  }
+  return best;
+}
+export const siteMode = (host, s) => siteEntry(host, s)?.mode ?? 'refuse';
+// The settings patch that gives host this mode. Only host's own entry changes: an entry for a parent domain stays,
+// so the choice for the parent's other subdomains is kept. host gets an entry only where it differs from what it
+// would inherit, so "refuse" without a parent just takes the host off the lists.
+export function siteModePatch(host, mode, s = {}) {
+  const lists = Object.fromEntries(SITE_LISTS.map(([key]) => [key, (s[key] ?? []).filter((d) => d !== host)]));
+  if (siteMode(host, lists) !== mode) lists[SITE_LIST_OF[mode]].push(host);
+  return lists;
+}
+// A site typed into Settings ("idnes.cz", "https://www.idnes.cz/zpravy") -> its host without "www.", or null.
+export function siteHost(input) {
+  const t = String(input ?? '').trim().toLowerCase();
+  if (!t) return null;
+  try {
+    const h = new URL(/^[a-z][a-z0-9+.-]*:\/\//.test(t) ? t : `https://${t}`).hostname.replace(/^www\./, '');
+    return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(h) ? h : null;
+  } catch { return null; }
+}
+
 // A remote data.json is only used if it has this shape (and is newer than the bundled one). Every rule needs a name
 // and a urlPattern that compiles: the background builds a RegExp from it on every frame's init.
 const compiles = (re) => { try { new RegExp(re ?? ''); return true; } catch { return false; } };
