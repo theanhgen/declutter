@@ -29,7 +29,9 @@ final class TipJar: ObservableObject {
             UserDefaults.standard.data(forKey: key).flatMap { try? JSONDecoder().decode(Tip.self, from: $0) }
         }
         var text: String {
-            "thank you for the \(price) tip on \(date.formatted(.dateTime.month(.abbreviated).day())). it pays for keeping the rules current."
+            // Some locales end the date with a period (cs: "24. 11."); don't add a second one.
+            let day = date.formatted(.dateTime.month(.abbreviated).day())
+            return "thank you for the \(price) tip on \(day.hasSuffix(".") ? String(day.dropLast()) : day). it pays for keeping the rules current."
         }
     }
 
