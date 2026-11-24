@@ -638,6 +638,18 @@ test('mergeData: a rule list older than the bundled data cannot override a bundl
   assert.equal(m.generated, '2026-03-01');
 });
 
+test('mergeData: an old rule list merged with a newer one cannot override a newer bundled rule (#53)', () => {
+  const list = (generated, rules) => ({ schema: 1, generated, shorts: { hide: [], cards: [] },
+    consent: { walls: [], disabledCmps: [], rules } });
+  const bundled = list('2026-11-20', [{ name: 'X', v: 'fixed' }, { name: 'Y', v: 'bundled' }]);
+  const a = list('2026-11-01', [{ name: 'X', v: 'old' }, { name: 'A' }]);
+  const b = list('2026-11-24', [{ name: 'Y', v: 'new' }, { name: 'B' }]);
+  const remote = [a, b].reduce((acc, d) => mergeData(acc, d), null); // as refreshRemoteData does
+  assert.equal(remote.generated, '2026-11-24');
+  const m = mergeData(bundled, remote); // as getData does
+  assert.deepEqual(m.consent.rules.map((r) => `${r.name}${r.v ?? ''}`).sort(), ['A', 'B', 'Xfixed', 'Ynew']);
+});
+
 test('applyCategories: only the adapter of the CMP autoconsent detected runs', async () => {
   const calls = [];
   globalThis.window = {
