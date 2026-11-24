@@ -171,6 +171,26 @@ test('one palette: tokens.css matches palette.js, no other hex in the extension 
   for (const f of ['extension/popup/popup.html', 'extension/options/options.html', 'extension/welcome/welcome.html']) assert.match(read(f), /href="\.\.\/tokens\.css"/, f);
 });
 
+test('one feature list and one set of category names on every surface (#27)', async () => {
+  const { FEATURE_LINE, FEATURE_LINE_LOWER, CATEGORIES } = await import('../extension/features.js');
+  // The line, word for word: the Chrome summary (manifest), settings, the site's pitch, the listing; the apps in
+  // their lowercase voice; the App Store text builds on the constant.
+  assert.equal(JSON.parse(read('extension/manifest.base.json')).description, FEATURE_LINE);
+  assert.ok(FEATURE_LINE.length <= 132, 'Chrome summary limit');
+  assert.ok(read('extension/options/options.html').includes(`<p>${FEATURE_LINE} `), 'settings');
+  assert.ok(read('site/index.html').includes(`<p class="pitch">${FEATURE_LINE}</p>`), 'site pitch');
+  assert.ok(read('store/LISTING.md').includes(FEATURE_LINE), 'LISTING');
+  for (const p of ['safari/iOSApp/DeclutterApp.swift', 'safari/App/DeclutterApp.swift']) assert.ok(read(p).includes(`Text("${FEATURE_LINE_LOWER}")`), p);
+  assert.match(read('store/asc-setup.mjs'), /\$\{FEATURE_LINE\}/);
+  // It says they are hidden, so they must be on by default (background.js DEFAULT_SETTINGS).
+  const bg = read('extension/background.js');
+  for (const k of ['shorts', 'posts', 'playables']) assert.match(bg, new RegExp(`DEFAULT_SETTINGS = \\{[^}]*\\b${k}: true`), k);
+  assert.doesNotMatch(read('store/LISTING.md') + read('store/asc-setup.mjs') + read('site/index.html'), /if you like|can be hidden too/i);
+  const site = read('site/index.html');
+  for (const [, name] of CATEGORIES) assert.ok(site.includes(`<dt>${name}</dt>`), name);
+  assert.doesNotMatch(read('extension/options/options.js'), /const CATEGORIES/);
+});
+
 test('hostMatches: exact host and subdomains only', () => {
   assert.ok(hostMatches('www.seznam.cz', ['seznam.cz']));
   assert.ok(hostMatches('seznam.cz', ['seznam.cz']));

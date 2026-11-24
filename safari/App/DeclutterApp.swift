@@ -36,6 +36,8 @@ struct ContentView: View {
                     .accessibilityHidden(true)  // repeats the name next to it
                 Text("declutter").font(Martian.font(.title2, weight: 600))
             }
+            Text("hides YouTube Shorts, posts in feeds and Playables, and answers cookie banners the way you choose.")
+                .fixedSize(horizontal: false, vertical: true)
             Text(status)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

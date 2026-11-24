@@ -1,4 +1,5 @@
 import { siteHost, siteMode, siteModePatch, ruleListLine, updateOutcome, REASONS, UNDO_MS, restoreItem, restoreReports, restoreStats, shortsStatsText, aboutSummary } from '../lib.js';
+import { CATEGORIES } from '../features.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -23,15 +24,6 @@ const CHOICES = {
 };
 // The popup's per-site words, same order.
 const SITE_MODES = [['refuse', 'refuse'], ['accept', 'accept'], ['ignore', 'leave alone']];
-// Consent-O-Matic's categories, same letters and meaning.
-const CATEGORIES = [
-  ['A', 'preferences and functionality', 'remember your choices (language, region, login) and enhanced personal features; not used to track you on other sites.'],
-  ['B', 'performance and analytics', 'count visits and traffic sources, and see how visitors move around the site.'],
-  ['D', 'information storage and access', 'store or read identifiers on your device (cookies, advertising and device ids).'],
-  ['E', 'content selection, delivery, and reporting', 'personalise content from a profile of your interests, and measure it.'],
-  ['F', 'ad selection, delivery, and reporting', 'personalise ads from a profile of your interests, and measure them. includes Google.'],
-  ['X', 'other purposes', 'anything the site does not describe clearly or that fits no other category.'],
-];
 const DEFAULTS = {
   shorts: true, posts: true, playables: true, dates: true, consent: true, walls: __WALLS_DEFAULT__, display: 'hide', chip: true, gpc: false, debug: false, debugEvals: false, clickDelay: false,
   // Same default rule list as the background's (the build-time one), so adding or removing a list keeps it.

@@ -3,6 +3,7 @@
 // Idempotent: existing tips are left alone, text fields are overwritten with what is here.
 // Never submits anything for review.   node store/asc-setup.mjs
 import { asc } from '../scripts/asc.mjs';
+import { FEATURE_LINE } from '../extension/features.js';
 
 const APP = '6816072545';
 const SITE = 'https://theanhgen.github.io/declutter/';
@@ -16,10 +17,11 @@ const TIPS = [
 const SUBTITLE = 'Hide Shorts, answer cookies'; // 30 chars max
 const KEYWORDS = 'cookie,consent,banner,gdpr,youtube,shorts,privacy,extension,reject,popup,tracking,block,safari';
 const PROMO = 'Free. Cookie banners answered the way you choose, YouTube Shorts gone. No tracking, no account.';
-const DESCRIPTION = `declutter is a Safari extension that does two things, entirely on your device.
+const DESCRIPTION = `${FEATURE_LINE} Entirely on your device, in Safari.
 
 YOUTUBE SHORTS
 Removes the Shorts shelf, the Shorts tab and Shorts in search and subscriptions, on desktop and mobile YouTube. A Shorts link opens in the normal video player instead.
+Community posts (pictures, polls, text) between the videos in your feeds and the YouTube Playables (games) shelf are hidden too; each has its own switch.
 
 COOKIE BANNERS
 Answers cookie-consent banners for you. By default it refuses everything that is not strictly necessary. You can instead allow categories (preferences, analytics, storage, content, ads, other); where the site uses Cookiebot, Didomi, OneTrust or cookieconsent, your exact mix is applied through the banner's own settings, and elsewhere a mix is answered by refusing.
