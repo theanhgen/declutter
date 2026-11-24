@@ -28,7 +28,7 @@
 <body>
 <h1>declutter: privacy</h1>
 <p class="muted">Applies to the declutter browser extension for Chrome, Edge, Firefox and Safari. Last updated
-  3 October 2026.</p>
+  24 November 2026.</p>
 
 <h2>short version</h2>
 <p>declutter collects nothing on its own. It has no account, no analytics and no tracking. The one exception is a
@@ -63,13 +63,21 @@
 
 <h2 id="reports">reports you send</h2>
 <p>The menu's "send to developer: not handled right" shows what it sends before you press it. Only if you press
-  it, declutter sends: the site's address only (for example https://www.idnes.cz, never the page's path,
-  query or fragment), what declutter saw on that page
-  (for example "failed" and the banner's platform name), the declutter version and the browser type. After sending,
-  you can add what went wrong by picking one of four fixed answers ("banner still there", "site broke after declutter
-  answered", "shorts got through", "something else"; for Shorts, the kind of YouTube page, such as search, never its
-  address); that goes as a second report for the same site. No account,
-  identifier, cookies, page content or other browsing is included. Reports are stored in a database hosted by
+  it, declutter sends a report that carries exactly this, and nothing else:</p>
+<ul>
+  <li><strong>site</strong>: the site's address only, for example https://www.idnes.cz, never the page's path, query
+    or fragment;</li>
+  <li><strong>consent state</strong>: what declutter did with the banner there, for example "done", "failed" or
+    "wall";</li>
+  <li><strong>CMP</strong>: the name of the banner's consent platform or rule, for example "onetrust";</li>
+  <li><strong>version</strong>: the declutter version, for example 1.2.2;</li>
+  <li><strong>browser</strong>: chrome, firefox or safari;</li>
+  <li><strong>reason</strong> (optional): after sending, you can add what went wrong by picking one of four fixed
+    answers ("banner still there", "site broke after declutter answered", "shorts got through", "something else";
+    for Shorts, the kind of YouTube page, such as search, never its address). If the report is still waiting to go out (offline), the reason goes with it; if it already went out, it goes as
+    a second report for the same site with the same fields. It is never free text; skip it and no reason is sent.</li>
+</ul>
+<p>No account, identifier, cookies, page content or other browsing is included. Reports are stored in a database hosted by
   Supabase (EU, Frankfurt) that only the developer can read, and are used only to fix how declutter handles
   those sites. Like any web request, it reveals your IP address to Supabase's servers, which keep request logs
   briefly; declutter does not store it. The same press keeps the site, with the page's full address, in settings →

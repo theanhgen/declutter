@@ -63,7 +63,8 @@ settings, and elsewhere a mix is answered by refusing.
 PRIVACY
 No account, no analytics, no tracking. Settings, counters and your reported-sites list stay in the
 browser's extension storage. declutter sends something only when you ask: a site you choose to send to the
-developer (the site's address only, not the page; what declutter saw; the version). It downloads its own rule
+developer (the site's address only, not the page; what declutter saw; the version and browser; and, if you
+pick one, what went wrong from four fixed answers). It downloads its own rule
 list from GitHub every 12 hours so site fixes arrive without an update; that download sends nothing about you.
 
 Open source (MIT): https://github.com/theanhgen/declutter
@@ -95,7 +96,9 @@ every 12 hours; it is checked against a fixed shape (`validData` in `extension/l
 as the fallback. Say this in the reviewer notes of every store.
 
 **Data usage** (Chrome disclosure checkboxes): "Web history", only the address of a page the user explicitly
-chooses to send as a report, reduced to the site (e.g. https://www.idnes.cz). Nothing else. Not sold, not used
+chooses to send as a report, reduced to the site (e.g. https://www.idnes.cz). The report also carries what
+declutter did there (consent state, CMP name), the version, the browser type and, if the user picks one, a
+reason from four fixed words (never free text). Nothing else. Not sold, not used
 for anything unrelated to the single purpose, not used for creditworthiness.
 
 **Firefox** `data_collection_permissions`: `required: ['none']`, `optional: ['browsingActivity']`; the popup asks for it before the first send.

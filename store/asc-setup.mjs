@@ -31,7 +31,7 @@ Answers cookie-consent banners for you. By default it refuses everything that is
 • a counter of clicks saved, and a "not handled right" list you keep on your device
 
 PRIVACY
-No account, no analytics, no tracking. Settings and counters stay in Safari's extension storage on your device. If a site is not handled right, you can choose to send the site's address (not the page's) to the developer; nothing is sent otherwise.
+No account, no analytics, no tracking. Settings and counters stay in Safari's extension storage on your device. If a site is not handled right, you can choose to send the site's address (not the page's), what declutter did there, its version, the browser and, if you pick one, what went wrong from four fixed answers, to the developer; nothing is sent otherwise.
 
 FREE
 Everything is free. If it saves you clicks, there is an optional tip jar in the app.
