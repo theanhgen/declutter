@@ -37,6 +37,16 @@ export async function applyCategories(c, cmp = '') {
   const want = (name) => { const k = classify(name); return k === 'necessary' || !!c[k]; };
   // Some CMP getters return objects keyed by id rather than arrays (Didomi does, depending on version).
   const list = (x) => (Array.isArray(x) ? x : Object.values(x ?? {}));
+  const visible = (sel) => !!document.querySelector(sel)?.getClientRects?.().length;
+  // An adapter that opened a preferences panel and cannot use it closes it again and waits until it is gone, then
+  // gives up (''): the refusal that follows (autoconsent's optOut) starts from the banner, as it expects.
+  const giveUp = async (closeSel, isOpen) => {
+    const close = document.querySelector(closeSel);
+    if (!close) return '';
+    close.click();
+    for (let i = 0; i < 20 && isOpen(); i++) await wait(100);
+    return '';
+  };
 
   // Cookiebot: preferences / statistics / marketing. Marketing is ad cookies: F only, not content (E).
   if (family === 'cookiebot' && window.Cookiebot?.submitCustomConsent) {
@@ -87,10 +97,7 @@ export async function applyCategories(c, cmp = '') {
     for (let i = 0; i < 20 && !document.querySelector('#cc-main input.section__toggle'); i++) await wait(150);
     const inputs = [...document.querySelectorAll('#cc-main input.section__toggle')].filter((el) => !el.disabled);
     const save = document.querySelector('#cc-main [data-role="save"]');
-    if (!inputs.length || !save) {
-      document.querySelector('#cc-main .pm__close-btn')?.click();
-      return '';
-    }
+    if (!inputs.length || !save) return giveUp('#cc-main .pm__close-btn', () => !!document.documentElement?.classList.contains('show--preferences'));
     for (const input of inputs) {
       const on = want(input.value);
       if (input.checked !== on) input.click();
@@ -107,13 +114,17 @@ export async function applyCategories(c, cmp = '') {
   }
 
   // OneTrust: groups C0002 performance (B), C0003 functional (A), C0004 targeting (F), C0005 social (X);
-  // anything else by its label. Set the toggles in the preference centre, then save.
+  // anything else by its label. Set the toggles in the preference centre, then save. No group toggles (a template
+  // without ot-group-id-* inputs) or no save: close the centre if we opened it, and leave the refusal to autoconsent,
+  // which reopens it when it needs it.
   if (family === 'onetrust' && (window.OneTrust || document.querySelector('#onetrust-banner-sdk, #onetrust-pc-sdk'))) {
     const known = { C0002: 'B', C0003: 'A', C0004: 'F', C0005: 'X' };
+    const wasOpen = visible('#onetrust-pc-sdk');
     document.querySelector('#onetrust-pc-btn-handler')?.click();
     for (let i = 0; i < 20 && !document.querySelector('#onetrust-pc-sdk input[id^="ot-group-id-"]'); i++) await wait(150);
     const inputs = [...document.querySelectorAll('#onetrust-pc-sdk input[id^="ot-group-id-"]')].filter((el) => !el.disabled);
-    if (!inputs.length) return '';
+    const save = document.querySelector('#onetrust-pc-sdk .save-preference-btn-handler');
+    if (!inputs.length || !save) return wasOpen ? '' : giveUp('#onetrust-pc-sdk #close-pc-btn-handler', () => visible('#onetrust-pc-sdk'));
     for (const input of inputs) {
       const id = input.id.replace('ot-group-id-', '');
       const label = input.closest('.ot-accordion-layout, .category-item, li')?.querySelector('h3, h4, .ot-cat-header')?.textContent ?? id;
@@ -121,8 +132,6 @@ export async function applyCategories(c, cmp = '') {
       if (input.checked !== on) input.click();
     }
     await wait(200);
-    const save = document.querySelector('#onetrust-pc-sdk .save-preference-btn-handler');
-    if (!save) return '';
     save.click();
     return 'onetrust';
   }

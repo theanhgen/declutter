@@ -424,6 +424,37 @@ test('applyCategories: bundled cookieconsent v3 with no save button closes its p
   } finally { delete globalThis.window; delete globalThis.document; }
 });
 
+test('applyCategories: OneTrust without group toggles closes the preference centre it opened, and waits for it (#56)', async () => {
+  const clicks = [];
+  let pcOpen = false;
+  const el = (name, extra = {}) => ({ click: () => clicks.push(name), ...extra });
+  const pc = { getClientRects: () => (pcOpen ? [{}] : []) };
+  const dom = {
+    '#onetrust-banner-sdk, #onetrust-pc-sdk': el('banner'),
+    '#onetrust-pc-sdk': pc,
+    // A template whose switches are not ot-group-id-* inputs: nothing for the adapter to set.
+    '#onetrust-pc-btn-handler': el('settings', { click: () => { clicks.push('settings'); pcOpen = true; } }),
+    '#onetrust-pc-sdk .save-preference-btn-handler': el('save'),
+    // OneTrust animates the centre away: it is still open for a moment after the click.
+    '#onetrust-pc-sdk #close-pc-btn-handler': el('close', { click: () => { clicks.push('close'); setTimeout(() => { pcOpen = false; }, 250); } }),
+  };
+  globalThis.window = {};
+  globalThis.document = { querySelector: (s) => dom[s] ?? null, querySelectorAll: () => [] };
+  try {
+    // Nothing set, nothing saved: the background refuses through autoconsent, from the banner.
+    assert.equal(await applyCategories({ A: true, B: true }, 'Onetrust'), '');
+    assert.deepEqual(clicks, ['settings', 'close']);
+    assert.equal(pcOpen, false, 'returned before the centre was gone');
+    // The centre was already open (no banner, the page shows it first): it is left as it was.
+    clicks.length = 0;
+    pcOpen = true;
+    dom['#onetrust-pc-btn-handler'] = null;
+    assert.equal(await applyCategories({ A: true }, 'Onetrust'), '');
+    assert.deepEqual(clicks, []);
+    assert.equal(pcOpen, true);
+  } finally { delete globalThis.window; delete globalThis.document; }
+});
+
 test('options and background default to the same rule lists (a saved default would pin it for good)', () => {
   for (const f of ['extension/background.js', 'extension/options/options.js']) {
     assert.match(read(f), /dataUrls: __DATA_URL__ \? \[__DATA_URL__\] : \[\]/, f);
