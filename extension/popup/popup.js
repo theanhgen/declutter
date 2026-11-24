@@ -111,7 +111,7 @@ async function main() {
     b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
     b.onclick = async () => {
       const m = b.dataset.mode;
-      await save((current) => (wall ? wallModePatch : siteModePatch)(host, m, current));
+      await save((current) => (wall ? wallModePatch(host, m, current) : siteModePatch(host, m, current)));
       if (!wall && m === 'accept' && mode !== 'accept') await api.runtime.sendMessage({ type: 'reopen', tabId: tab.id });
       api.tabs.reload(tab.id);
       window.close();
