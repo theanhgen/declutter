@@ -80,13 +80,17 @@ export async function applyCategories(c, cmp = '') {
     return 'cookieconsent-v3';
   }
   // v3 bundled inside a site's own script with no window.CookieConsent (Česká televize, cmp.js v2.4): the same
-  // through its preferences modal. Open it, set the toggles (value = category name), save.
+  // through its preferences modal. Open it, set the toggles (value = category name), save. No toggles or no save:
+  // close the modal again before giving up, or the refusal that follows answers the banner and leaves it open.
   if (family === 'cookieconsent' && document.querySelector('#cc-main [data-role="show"]')) {
     document.querySelector('#cc-main [data-role="show"]').click();
     for (let i = 0; i < 20 && !document.querySelector('#cc-main input.section__toggle'); i++) await wait(150);
     const inputs = [...document.querySelectorAll('#cc-main input.section__toggle')].filter((el) => !el.disabled);
     const save = document.querySelector('#cc-main [data-role="save"]');
-    if (!inputs.length || !save) return '';
+    if (!inputs.length || !save) {
+      document.querySelector('#cc-main .pm__close-btn')?.click();
+      return '';
+    }
     for (const input of inputs) {
       const on = want(input.value);
       if (input.checked !== on) input.click();

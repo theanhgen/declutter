@@ -407,6 +407,23 @@ test('applyCategories: Czech category names map to the right category', async ()
   } finally { delete globalThis.window; }
 });
 
+test('applyCategories: bundled cookieconsent v3 with no save button closes its preferences modal before giving up', async () => {
+  const clicks = [];
+  const el = (name, extra = {}) => ({ click: () => clicks.push(name), ...extra });
+  const dom = {
+    '#cc-main [data-role="show"]': el('show'),
+    '#cc-main input.section__toggle': el('toggle', { value: 'analytics', checked: false }),
+    '#cc-main .pm__close-btn': el('close'),
+  };
+  globalThis.window = {};
+  globalThis.document = { querySelector: (s) => dom[s] ?? null, querySelectorAll: (s) => (dom[s] ? [dom[s]] : []) };
+  try {
+    // No adapter answer: the background refuses through autoconsent, which answers the banner, not the modal.
+    assert.equal(await applyCategories({ A: true, B: true }, 'cookieconsent3'), '');
+    assert.deepEqual(clicks, ['show', 'close']);
+  } finally { delete globalThis.window; delete globalThis.document; }
+});
+
 test('options and background default to the same rule lists (a saved default would pin it for good)', () => {
   for (const f of ['extension/background.js', 'extension/options/options.js']) {
     assert.match(read(f), /dataUrls: __DATA_URL__ \? \[__DATA_URL__\] : \[\]/, f);
