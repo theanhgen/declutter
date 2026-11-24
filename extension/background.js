@@ -159,17 +159,29 @@ function getCompactRules() {
 }
 
 // ---- per-tab status (session storage survives the worker being suspended) ----
+// One read-modify-write at a time per key: frames of a tab report at once, and two overlapping writes would each start
+// from the same old value, the later one dropping the other's fields.
+const queues = new Map();
+function serial(key, fn) {
+  const run = (queues.get(key) ?? Promise.resolve()).then(fn, fn);
+  const tail = run.catch(() => { /* the caller sees it */ });
+  queues.set(key, tail);
+  tail.then(() => { if (queues.get(key) === tail) queues.delete(key); });
+  return run;
+}
 const tabKey = (tabId) => `tab-${tabId}`;
 async function getTab(tabId) {
   return (await api.storage.session.get(tabKey(tabId)))[tabKey(tabId)] ?? {};
 }
-async function setTab(tabId, patch, reset = false) {
-  const prev = await getTab(tabId);
-  const next = { ...(reset ? {} : prev), ...patch };
-  await api.storage.session.set({ [tabKey(tabId)]: next });
-  await paintBadge(tabId, next);
-  if ('consent' in patch) await showChip(tabId, prev, next, reset);
-  return next;
+function setTab(tabId, patch, reset = false) {
+  return serial(tabKey(tabId), async () => {
+    const prev = await getTab(tabId);
+    const next = { ...(reset ? {} : prev), ...patch };
+    await api.storage.session.set({ [tabKey(tabId)]: next });
+    await paintBadge(tabId, next);
+    if ('consent' in patch) await showChip(tabId, prev, next, reset);
+    return next;
+  });
 }
 
 const chipKey = (tabId) => `chip-${tabId}`;
@@ -192,7 +204,10 @@ async function paintBadge(tabId, state) {
 }
 
 // ---- counters (Settings → about); local only ----
-async function bump(patch, cmp, clicks = 0) {
+function bump(patch, cmp, clicks = 0) {
+  return serial('stats', () => bumpNow(patch, cmp, clicks));
+}
+async function bumpNow(patch, cmp, clicks) {
   const { stats = {} } = await api.storage.local.get('stats');
   for (const [k, v] of Object.entries(patch)) stats[k] = (stats[k] ?? 0) + v;
   if (cmp) {
@@ -252,12 +267,16 @@ async function applyShortsRedirect() {
 }
 
 // ---- messages from the content scripts ----
+// Frame 0's init per tab while it runs (set by the listener below). It records the tab's new host; a sub-frame
+// message waits for it, or during a navigation it would read the previous site's host and get that site's choice.
+const tabResets = new Map();
 async function onConsentMessage(msg, sender) {
   const tabId = sender.tab.id;
   const frameId = sender.frameId ?? 0;
   const senderUrl = sender.url || `${sender.origin}/`;
   // The main frame knows its own URL; sub-frames use the host the main frame recorded, because
   // sender.tab.url can still be the previous page while a navigation is in flight.
+  if (frameId !== 0) await tabResets.get(tabId);
   const tabHost = frameId === 0
     ? new URL(senderUrl).hostname
     : (await getTab(tabId)).host ?? new URL(sender.tab.url || senderUrl).hostname;
@@ -537,7 +556,11 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   } else if (msg.type === 'shortsNav') {
     setTab(sender.tab.id, { shortsLeak: 0 });
   } else {
-    onConsentMessage(msg, sender).catch((e) => console.warn('declutter:', msg.type, e));
+    const handled = onConsentMessage(msg, sender).catch((e) => console.warn('declutter:', msg.type, e));
+    if (msg.type === 'init' && (sender.frameId ?? 0) === 0) {
+      tabResets.set(sender.tab.id, handled);
+      handled.then(() => { if (tabResets.get(sender.tab.id) === handled) tabResets.delete(sender.tab.id); });
+    }
   }
 });
 
