@@ -3,7 +3,7 @@ import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import compactRulesText from '@duckduckgo/autoconsent/rules/compact-rules.json' with { type: 'text' };
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, siteMode, validData, FRESH_OUTCOME, afterSend, expireSends, sendsDue, fetchRuleList, ruleListStatus, wallMode, REASON_WORD, reasonWord } from './lib.js';
+import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, siteMode, validData, FRESH_OUTCOME, afterSend, expireSends, sendsDue, fetchRuleList, ruleListStatus, wallMode, REASON_WORD, reasonWord, markFixed, siteRules } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -142,6 +142,11 @@ async function doRefreshRemoteData() {
   await api.storage.local.set({ remoteData: merged, remoteLists, remoteStatus,
     // kept for older settings pages / tests
     remoteDataStatus: urls.length ? { ok: Object.keys(fetched).length === urls.length, at: Date.now(), ...(merged && { generated: merged.generated }) } : undefined });
+  // A reported site the new rules now cover: the popup and settings say it was fixed. Also runs after an update,
+  // whose bundled data may be the fix (start() refreshes on install and update).
+  const { reports = [] } = await api.storage.local.get('reports');
+  const marked = markFixed(reports, mergeData(await getBundledData(), merged));
+  if (marked.some((r, i) => r !== reports[i])) await api.storage.local.set({ reports: marked });
 }
 
 // ---- autoconsent rules ----
@@ -200,12 +205,14 @@ async function bump(patch, cmp, clicks = 0) {
   await api.storage.local.set({ stats });
 }
 
-// "report this site" from the popup: kept locally so rules can be written for it later.
+// "report this site" from the popup: kept locally so rules can be written for it later. rulesAtReport: the rules
+// and wall entry that matched it then (markFixed in lib.js compares later rule lists against it).
 async function report(tabId) {
   const tab = await api.tabs.get(tabId);
   const state = await getTab(tabId);
   const { reports = [] } = await api.storage.local.get('reports');
-  const entry = { url: tab.url, host: new URL(tab.url).hostname, at: Date.now(), consent: state.consent ?? 'none', cmp: state.cmp ?? '' };
+  const entry = { url: tab.url, host: new URL(tab.url).hostname, at: Date.now(), consent: state.consent ?? 'none', cmp: state.cmp ?? '',
+    rulesAtReport: siteRules(await getData(), tab.url) };
   // Reporting the site again must not drop a send the user already approved that is still waiting to go out.
   const waiting = reports.find((r) => r.host === entry.host)?.sendPending;
   if (waiting) entry.sendPending = waiting;

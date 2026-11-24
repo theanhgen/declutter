@@ -25,7 +25,7 @@ async function main() {
   // A report that could not be sent earlier goes out now if it can (the background keeps it, see sendReport).
   api.runtime.sendMessage({ type: 'retrySends' }).catch(() => { /* worker busy starting; the alarm retries too */ });
 
-  const { settings = {} } = await api.storage.local.get('settings');
+  const { settings = {}, reports = [] } = await api.storage.local.get(['settings', 'reports']);
   const s = { shorts: true, posts: true, playables: true, consent: true, walls: __WALLS_DEFAULT__, ...settings };
   for (const k of ['exceptions', 'acceptSites', 'wallAskSites']) if (!Array.isArray(s[k])) s[k] = [];
   // Only the changed keys over what is stored now (never the defaults above, and Settings may be open too). A function
@@ -97,6 +97,9 @@ async function main() {
     rows.push(statusRow('', `${state.shortsLeak} shorts caught by the backup check, hidden`,
       `on ${state.leakPath}: report it so the main list learns them`));
   }
+  // A site the user reported that a later rule list now covers (markFixed in lib.js).
+  const reported = reports.find((r) => r.host === host);
+  if (reported?.fixedAt) rows.push(statusRow('', `fixed since you reported it on ${new Date(reported.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`));
   $('status').replaceChildren(...rows);
   $('pageSection').hidden = false;
 

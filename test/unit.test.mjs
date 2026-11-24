@@ -6,7 +6,7 @@ import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
 import { collectDates, videoIdOf } from '../extension/shorts/dates-lib.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules } from '../extension/lib.js';
 import { declutterSnippets } from '../extension/consent/snippets.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -201,6 +201,25 @@ test('failed report send: kept with the approved body, retried for a week, cance
   assert.match(bg, /sendPending: pending/);
   assert.match(bg, /a\.name === 'data'[\s\S]*retrySends\(\)/);
   assert.match(read('extension/popup/popup.js'), /type: 'retrySends'/);
+});
+
+test('markFixed: a reported site is fixed once a later rule list adds a rule or wall entry for it', () => {
+  const list = (rules, walls = []) => ({ consent: { walls, rules: rules.map(([name, urlPattern]) => ({ name, ...(urlPattern && { runContext: { urlPattern } }) })) } });
+  const a = list([['cz-shop-old', '^https?://([a-z0-9-]+\\.)*shop\\.cz/'], ['cz-other', '^https?://other\\.cz/'], ['generic']]);
+  const url = 'https://www.shop.cz/kosik';
+  const report = { url, host: 'www.shop.cz', at: 1, rulesAtReport: siteRules(a, url) };
+  assert.deepEqual(report.rulesAtReport, { names: ['cz-shop-old'], wall: false }, 'a rule without a urlPattern does not count');
+  // list B adds a rule for the site
+  const b = list([...a.consent.rules.map((r) => [r.name, r.runContext?.urlPattern]), ['cz-shop', '^https?://www\\.shop\\.cz/']]);
+  assert.equal(markFixed([report], b, 50)[0].fixedAt, 50);
+  // a wall entry for the site counts too
+  assert.equal(markFixed([report], list([], ['shop.cz']), 50)[0].fixedAt, 50);
+  // no new matching rule: still just reported (same list, a rule for another site, a new generic rule)
+  const c = list([...a.consent.rules.map((r) => [r.name, r.runContext?.urlPattern]), ['cz-elsewhere', '^https?://elsewhere\\.cz/'], ['generic-2']], ['other.cz']);
+  for (const d of [a, c]) assert.equal(markFixed([report], d, 50)[0], report);
+  // set once, and never on a report saved before rulesAtReport existed
+  assert.equal(markFixed([{ ...report, fixedAt: 9 }], b, 50)[0].fixedAt, 9);
+  assert.equal(markFixed([{ url, host: 'www.shop.cz', at: 1 }], b, 50)[0].fixedAt, undefined);
 });
 
 test('validData rejects malformed remote payloads', () => {
