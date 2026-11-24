@@ -1,4 +1,4 @@
-import { choiceMode, reportUrl } from '../lib.js';
+import { choiceMode, reportUrl, siteModePatch, siteMode } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -25,11 +25,13 @@ async function main() {
   const { settings = {} } = await api.storage.local.get('settings');
   const s = { shorts: true, posts: true, playables: true, consent: true, ...settings };
   for (const k of ['exceptions', 'acceptSites']) if (!Array.isArray(s[k])) s[k] = [];
-  // Only the changed keys over what is stored now (never the defaults above, and Settings may be open too).
+  // Only the changed keys over what is stored now (never the defaults above, and Settings may be open too). A function
+  // patch is computed from what is stored at the time of writing, not from this popup's copy.
   const save = async (patch) => {
     const { settings: current = {} } = await api.storage.local.get('settings');
-    await api.storage.local.set({ settings: { ...current, ...patch } });
-    Object.assign(s, patch);
+    const p = typeof patch === 'function' ? patch(current) : patch;
+    await api.storage.local.set({ settings: { ...current, ...p } });
+    Object.assign(s, p);
   };
   for (const k of ['shorts', 'posts', 'playables', 'consent']) {
     $(k).checked = Boolean(s[k]);
@@ -95,15 +97,13 @@ async function main() {
 
   // Per-site choice: the global answer (refuse / your mix / accept, from Settings → your choice) / accept / leave alone.
   $('siteMode').querySelector('[data-mode=refuse]').textContent = { refuse: 'refuse', mix: 'your mix', accept: 'accept all' }[choiceMode(s.categories)];
-  const mode = s.exceptions.includes(host) ? 'ignore' : s.acceptSites.includes(host) ? 'accept' : 'refuse';
+  // Matched the way the background matches (lib.js): a choice made for a parent domain shows here. Changing it here
+  // sets this host only; the parent's other subdomains keep theirs.
+  const mode = siteMode(host, s);
   for (const b of $('siteMode').querySelectorAll('button')) {
     b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
     b.onclick = async () => {
-      const m = b.dataset.mode;
-      await save({
-        exceptions: [...s.exceptions.filter((h) => h !== host), ...(m === 'ignore' ? [host] : [])],
-        acceptSites: [...s.acceptSites.filter((h) => h !== host), ...(m === 'accept' ? [host] : [])],
-      });
+      await save((current) => siteModePatch(host, b.dataset.mode, current));
       api.tabs.reload(tab.id);
       window.close();
     };

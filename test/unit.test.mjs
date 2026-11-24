@@ -6,7 +6,7 @@ import test from 'node:test';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
 import { collectDates, videoIdOf } from '../extension/shorts/dates-lib.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch } from '../extension/lib.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -19,6 +19,53 @@ test('redirectTarget: Shorts and channel Shorts tabs', () => {
   assert.equal(redirectTarget('https://www.youtube.com/watch?v=abc'), null);
   assert.equal(redirectTarget('https://www.youtube.com/@shorts'), null);
   assert.equal(redirectTarget('https://www.youtube.com/results?search_query=shorts'), null);
+});
+
+test('per-site choice: one model for popup, Settings and background; most specific entry wins', () => {
+  // #51: a parent on accept shows as accept on its subdomains, and refuse on a subdomain stops the accept there only.
+  let s = { acceptSites: ['example.com'], exceptions: [] };
+  assert.equal(siteMode('shop.example.com', s), 'accept');
+  s = { ...s, ...siteModePatch('shop.example.com', 'refuse', s) };
+  assert.deepEqual(s.acceptSites, ['example.com']);
+  assert.deepEqual(s.refuseSites, ['shop.example.com']);
+  assert.equal(siteMode('shop.example.com', s), 'refuse');
+  assert.equal(siteMode('www.example.com', s), 'accept');
+  assert.equal(siteMode('a.shop.example.com', s), 'refuse');
+  // #23 finding 1: changing a subdomain never deletes the parent; siblings keep the parent's choice.
+  s = { exceptions: ['idnes.cz'], acceptSites: [] };
+  s = { ...s, ...siteModePatch('www.idnes.cz', 'accept', s) };
+  assert.deepEqual(s.exceptions, ['idnes.cz']);
+  assert.equal(siteMode('www.idnes.cz', s), 'accept');
+  assert.equal(siteMode('sport.idnes.cz', s), 'ignore');
+  // Back to what it inherits: the override goes, nothing new is added.
+  s = { ...s, ...siteModePatch('www.idnes.cz', 'ignore', s) };
+  assert.deepEqual(s, { exceptions: ['idnes.cz'], acceptSites: [], refuseSites: [] });
+  // No parent: refuse just takes the host off; older settings without refuseSites work as before.
+  assert.equal(siteMode('o2.cz', { acceptSites: ['www.o2.cz'] }), 'refuse');
+  assert.deepEqual(siteModePatch('www.o2.cz', 'refuse', { acceptSites: ['www.o2.cz'] }), { acceptSites: [], exceptions: [], refuseSites: [] });
+  assert.deepEqual(siteEntry('www.o2.cz', { acceptSites: ['o2.cz'], exceptions: ['www.o2.cz'] }), { domain: 'www.o2.cz', mode: 'ignore' });
+  // #23 finding 2: a patch built from what is stored at write time keeps a choice made elsewhere meanwhile.
+  const stored = { exceptions: ['seznam.cz'], acceptSites: [] }; // set in the popup after Settings rendered
+  assert.deepEqual(siteModePatch('o2.cz', 'accept', stored).exceptions, ['seznam.cz']);
+  // "Add a site" takes a host or an address.
+  assert.equal(siteHost(' https://www.iDnes.cz/zpravy?x=1 '), 'idnes.cz');
+  assert.equal(siteHost('sport.idnes.cz'), 'sport.idnes.cz');
+  for (const bad of ['', 'idnes', 'not a site', 'http://']) assert.equal(siteHost(bad), null, bad);
+});
+
+test('per-site choice: popup, Settings and background all go through siteMode, and say "leave alone"', () => {
+  const bg = read('extension/background.js');
+  assert.doesNotMatch(bg, /hostMatches\(tabHost, settings\.(exceptions|acceptSites)|hostMatches\([^)]*acceptSites/);
+  assert.match(bg, /siteMode\(tabHost, settings\) === 'ignore'/);
+  for (const p of ['extension/popup/popup.js', 'extension/options/options.js']) {
+    assert.match(read(p), /siteModePatch\(host, [^,]+, (current|cur)\)/, p);
+    assert.doesNotMatch(read(p), /exceptions\.includes\(host\)|acceptSites\.includes\(host\)/, p);
+  }
+  assert.match(read('extension/popup/popup.html'), /data-mode="ignore">leave alone</);
+  for (const p of ['extension/options/options.html', 'extension/welcome/welcome.html', 'site/index.html']) {
+    assert.match(read(p), /leave alone/, p);
+    assert.doesNotMatch(read(p), /refuse \/ accept \/ leave[^ ]|choice-word">leave<|Set exceptions/, p);
+  }
 });
 
 test('hostMatches: exact host and subdomains only', () => {

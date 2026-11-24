@@ -1,3 +1,5 @@
+import { siteHost, siteMode, siteModePatch } from '../lib.js';
+
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 
@@ -17,6 +19,8 @@ const CHOICES = {
   debugEvals: [[false, 'off'], [true, 'on']],
   clickDelay: [[false, 'off'], [true, 'on']],
 };
+// The popup's per-site words, same order.
+const SITE_MODES = [['refuse', 'refuse'], ['accept', 'accept'], ['ignore', 'leave alone']];
 // Consent-O-Matic's categories, same letters and meaning.
 const CATEGORIES = [
   ['A', 'preferences and functionality', 'remember your choices (language, region, login) and enhanced personal features; not used to track you on other sites.'],
@@ -29,7 +33,7 @@ const CATEGORIES = [
 const DEFAULTS = {
   shorts: true, posts: true, playables: true, dates: true, consent: true, walls: __WALLS_DEFAULT__, display: 'hide', chip: true, gpc: false, debug: false, debugEvals: false, clickDelay: false,
   // Same default rule list as the background's (the build-time one), so adding or removing a list keeps it.
-  exceptions: [], acceptSites: [], dataUrls: __DATA_URL__ ? [__DATA_URL__] : [], categories: Object.fromEntries(CATEGORIES.map(([k]) => [k, false])),
+  exceptions: [], acceptSites: [], refuseSites: [], dataUrls: __DATA_URL__ ? [__DATA_URL__] : [], categories: Object.fromEntries(CATEGORIES.map(([k]) => [k, false])),
 };
 
 const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
@@ -45,9 +49,10 @@ async function render() {
   const s = { ...DEFAULTS, ...settings, categories: { ...DEFAULTS.categories, ...settings.categories } };
   // Write only the changed keys over what is stored now: the page defaults must never be saved (they would pin
   // a default for good), and the popup may have changed something since this page rendered.
+  // A function patch is computed from what is stored at the time of writing: this page may be stale.
   const save = async (patch) => {
     const { settings: current = {} } = await api.storage.local.get('settings');
-    await api.storage.local.set({ settings: { ...current, ...patch } });
+    await api.storage.local.set({ settings: { ...current, ...(typeof patch === 'function' ? patch(current) : patch) } });
     // render() replaces the lines, which would drop keyboard focus to the top of the page: put it back on the line
     // that was changed.
     const line = document.activeElement?.closest('p, div[id]');
@@ -67,11 +72,22 @@ async function render() {
     el('p', { className: 'desc', textContent: desc }),
   ]));
 
-  const siteList = (key) => $(key).replaceChildren(...(s[key].length
-    ? s[key].flatMap((host, i) => [...(i ? [', '] : []), `${host} (`, link('remove', () => save({ [key]: s[key].filter((h) => h !== host) })), ')'])
-    : [el('span', { className: 'muted', textContent: 'no sites' })]));
-  siteList('acceptSites');
-  siteList('exceptions');
+  // Per site: one line per listed host with the popup's choice (lib.js), so a change here is what the popup shows
+  // there. A subdomain listed under a listed parent keeps its own line.
+  const hosts = [...new Set([...s.acceptSites, ...s.exceptions, ...s.refuseSites])].sort();
+  $('sites').replaceChildren(...(hosts.length
+    ? hosts.map((host) => el('p', { className: 'bullet', style: '--dot:#8d8d8d' }, `${host}: `,
+      el('span', { className: 'choice' }, ...choiceLine(SITE_MODES, siteMode(host, s), (m) => save((cur) => siteModePatch(host, m, cur))))))
+    : [el('p', { className: 'desc', textContent: 'no sites yet.' })]));
+  const addSite = (mode) => (e) => {
+    e.preventDefault();
+    const host = siteHost($('newSite').value);
+    if (!host) { $('newSite').focus(); return; }
+    $('newSite').value = '';
+    save((cur) => siteModePatch(host, mode, cur));
+  };
+  $('addAccept').onclick = addSite('accept');
+  $('addIgnore').onclick = addSite('ignore');
 
   // rule lists
   const urls = [...new Set([...s.dataUrls, s.dataUrl].filter(Boolean))];
