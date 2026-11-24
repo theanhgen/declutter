@@ -15,9 +15,23 @@ final class TipJar: ObservableObject {
     @Published var loaded = false
     @Published var loadFailed = false
     @Published var busy = false
-    @Published var thanks = false
+    // The last tip, kept across launches: "thank you for the $2.99 tip on Oct 26."
+    @Published private(set) var lastTip: Tip? = Tip.saved
+    var thanks: Bool { lastTip != nil }
     @Published var note: String?
     private var updates: Task<Void, Never>?
+
+    struct Tip: Codable, Equatable {
+        let price: String
+        let date: Date
+        static let key = "lastTip"
+        static var saved: Tip? {
+            UserDefaults.standard.data(forKey: key).flatMap { try? JSONDecoder().decode(Tip.self, from: $0) }
+        }
+        var text: String {
+            "thank you for the \(price) tip on \(date.formatted(.dateTime.month(.abbreviated).day())). it pays for keeping the rules current."
+        }
+    }
 
     // Purchases that complete outside the sheet (Ask to Buy, interrupted payments). Tips unlock nothing, so every
     // transaction is finished, verified or not; only a verified, unrefunded one says thanks.
@@ -34,7 +48,14 @@ final class TipJar: ObservableObject {
         switch result {
         case .verified(let t):
             await t.finish()
-            if t.revocationDate == nil { thanks = true }
+            guard t.revocationDate == nil else { return }
+            // An approved Ask to Buy arrives here: the "waiting for approval" note is done.
+            note = nil
+            let price = products.first { $0.id == t.productID }?.displayPrice
+                ?? t.price.map { $0.formatted(.currency(code: t.currency?.identifier ?? "USD")) } ?? "your"
+            let tip = Tip(price: price, date: t.purchaseDate)
+            lastTip = tip
+            if let data = try? JSONEncoder().encode(tip) { UserDefaults.standard.set(data, forKey: Tip.key) }
         case .unverified(let t, _):
             await t.finish()
         }
@@ -61,14 +82,21 @@ final class TipJar: ObservableObject {
                 await handle(result)
                 if case .unverified = result { note = "the App Store could not verify that purchase." }
             case .pending:
+                // Cleared when the approved purchase arrives (handle).
                 note = "waiting for approval. thanks!"
             case .userCancelled:
                 break
             @unknown default:
                 break
             }
+        } catch Product.PurchaseError.purchaseNotAllowed {
+            note = "purchases are turned off on this device (Screen Time)."
+        } catch StoreKitError.notAvailableInStorefront {
+            note = "tips aren't available in your country's App Store."
+        } catch StoreKitError.networkError {
+            note = "couldn't reach the App Store. try again later."
         } catch {
-            note = "could not reach the App Store. try again later."
+            note = "the tip didn't go through. try again later."
         }
     }
 }
@@ -95,7 +123,7 @@ struct TipJarView: View {
 
     @ViewBuilder private var content: some View {
         Text("tip jar").font(Martian.font(.headline, weight: 600))
-        Text(jar.thanks ? "thank you." : "declutter is free. If it saves you clicks, a tip keeps the rules up to date.")
+        Text(jar.lastTip?.text ?? "declutter is free. If it saves you clicks, a tip keeps the rules up to date.")
             .font(Martian.font(.callout, weight: 300))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
@@ -121,7 +149,7 @@ struct TipJarView: View {
             }
             #endif
         }
-        if let note = jar.note {
+        if let note = jar.note ?? (jar.loadFailed ? "couldn't reach the App Store." : nil) {
             Text(note).font(Martian.font(.caption, weight: 300)).foregroundStyle(.secondary)
         }
     }
