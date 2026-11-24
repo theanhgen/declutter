@@ -76,7 +76,8 @@ async function main() {
     $('reload').hidden = false;
     $('reload').onclick = () => { api.tabs.reload(tab.id); window.close(); };
   } else if (state.consent === 'done' || state.consent === 'choice') rows.push(handled('cookie banner', label(state), outcomeDetail(state)));
-  else if (failed) rows.push(statusRow('bad', STATUS.failed.label, "declutter couldn't answer it. answer it yourself on the page; reporting it helps get it fixed."));
+  // The report row goes right under it: reporting is the next step (#11).
+  else if (failed) rows.push(statusRow('bad', STATUS.failed.label, 'answer it yourself on the page. reporting it helps get it fixed.'), $('report'));
   else if (state.consent === 'wall') {
     rows.push(statusRow('wall', STATUS.wall.label, state.looping
       ? 'it came back twice within a minute after accepting, so auto-accept is paused in this tab'
@@ -137,8 +138,6 @@ async function main() {
   }
 
   $('report').hidden = false;
-  // When declutter failed, reporting is the next step: put it first.
-  if (failed) $('actions').prepend($('report'));
   // One press saves the site on this device (settings → reported sites, with the page's full address) and sends it.
   // The note says exactly what goes out before the press.
   const sendUrl = reportUrl(tab.url);
