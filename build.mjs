@@ -212,6 +212,7 @@ async function buildTarget(name, data) {
       'shorts/dates-main': 'extension/shorts/dates-main.js',
       'popup/popup': 'extension/popup/popup.js',
       'options/options': 'extension/options/options.js',
+      'welcome/welcome': 'extension/welcome/welcome.js',
     },
     absWorkingDir: root,
     outdir: out,
