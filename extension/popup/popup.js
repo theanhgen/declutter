@@ -1,4 +1,4 @@
-import { choiceMode, reportUrl, siteModePatch, siteMode, wallMode, wallModePatch, outcomeDetail, REASONS, reasonsFor, shortsSummary } from '../lib.js';
+import { choiceMode, reportUrl, siteModePatch, siteMode, wallMode, wallModePatch, outcomeDetail, REASONS, reasonsFor, shortsSummary, STATUS, statusKey } from '../lib.js';
 import { declutterSnippets } from '../consent/snippets.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
@@ -18,6 +18,8 @@ function statusRow(kind, text, sub) {
   if (sub) row.append(Object.assign(document.createElement('span'), { className: 'sub', textContent: sub }));
   return row;
 }
+// The shared status words (lib.js STATUS), the same as the chip's and the badge tooltip's.
+const label = (state) => STATUS[statusKey(state)]?.label ?? '';
 const handled = (thing, ...sub) => statusRow('done', thing, sub.filter(Boolean).join(' · '));
 
 async function main() {
@@ -73,11 +75,10 @@ async function main() {
     rows.push(statusRow('bad', "declutter isn't running on this page yet", 'it was open before declutter was installed or updated'));
     $('reload').hidden = false;
     $('reload').onclick = () => { api.tabs.reload(tab.id); window.close(); };
-  } else if (state.consent === 'done') rows.push(handled('cookie banner', state.cosmetic ? 'hidden' : 'refused', outcomeDetail(state), state.choiceFallback && !state.cosmetic && "your mix isn't supported by this banner, so everything was refused"));
-  else if (state.consent === 'choice') rows.push(handled('cookie banner', 'your choice applied', outcomeDetail(state)));
-  else if (failed) rows.push(statusRow('bad', "declutter couldn't answer this banner", 'answer it yourself on the page. reporting it helps get it fixed.'));
+  } else if (state.consent === 'done' || state.consent === 'choice') rows.push(handled('cookie banner', label(state), outcomeDetail(state)));
+  else if (failed) rows.push(statusRow('bad', STATUS.failed.label, "declutter couldn't answer it. answer it yourself on the page; reporting it helps get it fixed."));
   else if (state.consent === 'wall') {
-    rows.push(statusRow('wall', 'pay wall: agree to tracking or pay', state.looping
+    rows.push(statusRow('wall', STATUS.wall.label, state.looping
       ? 'it came back twice within a minute after accepting, so auto-accept is paused in this tab'
       : 'there is no free refuse on this site'));
     $('acceptWall').hidden = false;
@@ -87,11 +88,11 @@ async function main() {
       await api.runtime.sendMessage({ type: 'acceptWall', tabId: tab.id });
       window.close();
     };
-  } else if (state.consent === 'accepting') rows.push(statusRow('wall', 'accepting the wall…', state.cmp));
-  else if (state.consent === 'accepted') rows.push(handled('pay wall', 'accepted', outcomeDetail(state)));
-  else if (state.consent === 'paused') rows.push(statusRow('', 'banners left alone here'));
-  else if (state.consent === 'acceptedSite') rows.push(handled('cookie banner', 'accepted (your choice)', outcomeDetail(state)));
-  else if (state.consent === 'working') rows.push(statusRow('', `answering ${state.cmp}…`));
+  } else if (state.consent === 'accepting') rows.push(statusRow('wall', STATUS.accepting.label, state.cmp));
+  else if (state.consent === 'accepted') rows.push(handled('pay wall', label(state), outcomeDetail(state)));
+  else if (state.consent === 'paused') rows.push(statusRow('', STATUS.paused.label));
+  else if (state.consent === 'acceptedSite') rows.push(handled('cookie banner', label(state), outcomeDetail(state)));
+  else if (state.consent === 'working') rows.push(statusRow('', STATUS.working.label, state.cmp));
   else if (state.banner === 'suspected') {
     // Cookie-banner wording no rule matched (bannerSuspected in lib.js). The report row goes right under it.
     rows.push(statusRow('wall', "looks like a cookie banner declutter doesn't know yet", 'answer it on the page, then report it so a rule gets written'), $('report'));

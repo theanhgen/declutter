@@ -2,6 +2,7 @@
 //   npm run build && node test/states.mjs
 import http from 'node:http';
 import { launch, reporter, setSettings } from './lib.mjs';
+import { STATUS } from '../extension/lib.js';
 
 const { results, check } = reporter();
 const server = http.createServer((_, res) => { res.setHeader('Content-Type', 'text/html'); res.end('<!doctype html><title>t</title><p>plain page'); });
@@ -46,9 +47,17 @@ await setSettings(sw, { consent: true });
 
 await setTabState({ consent: 'failed', cmp: 'x' });
 ({ pop, status } = await popup());
-check('failed: next step, no rule name', status.includes("couldn't answer") && status.includes('answer it yourself') && !status.includes('\nx'), status);
+check('failed: next step, no rule name', status.includes('banner not answered') && status.includes('answer it yourself') && !status.includes('\nx'), status);
 check('failed: report is the first action', await pop.locator('#actions > :first-child').getAttribute('id') === 'report');
 await pop.close();
+
+// Every state the popup words from the shared map (lib.js STATUS) shows that label (#21).
+for (const [consent, key] of [['done', 'done'], ['choice', 'choice'], ['acceptedSite', 'acceptedSite'], ['accepted', 'accepted'], ['wall', 'wall'], ['accepting', 'accepting'], ['paused', 'paused'], ['working', 'working']]) {
+  await setTabState({ consent, cmp: 'x', host: '127.0.0.1', since: Date.now() });
+  ({ pop, status } = await popup());
+  check(`${consent}: popup says "${STATUS[key].label}"`, status.includes(STATUS[key].label), status);
+  await pop.close();
+}
 
 await setTabState({ consent: undefined, shortsLeak: 3, leakPath: '/results' });
 ({ pop, status } = await popup());

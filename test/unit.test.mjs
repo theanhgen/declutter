@@ -7,7 +7,7 @@ import vm from 'node:vm';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
 import { collectDates, videoIdOf } from '../extension/shorts/dates-lib.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules, restoreItem, restoreReports, restoreStats, bannerSuspected, countNewlyHidden, shortsStatsText, shortsSummary, aboutSummary } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules, restoreItem, restoreReports, restoreStats, bannerSuspected, countNewlyHidden, shortsStatsText, shortsSummary, aboutSummary, STATUS, TONE_COLOR, statusKey } from '../extension/lib.js';
 import { declutterSnippets } from '../extension/consent/snippets.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -128,6 +128,32 @@ test('aboutSummary: leads with banners answered and shorts hidden; a fresh insta
   assert.equal((read('extension/background.js').match(/bump\(\{ shortsHidden:/g) ?? []).length, 1);
 });
 
+test('one status map: chip, popup and badge share the label and tone for every state (#21)', () => {
+  const now = Date.now();
+  for (const [consent, extra] of [['done', {}], ['done', { cosmetic: true }], ['done', { choiceFallback: true }], ['choice', { adapter: 'onetrust' }],
+    ['acceptedSite', {}], ['accepted', {}], ['wall', { host: 'x.cz' }], ['failed', {}]]) {
+    const state = { consent, cmp: 'c', host: 'x.cz', ...extra };
+    const s = STATUS[statusKey(state, now)];
+    const chip = chipFor({}, state, {}, now);
+    assert.ok(chip.text.startsWith(s.label), `chip ${consent}`);
+    assert.equal(chip.tone, s.tone, `chip tone ${consent}`);
+    const badge = badgeFor(state, now);
+    assert.ok(badge.title.startsWith(`declutter: ${s.label}`), `badge ${consent}: ${badge.title}`);
+    assert.equal(badge.color, TONE_COLOR[s.tone], `badge colour ${consent}`);
+  }
+  // pay wall accepted: one tone everywhere.
+  assert.equal(STATUS.accepted.tone, 'wall');
+  assert.equal(badgeFor({ consent: 'accepted', cmp: 'c' }).color, TONE_COLOR.wall);
+  // States the badge used to leave as plain "declutter" now say what is going on.
+  for (const consent of ['acceptedSite', 'paused', 'accepting', 'working']) assert.notEqual(badgeFor({ consent, since: now }, now).title, 'declutter', consent);
+  // ...but Shorts the backup check caught still show while a banner is being answered or left alone.
+  for (const consent of ['paused', 'working']) assert.match(badgeFor({ consent, since: now, shortsLeak: 2 }, now).title, /2 shorts caught/, consent);
+  assert.match(badgeFor({ consent: 'done', cmp: 'c', shortsLeak: 2 }, now).title, /cookies refused/);
+  // The popup takes its status words from the map.
+  const popup = read('extension/popup/popup.js');
+  for (const w of ["'cookies refused'", "'pay wall accepted'", "'accepted (your choice)'", "'accepting the wall…'", "'banners left alone here'"]) assert.ok(!popup.includes(w), w);
+});
+
 test('hostMatches: exact host and subdomains only', () => {
   assert.ok(hostMatches('www.seznam.cz', ['seznam.cz']));
   assert.ok(hostMatches('seznam.cz', ['seznam.cz']));
@@ -152,8 +178,8 @@ test('badgeFor: problems are red, everything else is quiet', () => {
 test('badgeFor: a site set to accept says so, not the plain idle state', () => {
   const b = badgeFor({ consent: 'acceptedSite', cmp: 'x' });
   assert.equal(b.text, '');
-  assert.equal(b.color, '#1e8e3e');
-  assert.match(b.title, /cookies accepted on this site \(x\)/);
+  assert.equal(b.color, TONE_COLOR.neutral); // grey: accepting is the user's choice, not a win (#21)
+  assert.equal(b.title, 'declutter: cookies accepted (x)');
   assert.notDeepEqual(b, badgeFor({}));
 });
 
@@ -161,7 +187,7 @@ test('chipFor: once per outcome, not on a reload of the same site', () => {
   assert.deepEqual(chipFor({ consent: 'working' }, { consent: 'done', host: 'a.cz' }), { text: 'cookies refused', tone: 'ok' });
   assert.equal(chipFor({}, { consent: 'acceptedSite' }).text, 'cookies accepted');
   assert.equal(chipFor({}, { consent: 'choice' }).text, 'your choice applied');
-  assert.equal(chipFor({}, { consent: 'wall' }).tone, 'wait');
+  assert.equal(chipFor({}, { consent: 'wall' }).tone, 'wall');
   // a cosmetic rule answers nothing: say hidden, never refused or accepted
   assert.equal(chipFor({}, { consent: 'done', cosmetic: true }).text, 'banner hidden');
   assert.equal(chipFor({}, { consent: 'acceptedSite', cosmetic: true }).text, 'banner hidden');
@@ -205,13 +231,13 @@ test('when and how the choice was made: popup line and fallback chip', () => {
   const bg = read('extension/background.js');
   assert.equal(bg.match(/\.\.\.FRESH_OUTCOME, consent: '(working|accepting|wall)'/g)?.length, 3, 'every popupFound resets the outcome');
   assert.match(bg, /\['done', 'acceptedSite', 'choice', 'accepted'\]\.includes\(prev\.consent\)/, 'a pay-wall accept is kept over a reload');
-  assert.match(read('extension/popup/popup.js'), /state\.choiceFallback && !state\.cosmetic/, 'a hidden banner is not called refused');
+  assert.equal(statusKey({ consent: 'done', cosmetic: true, choiceFallback: true }), 'hidden', 'a hidden banner is not called refused');
 });
 
 test('pay walls: one name and one definition everywhere, no Czech-only button', () => {
-  assert.equal(chipFor({}, { consent: 'wall' }).text, 'pay wall: accept from the declutter button');
-  assert.equal(badgeFor({ consent: 'wall', host: 'www.spiegel.de' }).title, 'declutter: pay wall — agree or pay, from this menu');
-  assert.match(read('extension/popup/popup.js'), /'pay wall: agree to tracking or pay'/);
+  assert.equal(chipFor({}, { consent: 'wall' }).text, 'pay wall: agree to tracking or pay');
+  assert.equal(badgeFor({ consent: 'wall', host: 'www.spiegel.de' }).title, 'declutter: pay wall: agree to tracking or pay — decide from this menu');
+  assert.match(read('extension/popup/popup.js'), /STATUS\.wall\.label/);
   assert.match(read('extension/popup/popup.html'), />agree to tracking on this site</);
   // user-facing copy; research and review notes keep their own words
   const copy = ['extension/popup/popup.html', 'extension/popup/popup.js', 'extension/options/options.html',
