@@ -3,7 +3,7 @@ import { evalSnippets, filterCompactRules } from '@duckduckgo/autoconsent';
 import compactRulesText from '@duckduckgo/autoconsent/rules/compact-rules.json' with { type: 'text' };
 import { applyCategories } from './consent/categories.js';
 import { declutterSnippets } from './consent/snippets.js';
-import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, siteMode, validData, FRESH_OUTCOME, afterSend, expireSends, sendsDue, fetchRuleList, ruleListStatus, wallMode } from './lib.js';
+import { badgeFor, chipFor, choiceMode, STUCK_AFTER_MS, GPC_RULE_ID, gpcExcludeMatches, gpcRule, hostMatches, keepRemoteLists, mergeData, reportUrl, siteMode, validData, FRESH_OUTCOME, afterSend, expireSends, sendsDue, fetchRuleList, ruleListStatus, wallMode, REASON_WORD, reasonWord } from './lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 Object.assign(evalSnippets, declutterSnippets);
@@ -464,6 +464,33 @@ async function trySend(host, pending) {
   return result.ok;
 }
 
+// What went wrong (#18), picked after the send. The public key can only insert, so: a send still waiting carries the
+// reason in its own row; one already sent gets a second row for the same site (scripts/reports.mjs joins them). The
+// reason is also kept on the local report. true: noted (and sent or queued); false: not this tab's site, or unknown.
+async function sendReason(tabId, { url, reason }) {
+  const tab = await api.tabs.get(tabId);
+  const state = await getTab(tabId);
+  const word = reasonWord(reason, state.leakPath);
+  if (!url || reportUrl(tab.url) !== url || !REASON_WORD.test(word)) return false;
+  const host = new URL(tab.url).hostname;
+  const { reports = [] } = await api.storage.local.get('reports');
+  const entry = reports.find((r) => r.host === host);
+  if (!entry) return false;
+  const pending = entry.sendPending && { ...entry.sendPending, body: { ...entry.sendPending.body, reason: word } };
+  await api.storage.local.set({ reports: reports.map((r) => (r.host === host ? { ...r, reason: word, ...(pending && { sendPending: pending }) } : r)) });
+  if (pending || !entry.sentAt) return true;
+  if (__TARGET__ === 'firefox' && !(await api.permissions.contains({ data_collection: ['browsingActivity'] }).catch(() => false))) return true;
+  try {
+    await fetch(REPORTS_URL, {
+      method: 'POST',
+      headers: { apikey: REPORTS_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ url, consent: entry.consent ?? 'none', cmp: (entry.cmp ?? '').slice(0, 60),
+        version: api.runtime.getManifest().version, browser: __TARGET__, reason: word }),
+    });
+  } catch { /* the reason is optional: kept locally, not retried */ }
+  return true;
+}
+
 // The 12 h data alarm and every popup open: try each send still waiting, give up on those a week old. One run at a
 // time, so the alarm and a popup never send the same report twice.
 let retrying = null;
@@ -486,7 +513,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // (on every state update), which must not reach the popup's handler. Extension pages can be in a tab (tests), so
   // check the sender's URL, not sender.tab (falling back to it if a browser leaves sender.url out).
   const fromExtension = sender.url ? sender.url.startsWith(api.runtime.getURL('')) : !sender.tab;
-  const popupRequest = { acceptWall, reopen, report, sendReport, retrySends, wallSite }[msg.type];
+  const popupRequest = { acceptWall, reopen, report, sendReport, sendReason, retrySends, wallSite }[msg.type];
   if (fromExtension && popupRequest) {
     popupRequest(msg.tabId, msg).then(sendResponse, () => sendResponse(false));
     return true;

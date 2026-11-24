@@ -21,6 +21,18 @@ const res = await fetch(`https://wpsmgzihqgdmsrvzpcca.supabase.co/rest/v1/report
   { headers: { apikey: key } });
 if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
 let rows = await res.json();
+// One user's report can arrive as two rows: the report, then (after they pick what went wrong) a second row with the
+// reason for the same site. Rows for the same host within FOLD_MS fold into one, keeping the reason.
+const FOLD_MS = 10 * 60e3;
+rows = rows.reduce((out, r) => {
+  const prev = out.at(-1);
+  if (prev && new URL(prev.url).host === new URL(r.url).host && new Date(prev.firstAt) - new Date(r.at) <= FOLD_MS) {
+    prev.reason ??= r.reason;
+    prev.firstAt = r.at;
+    return out;
+  }
+  return [...out, { ...r, firstAt: r.at }];
+}, []);
 
 if (open) {
   const { sites } = JSON.parse(fs.readFileSync(path.join(root, 'canary/sites.json'), 'utf8'));
@@ -45,6 +57,6 @@ if (open) {
     return new Date(r.at) > addedAt(host);
   });
 }
-for (const r of rows) console.log(`${r.at.slice(0, 16).replace('T', ' ')}  ${r.browser.padEnd(7)} ${r.version.padEnd(6)} ${r.consent.padEnd(8)} ${(r.cmp || '-').padEnd(20)} ${r.url}`);
+for (const r of rows) console.log(`${r.at.slice(0, 16).replace('T', ' ')}  ${r.browser.padEnd(7)} ${r.version.padEnd(6)} ${r.consent.padEnd(8)} ${(r.cmp || '-').padEnd(20)} ${r.url}${r.reason ? `  (${r.reason})` : ''}`);
 console.log(`${rows.length} ${open ? 'open ' : ''}report(s) in the last ${days} days`);
 if (open && rows.length) process.exit(1);
