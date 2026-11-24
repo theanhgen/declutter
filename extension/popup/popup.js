@@ -1,4 +1,4 @@
-import { choiceMode, reportUrl, siteModePatch, siteMode } from '../lib.js';
+import { choiceMode, reportUrl, siteModePatch, siteMode, outcomeDetail } from '../lib.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
@@ -70,8 +70,8 @@ async function main() {
     rows.push(statusRow('bad', "declutter isn't running on this page yet", 'it was open before declutter was installed or updated'));
     $('reload').hidden = false;
     $('reload').onclick = () => { api.tabs.reload(tab.id); window.close(); };
-  } else if (state.consent === 'done') rows.push(handled('cookie banner', state.cosmetic ? 'hidden' : 'refused', state.cmp, state.choiceFallback && "your mix isn't supported by this banner, so everything was refused"));
-  else if (state.consent === 'choice') rows.push(handled('cookie banner', 'your choice applied', `${state.cmp} via ${state.adapter}`));
+  } else if (state.consent === 'done') rows.push(handled('cookie banner', state.cosmetic ? 'hidden' : 'refused', outcomeDetail(state), state.choiceFallback && !state.cosmetic && "your mix isn't supported by this banner, so everything was refused"));
+  else if (state.consent === 'choice') rows.push(handled('cookie banner', 'your choice applied', outcomeDetail(state)));
   else if (failed) rows.push(statusRow('bad', "declutter couldn't answer this banner", 'answer it yourself on the page. reporting it helps get it fixed.'));
   else if (state.consent === 'wall') {
     rows.push(statusRow('wall', 'pay wall: agree or pay', state.looping
@@ -83,9 +83,9 @@ async function main() {
       window.close();
     };
   } else if (state.consent === 'accepting') rows.push(statusRow('wall', 'accepting the wall…', state.cmp));
-  else if (state.consent === 'accepted') rows.push(handled('pay wall', 'accepted', state.cmp));
+  else if (state.consent === 'accepted') rows.push(handled('pay wall', 'accepted', outcomeDetail(state)));
   else if (state.consent === 'paused') rows.push(statusRow('', 'banners left alone here'));
-  else if (state.consent === 'acceptedSite') rows.push(handled('cookie banner', 'accepted (your choice)', state.cmp));
+  else if (state.consent === 'acceptedSite') rows.push(handled('cookie banner', 'accepted (your choice)', outcomeDetail(state)));
   else if (state.consent === 'working') rows.push(statusRow('', `answering ${state.cmp}…`));
   else rows.push(statusRow('', 'no known cookie banner found'));
   if (state.shortsLeak > 0) {
