@@ -159,7 +159,7 @@ test('when and how the choice was made: popup line and fallback chip', () => {
 });
 
 test('pay walls: one name and one definition everywhere, no Czech-only button', () => {
-  assert.equal(chipFor({}, { consent: 'wall' }).text, 'pay wall: your call');
+  assert.equal(chipFor({}, { consent: 'wall' }).text, 'pay wall: accept from the declutter button');
   assert.equal(badgeFor({ consent: 'wall', host: 'www.spiegel.de' }).title, 'declutter: pay wall — agree or pay, from this menu');
   assert.match(read('extension/popup/popup.js'), /'pay wall: agree to tracking or pay'/);
   assert.match(read('extension/popup/popup.html'), />agree to tracking on this site</);
