@@ -127,8 +127,10 @@ async function main() {
     await api.runtime.sendMessage({ type: 'report', tabId: tab.id });
     // The background sends this exact address, and nothing if the tab has moved to another site since.
     const sent = mayCollect && await api.runtime.sendMessage({ type: 'sendReport', tabId: tab.id, url: sendUrl });
-    $('report').querySelector('.label').textContent =
-      sent ? 'sent, thanks' : mayCollect ? 'saved here, could not send: try again later' : 'saved here, not sent';
+    const outcome = sent ? 'sent, thanks' : mayCollect ? 'saved here, could not send: try again later' : 'saved here, not sent';
+    $('report').querySelector('.label').textContent = outcome;
+    // The button label changes under the focus; say it too, for screen readers.
+    $('announce').textContent = outcome;
     if (mayCollect && !sent) $('report').disabled = false;
   };
 }

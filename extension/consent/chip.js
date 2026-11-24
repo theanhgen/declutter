@@ -44,13 +44,21 @@ export function showChip({ text, tone, host: site }) {
     font: '12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace', boxShadow: '0 2px 10px rgba(0,0,0,.28)',
   });
   // Nothing on the host names declutter or the outcome: the page can't read either from the closed root.
+  // Screen readers: the pill is a polite live region. Its spoken text goes in only after the region is on the page,
+  // since a region inserted together with its text is often not announced; the visible text is hidden from them so
+  // the outcome is read once.
   pill.setAttribute('role', 'status');
-  pill.setAttribute('aria-label', `declutter: ${text}`);
+  pill.setAttribute('aria-live', 'polite');
   const [mark, color] = MARK[tone] ?? MARK.wait;
-  pill.append(logo(), el('span', {}, text), ...(mark ? [el('span', { color, fontWeight: '700' }, mark)] : []));
+  const visible = el('span', { display: 'flex', alignItems: 'center', gap: '7px' });
+  visible.setAttribute('aria-hidden', 'true');
+  visible.append(logo(), el('span', {}, text), ...(mark ? [el('span', { color, fontWeight: '700' }, mark)] : []));
+  const spoken = el('span', { position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clipPath: 'inset(50%)', whiteSpace: 'nowrap' });
+  pill.append(visible, spoken);
   host.attachShadow({ mode: 'closed' }).append(pill);
   document.body.append(host);
   shown = host;
+  setTimeout(() => { spoken.textContent = `declutter: ${text}`; }, 100);
 
   const width = pill.getBoundingClientRect().width;
   // No width (not laid out yet, a hidden tab): fade only, or the pill would pop from nothing.

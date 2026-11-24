@@ -48,7 +48,12 @@ async function render() {
   const save = async (patch) => {
     const { settings: current = {} } = await api.storage.local.get('settings');
     await api.storage.local.set({ settings: { ...current, ...patch } });
-    render();
+    // render() replaces the lines, which would drop keyboard focus to the top of the page: put it back on the line
+    // that was changed.
+    const line = document.activeElement?.closest('p, div[id]');
+    const at = line && [...document.querySelectorAll('p, div[id]')].indexOf(line);
+    await render();
+    if (at >= 0) document.querySelectorAll('p, div[id]')[at]?.querySelector('a')?.focus();
   };
 
   for (const node of document.querySelectorAll('[data-choice]')) {
