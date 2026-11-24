@@ -181,7 +181,7 @@ test('failed report send: kept with the approved body, retried for a week, cance
   // background.js keeps the send before trying, retries it on the data alarm and on popup open.
   const bg = read('extension/background.js');
   assert.match(bg, /sendPending: pending/);
-  assert.match(bg, /a\.name !== 'data'[\s\S]*retrySends\(\)/);
+  assert.match(bg, /a\.name === 'data'[\s\S]*retrySends\(\)/);
   assert.match(read('extension/popup/popup.js'), /type: 'retrySends'/);
 });
 
