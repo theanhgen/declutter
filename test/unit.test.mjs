@@ -776,6 +776,21 @@ test('live test scripts build build/chrome first, so a stale build cannot fail (
   assert.match(scripts.canary, /canary\/run\.mjs --build/);
 });
 
+// No Xcode test target: the macOS app's status check is pinned by its source.
+test('macOS app: re-checks Safari on activate and after Settings, and an error is not "off" (#31)', () => {
+  const app = read('safari/App/DeclutterApp.swift');
+  assert.match(app, /\.onReceive\(NotificationCenter\.default\.publisher\(for: NSApplication\.didBecomeActiveNotification\)\)[^}]*await refresh\(\)/);
+  assert.match(app, /showPreferencesForExtension\(withIdentifier: extensionID\) \{ _ in\s+Task \{ await refresh\(\) \}/);
+  assert.doesNotMatch(app, /try\? await SFSafariExtensionManager/, 'a failed check must not read as off');
+  assert.ok(app.includes("Couldn't ask Safari. Open Safari Settings → Extensions to check."));
+  assert.ok(app.includes("declutter is on. Last step: Always Allow on Every Website, or cookie banners won't be answered."));
+  // Checks overlap (launch, Settings button, activate): only the newest sets the state, on the main actor.
+  assert.match(app, /@MainActor private func refresh\(\) async \{\s+checks \+= 1\s+let check = checks/);
+  assert.match(app, /guard check == checks else \{ return \}\s+justTurnedOn = /);
+  // "Last step" only on the check that sees it go from off to on, not on every later activate.
+  assert.match(app, /justTurnedOn = result == \.on && safari == \.off\n/);
+});
+
 test('canary: baseline is the newest earlier day, never today (a rerun)', () => {
   const files = ['2026-09-25.json', '2026-09-27.json', '2026-09-30.json', 'notes.txt'];
   assert.equal(previousFile(files, '2026-09-30'), '2026-09-27.json');
