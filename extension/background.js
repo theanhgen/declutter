@@ -305,8 +305,11 @@ async function onConsentMessage(msg, sender) {
         const kept = ['done', 'acceptedSite', 'choice', 'accepted'].includes(prev.consent) && prev.host === tabHost && Date.now() - prev.doneAt < 60000
           ? { consent: prev.consent, cmp: prev.cmp, doneAt: prev.doneAt, cosmetic: prev.cosmetic, adapter: prev.adapter,
             clicks: prev.clicks, choiceFallback: prev.choiceFallback, kept: true } : {};
-        await setTab(tabId, { host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil, acceptFamily: prev.acceptFamily }),
-          ...(reopenPending && { reopenUntil: prev.reopenUntil }), ...(excepted ? { consent: 'paused' } : reopenPending ? {} : kept) }, true);
+        // A Short opened in the normal player is a new page load: keep the tab's count of those on the same site.
+        // Read at write time (cur), so a redirect counted while this message was being handled is not lost.
+        await setTab(tabId, (cur) => ({ host: tabHost, ...(acceptPending && { acceptUntil: prev.acceptUntil, acceptFamily: prev.acceptFamily }),
+          ...(reopenPending && { reopenUntil: prev.reopenUntil }), ...(excepted ? { consent: 'paused' } : reopenPending ? {} : kept),
+          ...(cur.host === tabHost && cur.shortsRedirects && { shortsRedirects: cur.shortsRedirects }) }), true);
       }
       const logs = { lifecycle: settings.debug, rulesteps: settings.debug, detectionsteps: settings.debug, evals: settings.debugEvals, errors: true };
       // refuse (all categories off) / accept (all on) / mix (applied per CMP on popupFound, else refused).
@@ -565,10 +568,15 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!sender.tab) return;
   if (msg.type === 'shortsLeak') {
     setTab(sender.tab.id, { shortsLeak: msg.count, leakPath: msg.path });
+  } else if (msg.type === 'shortsHidden') {
+    // count: this page's total so far; added: new since the last message; first: the page's first hidden short.
+    setTab(sender.tab.id, { shortsHidden: msg.count });
+    bump({ shortsHidden: msg.added, ...(msg.first && { shortsPages: 1 }) });
   } else if (msg.type === 'shortsRedirect') {
     bump({ shorts: 1 });
+    setTab(sender.tab.id, (t) => ({ shortsRedirects: (t.shortsRedirects ?? 0) + 1 }));
   } else if (msg.type === 'shortsNav') {
-    setTab(sender.tab.id, { shortsLeak: 0 });
+    setTab(sender.tab.id, { shortsLeak: 0, shortsHidden: 0 });
   } else {
     const handled = onConsentMessage(msg, sender).catch((e) => console.warn('declutter:', msg.type, e));
     if (msg.type === 'init' && (sender.frameId ?? 0) === 0) {
