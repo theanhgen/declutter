@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
+import vm from 'node:vm';
 import { alertText, looksOffline, missedDays, previousFile } from '../canary/alert.mjs';
 import { applyCategories } from '../extension/consent/categories.js';
 import { collectDates, videoIdOf } from '../extension/shorts/dates-lib.js';
-import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules, restoreItem, restoreReports, restoreStats } from '../extension/lib.js';
+import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules, restoreItem, restoreReports, restoreStats, bannerSuspected } from '../extension/lib.js';
 import { declutterSnippets } from '../extension/consent/snippets.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -178,6 +179,57 @@ test('pay walls: one name and one definition everywhere, no Czech-only button', 
   for (const f of ['extension/welcome/welcome.html', 'site/index.html', 'store/LISTING.md', 'store/asc-setup.mjs']) {
     assert.match(read(f).replace(/[“”]/g, '"'), /pay walls \("agree to tracking or pay"\) are never hidden or refused/i, f);
   }
+});
+
+test('bannerSuspected: banner wording in the top frame, only when no rule did anything', () => {
+  const report = (url, heuristicPatterns = ['/accept all/gi']) => ({ type: 'report', url, mainFrame: true, state: { heuristicPatterns } });
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.a.cz/clanek'), true), true);
+  // no wording, a sub-frame, or another page's late report
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.a.cz/', []), true), false);
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.a.cz/'), false), false);
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, report('https://www.b.cz/'), true), false);
+  assert.equal(bannerSuspected({ host: 'www.a.cz' }, {}, true), false);
+  // a banner a rule found or answered has the same wording: that state wins
+  for (const consent of ['working', 'done', 'failed', 'wall', 'paused', 'acceptedSite', 'choice']) {
+    assert.equal(bannerSuspected({ host: 'www.a.cz', consent }, report('https://www.a.cz/'), true), false);
+  }
+});
+
+test('background: a heuristic report racing popupFound never drops the consent state', async () => {
+  // The built background with a fake chrome whose session writes land late, so unserialized read/merge/writes of
+  // the tab record interleave (report read -> popupFound read -> popupFound write -> report write).
+  const session = {};
+  const later = (ms) => new Promise((r) => setTimeout(r, ms));
+  const listeners = [];
+  const event = () => ({ addListener: (f) => listeners.push(f) });
+  const chrome = {
+    runtime: { onMessage: { addListener: (f) => { chrome.onMessage = f; } }, onInstalled: event(), onStartup: event(), getURL: (p) => `chrome-extension://x/${p}` },
+    storage: {
+      onChanged: event(),
+      local: { get: async () => ({}), set: async () => {} },
+      session: {
+        get: async (k) => { const v = session[k]; await later(1); return v === undefined ? {} : { [k]: structuredClone(v) }; },
+        set: async (o) => { await later(5); Object.assign(session, structuredClone(o)); },
+        remove: async () => {},
+      },
+    },
+    tabs: { onRemoved: event(), sendMessage: async () => {} },
+    alarms: { onAlarm: event(), create() {}, clear() {}, get: async () => null },
+    action: { setBadgeText: async () => {}, setBadgeBackgroundColor: async () => {}, setTitle: async () => {} },
+  };
+  vm.runInNewContext(read('build/chrome/background.js'), { chrome, console, URL, setTimeout, structuredClone, fetch: () => Promise.reject(new Error('offline')) });
+  session['tab-7'] = { host: 'www.a.cz' };
+  const sender = { tab: { id: 7, url: 'https://www.a.cz/' }, frameId: 0, url: 'https://www.a.cz/' };
+  chrome.onMessage({ type: 'report', url: 'https://www.a.cz/', mainFrame: true, state: { heuristicPatterns: ['/accept all/gi'] } }, sender, () => {});
+  chrome.onMessage({ type: 'popupFound', cmp: 'Onetrust' }, sender, () => {});
+  await later(100);
+  assert.equal(session['tab-7'].consent, 'working');
+  assert.equal(session['tab-7'].cmp, 'Onetrust');
+  // On its own, the same report marks the tab.
+  session['tab-8'] = { host: 'www.a.cz' };
+  chrome.onMessage({ type: 'report', url: 'https://www.a.cz/', mainFrame: true, state: { heuristicPatterns: ['/accept all/gi'] } }, { ...sender, tab: { id: 8, url: 'https://www.a.cz/' } }, () => {});
+  await later(50);
+  assert.deepEqual(session['tab-8'], { host: 'www.a.cz', banner: 'suspected' });
 });
 
 test('currencyFor: country domain, euro otherwise', () => {
