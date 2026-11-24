@@ -21,8 +21,11 @@ struct DeclutterApp: App {
 struct ContentView: View {
     private let extensionID = "com.theanhgen.declutter.extension"
     @State private var safari: SafariState = .checking
-    // Set when a check finds it on after one found it off: the user just turned it on, so say what is left.
+    // Set when a check finds it on and the one before found it off: the user just turned it on, so say what is left.
     @State private var justTurnedOn = false
+    // Each check is numbered; only the newest may set the state, so a slow earlier check (launch, the Settings
+    // button) can't overwrite a newer answer.
+    @State private var checks = 0
 
     private enum SafariState { case checking, on, off, unknown }
 
@@ -64,14 +67,18 @@ struct ContentView: View {
         }
     }
 
-    private func refresh() async {
+    @MainActor private func refresh() async {
+        checks += 1
+        let check = checks
+        let result: SafariState
         // A failed check is not "off": saying so would send the user to turn on something that may be on.
         do {
-            let isOn = try await SFSafariExtensionManager.stateOfSafariExtension(withIdentifier: extensionID).isEnabled
-            justTurnedOn = isOn && (safari == .off || justTurnedOn)
-            safari = isOn ? .on : .off
+            result = try await SFSafariExtensionManager.stateOfSafariExtension(withIdentifier: extensionID).isEnabled ? .on : .off
         } catch {
-            safari = .unknown
+            result = .unknown
         }
+        guard check == checks else { return }
+        justTurnedOn = result == .on && safari == .off
+        safari = result
     }
 }
