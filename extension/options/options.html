@@ -66,6 +66,8 @@
   input[type=url] { font: inherit; font-size: 13px; width: 28em; max-width: 70%; background: none; color: inherit;
     border: 0; border-bottom: 1px solid var(--dim-line); padding: 2px 0; }
   input[type=url]:focus { outline: none; border-bottom-color: var(--fg); }
+  /* Keyboard focus: one visible ring on every link, the dimmed choice words included. */
+  a:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; border-radius: 2px; color: var(--fg); }
   .big { font-size: 28px; }
   /* One section per page; the nav switches between them (options.js). */
   section:not(.shown) { display: none; }

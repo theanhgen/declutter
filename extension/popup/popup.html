@@ -111,6 +111,8 @@
   .segmented button:focus-visible { outline: 2px solid var(--fg); outline-offset: 1px; }
 
   .note { margin: 6px 0 0; padding: 0 16px; color: var(--muted); }
+  /* Read by screen readers only (announcements). */
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -125,7 +127,7 @@
 
   <section id="pageSection" hidden>
     <p class="caption">this page</p>
-    <div id="status"></div>
+    <div id="status" role="status" aria-live="polite"></div>
   </section>
 
   <section id="siteSection" hidden>
@@ -143,6 +145,7 @@
   </section>
 
   <p class="note" id="sendNote" hidden></p>
+  <p class="sr-only" id="announce" role="status" aria-live="polite"></p>
   <script src="popup.js"></script>
 </body>
 </html>
