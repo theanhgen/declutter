@@ -142,7 +142,7 @@ export const STATUS = {
   choice: { label: 'your choice applied', tone: 'ok' },
   acceptedSite: { label: 'cookies accepted', tone: 'neutral' },
   accepted: { label: 'pay wall accepted', tone: 'wall' },
-  wall: { label: 'pay wall: agree to tracking or pay', tone: 'wall', chip: 'accept from the declutter button', next: 'decide from this menu' },
+  wall: { label: 'pay wall: agree to tracking or pay', tone: 'wall', chip: 'agree from the declutter button', next: 'decide from this menu' },
   accepting: { label: 'accepting the pay wall…', tone: 'wall' },
   failed: { label: 'banner not answered', tone: 'bad', chip: 'see the declutter button', next: 'answer it on the page' },
   working: { label: 'answering the banner…', tone: 'neutral' },

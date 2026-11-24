@@ -76,8 +76,7 @@ async function main() {
     $('reload').hidden = false;
     $('reload').onclick = () => { api.tabs.reload(tab.id); window.close(); };
   } else if (state.consent === 'done' || state.consent === 'choice') rows.push(handled('cookie banner', label(state), outcomeDetail(state)));
-  // The report row goes right under it: reporting is the next step (#11).
-  else if (failed) rows.push(statusRow('bad', STATUS.failed.label, 'answer it yourself on the page. reporting it helps get it fixed.'), $('report'));
+  else if (failed) rows.push(statusRow('bad', STATUS.failed.label, 'answer it yourself on the page. reporting it helps get it fixed.'));
   else if (state.consent === 'wall') {
     rows.push(statusRow('wall', STATUS.wall.label, state.looping
       ? 'it came back twice within a minute after accepting, so auto-accept is paused in this tab'
@@ -109,6 +108,9 @@ async function main() {
   const reported = reports.find((r) => r.host === host);
   if (reported?.fixedAt) rows.push(statusRow('', `fixed since you reported it on ${new Date(reported.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`));
   $('status').replaceChildren(...rows);
+  // On a failure reporting is the next step (#11): the report button goes right under the status, with its note on
+  // what it sends and the reasons that follow a send (outside the live region, which only speaks the status).
+  if (failed) $('status').after($('report'), $('sendNote'), $('reasonSection'));
   $('pageSection').hidden = false;
 
   // Per-site choice: the global answer (refuse / your mix / accept, from Settings → your choice) / accept / leave alone.

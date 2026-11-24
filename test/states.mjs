@@ -48,7 +48,7 @@ await setSettings(sw, { consent: true });
 await setTabState({ consent: 'failed', cmp: 'x' });
 ({ pop, status } = await popup());
 check('failed: next step, no rule name', status.includes('banner not answered') && status.includes('answer it yourself') && !status.includes('\nx'), status);
-check('failed: report row directly under the failed row', await pop.locator('#status .status.bad + #report').count() === 1);
+check('failed: report right under the status, with its note', await pop.locator('#status:has(.status.bad) + #report + #sendNote').count() === 1);
 await pop.close();
 
 // Every state the popup words from the shared map (lib.js STATUS) shows that label (#21).
