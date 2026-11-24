@@ -21,6 +21,8 @@ const handled = (thing, ...sub) => statusRow('done', thing, sub.filter(Boolean).
 
 async function main() {
   $('settings').onclick = () => { api.runtime.openOptionsPage(); window.close(); };
+  // A report that could not be sent earlier goes out now if it can (the background keeps it, see sendReport).
+  api.runtime.sendMessage({ type: 'retrySends' }).catch(() => { /* worker busy starting; the alarm retries too */ });
 
   const { settings = {} } = await api.storage.local.get('settings');
   const s = { shorts: true, posts: true, playables: true, consent: true, ...settings };
@@ -126,8 +128,10 @@ async function main() {
     $('report').disabled = true;
     await api.runtime.sendMessage({ type: 'report', tabId: tab.id });
     // The background sends this exact address, and nothing if the tab has moved to another site since.
+    // true: sent. 'pending': kept on the report, and the background tries again (alarm, next popup open). false: nothing sent.
     const sent = mayCollect && await api.runtime.sendMessage({ type: 'sendReport', tabId: tab.id, url: sendUrl });
-    const outcome = sent ? 'sent, thanks' : mayCollect ? 'saved here, could not send: try again later' : 'saved here, not sent';
+    const outcome = sent === 'pending' ? "couldn't send (offline?). saved; declutter will try again."
+      : sent ? 'sent, thanks' : mayCollect ? 'saved here, could not send: try again later' : 'saved here, not sent';
     $('report').querySelector('.label').textContent = outcome;
     // The button label changes under the focus; say it too, for screen readers.
     $('announce').textContent = outcome;
