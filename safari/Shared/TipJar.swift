@@ -125,7 +125,7 @@ struct TipJarView: View {
 
     @ViewBuilder private var content: some View {
         Text("tip jar").font(Martian.font(.headline, weight: 600))
-        Text(jar.lastTip?.text ?? "declutter is free. If it saves you clicks, a tip keeps the rules up to date.")
+        Text(jar.lastTip?.text ?? "declutter is free. if it saves you clicks, a tip keeps the rules up to date.")
             .font(Martian.font(.callout, weight: 300))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)

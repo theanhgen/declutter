@@ -936,7 +936,8 @@ test('site: every link on index.html resolves; tip worded like the Safari tip ja
   // Tips exist only as StoreKit purchases in the Safari app; the site and settings use its sentence.
   const tip = read('safari/Shared/TipJar.swift').match(/"(declutter is free\.[^"]+)"/)[1];
   const text = (p) => read(p).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ');
-  assert.ok(text('site/index.html').includes(tip), `site: "${tip}"`);
+  // The site's body copy is sentence case ("If it saves you clicks"), the apps and settings lowercase: same words.
+  assert.ok(text('site/index.html').toLowerCase().includes(tip.toLowerCase()), `site: "${tip}"`);
   assert.ok(text('extension/options/options.html').includes(tip), `settings: "${tip}"`);
 });
 
