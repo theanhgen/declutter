@@ -120,42 +120,42 @@
   <header><h1><img src="d.svg" alt="" class="logo">declutter</h1><span id="host"></span></header>
 
   <div id="toggles">
-    <div class="row switch"><span class="label" id="shorts-label">hide shorts</span><input type="checkbox" switch class="hit" id="shorts" aria-labelledby="shorts-label"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></div>
-    <div class="row switch"><span class="label" id="posts-label">hide posts in feeds</span><input type="checkbox" switch class="hit" id="posts" aria-labelledby="posts-label"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></div>
-    <div class="row switch"><span class="label" id="playables-label">hide playables</span><input type="checkbox" switch class="hit" id="playables" aria-labelledby="playables-label"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></div>
-    <div class="row switch"><span class="label" id="consent-label">answer cookie banners</span><input type="checkbox" switch class="hit" id="consent" aria-labelledby="consent-label"><span class="toggle" aria-hidden="true"><span class="w on">on</span><span class="sep"> / </span><span class="w off">off</span></span></div>
+    <div class="row switch"><span class="label" id="shorts-label" data-i18n="popup.hideShorts">hide shorts</span><input type="checkbox" switch class="hit" id="shorts" aria-labelledby="shorts-label"><span class="toggle" aria-hidden="true"><span class="w on" data-i18n="on">on</span><span class="sep"> / </span><span class="w off" data-i18n="off">off</span></span></div>
+    <div class="row switch"><span class="label" id="posts-label" data-i18n="popup.hidePosts">hide posts in feeds</span><input type="checkbox" switch class="hit" id="posts" aria-labelledby="posts-label"><span class="toggle" aria-hidden="true"><span class="w on" data-i18n="on">on</span><span class="sep"> / </span><span class="w off" data-i18n="off">off</span></span></div>
+    <div class="row switch"><span class="label" id="playables-label" data-i18n="popup.hidePlayables">hide playables</span><input type="checkbox" switch class="hit" id="playables" aria-labelledby="playables-label"><span class="toggle" aria-hidden="true"><span class="w on" data-i18n="on">on</span><span class="sep"> / </span><span class="w off" data-i18n="off">off</span></span></div>
+    <div class="row switch"><span class="label" id="consent-label" data-i18n="popup.answerBanners">answer cookie banners</span><input type="checkbox" switch class="hit" id="consent" aria-labelledby="consent-label"><span class="toggle" aria-hidden="true"><span class="w on" data-i18n="on">on</span><span class="sep"> / </span><span class="w off" data-i18n="off">off</span></span></div>
   </div>
 
   <section id="pageSection" hidden>
-    <p class="caption">this page</p>
+    <p class="caption" data-i18n="popup.thisPage">this page</p>
     <div id="status" role="status" aria-live="polite"></div>
   </section>
 
   <section id="siteSection" hidden>
-    <p class="caption">cookie banners on this site</p>
+    <p class="caption" data-i18n="popup.siteCaption">cookie banners on this site</p>
     <div class="segmented" id="siteMode">
-      <button data-mode="refuse">refuse</button><button data-mode="accept">accept</button><button data-mode="ignore">leave alone</button>
+      <button data-i18n="site.refuse" data-mode="refuse">refuse</button><button data-i18n="site.accept" data-mode="accept">accept</button><button data-i18n="site.ignore" data-mode="ignore">leave alone</button>
     </div>
-    <p class="note" id="siteNote" hidden>applies the next time this site asks. the answer it already has stays until you clear its cookies (or use its cookie settings link).</p>
+    <p class="note" id="siteNote" hidden data-i18n="popup.siteNote">applies the next time this site asks. the answer it already has stays until you clear its cookies (or use its cookie settings link).</p>
   </section>
 
   <section id="wallSection" hidden>
-    <p class="caption">pay wall on this site</p>
+    <p class="caption" data-i18n="popup.wallCaption">pay wall on this site</p>
     <div class="segmented" id="wallMode">
-      <button data-mode="agree">agree for me</button><button data-mode="ask">ask me</button><button data-mode="ignore">leave alone</button>
+      <button data-i18n="wall.agree" data-mode="agree">agree for me</button><button data-i18n="wall.ask" data-mode="ask">ask me</button><button data-i18n="site.ignore" data-mode="ignore">leave alone</button>
     </div>
   </section>
 
   <section id="actions">
-    <button class="row action wall" id="acceptWall" hidden><span class="label">agree to tracking on this site</span></button>
-    <button class="row action" id="reload" hidden><span class="label">reload page</span></button>
-    <button class="row action" id="report" hidden><span class="label">send to developer: not handled right</span></button>
-    <button class="row" id="settings"><span class="label">settings</span><span class="chevron">›</span></button>
+    <button class="row action wall" id="acceptWall" hidden><span class="label" data-i18n="popup.agreeHere">agree to tracking on this site</span></button>
+    <button class="row action" id="reload" hidden><span class="label" data-i18n="popup.reload">reload page</span></button>
+    <button class="row action" id="report" hidden><span class="label" data-i18n="popup.report">send to developer: not handled right</span></button>
+    <button class="row" id="settings"><span class="label" data-i18n="settings">settings</span><span class="chevron">›</span></button>
   </section>
 
   <p class="note" id="sendNote" hidden></p>
   <section id="reasonSection" hidden>
-    <p class="caption">what went wrong? (optional)</p>
+    <p class="caption" data-i18n="popup.reasonCaption">what went wrong? (optional)</p>
     <div id="reasons"></div>
   </section>
   <p class="sr-only" id="announce" role="status" aria-live="polite"></p>

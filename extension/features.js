@@ -12,3 +12,12 @@ export const CATEGORIES = [
   ['F', 'ad selection, delivery, and reporting', 'personalise ads from a profile of your interests, and measure them. includes Google.'],
   ['X', 'other purposes', 'anything the site does not describe clearly or that fits no other category.'],
 ];
+// The same in Czech (#25), for settings in a Czech browser: letter -> [name, what it covers].
+export const CATEGORIES_CS = {
+  A: ['preference a funkce', 'pamatují si vaše volby (jazyk, region, přihlášení) a rozšířené osobní funkce; nesledují vás na jiných webech.'],
+  B: ['výkon a analytika', 'počítají návštěvy a zdroje návštěvnosti a ukazují, jak se návštěvníci po webu pohybují.'],
+  D: ['ukládání informací a přístup k nim', 'ukládají nebo čtou identifikátory ve vašem zařízení (cookies, reklamní ID a ID zařízení).'],
+  E: ['výběr, doručení a vyhodnocení obsahu', 'přizpůsobují obsah podle profilu vašich zájmů a měří ho.'],
+  F: ['výběr, doručení a vyhodnocení reklam', 'přizpůsobují reklamy podle profilu vašich zájmů a měří je. včetně Googlu.'],
+  X: ['jiné účely', 'cokoli, co web jasně nepopisuje nebo co nepatří do jiné kategorie.'],
+};

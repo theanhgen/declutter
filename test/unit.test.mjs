@@ -9,6 +9,10 @@ import { applyCategories } from '../extension/consent/categories.js';
 import { collectDates, videoIdOf } from '../extension/shorts/dates-lib.js';
 import { badgeFor, chipFor, currencyFor, gpcExcludeMatches, gpcRule, reportUrl, choiceMode, hostMatches, keepRemoteLists, mergeData, redirectTarget, validData, siteEntry, siteHost, siteMode, siteModePatch, outcomeDetail, FRESH_OUTCOME, fetchRuleList, ruleListLine, ruleListStatus, updateOutcome, REASONS, REASON_WORD, reasonsFor, reasonWord, markFixed, siteRules, restoreItem, restoreReports, restoreStats, bannerSuspected, countNewlyHidden, shortsStatsText, shortsSummary, aboutSummary, STATUS, TONE_COLOR, statusKey } from '../extension/lib.js';
 import { declutterSnippets } from '../extension/consent/snippets.js';
+import { LANG, setLang, STRINGS, t } from '../extension/i18n.js';
+
+// The extension's words follow the UI language (#25); these tests are written for English whatever this machine runs.
+setLang('en');
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -1091,4 +1095,112 @@ test('refreshRemoteData: a newer refresh that fails keeps what an older overlapp
   await Promise.all([updateData(), updateData()]);
   assert.deepEqual(local.remoteData.consent.rules.map((r) => r.name), ['rule-a']);
   assert.equal(local.remoteStatus['https://a/'].ok, false, 'the newest attempt is what the status shows');
+});
+
+test('Czech UI: the string table has every key in both languages, nothing empty, the same slots (#25)', () => {
+  const { en, cs } = STRINGS;
+  assert.deepEqual(Object.keys(cs).sort(), Object.keys(en).sort(), 'same keys');
+  const vars = (n) => ({ n, pages: n, rules: n, selectors: n, banners: n, shorts: n, refused: n, choice: n, accepted: n, walls: n,
+    at: 'x', date: 'x', since: 'x', error: 'x', rest: 'x', host: 'x', path: 'x', url: 'x', reason: 'x', item: 'x', status: 'x', cmp: 'x', adapter: 'x' });
+  const slots = (s) => [...new Set(s.match(/\{\w+\}/g) ?? [])].sort();
+  for (const k of Object.keys(en)) {
+    for (const [lang, v] of [['en', en[k]], ['cs', cs[k]]]) {
+      assert.ok(['string', 'function'].includes(typeof v), lang + ' ' + k);
+      for (const n of [0, 1, 2, 5, 22]) assert.ok(String(typeof v === 'function' ? v(vars(n)) : v).trim(), lang + ' ' + k + ' empty');
+      if (typeof v === 'function') for (const n of [1, 2, 5]) assert.doesNotMatch(v(vars(n)), /undefined|NaN|\{\w+\}/, lang + ' ' + k);
+    }
+    if (typeof en[k] === 'string' && typeof cs[k] === 'string') assert.deepEqual(slots(cs[k]), slots(en[k]), 'slots ' + k);
+  }
+  // Czech is spelled with its diacritics; a table typed without them would show here.
+  assert.match(Object.values(cs).filter((v) => typeof v === 'string').join(' '), /[ěščřžýáíéůú]/);
+});
+
+test('Czech UI: every data-i18n key on the pages is in the table, and its English is the page\'s own text (#25)', () => {
+  const pages = ['extension/popup/popup.html', 'extension/options/options.html', 'extension/welcome/welcome.html'];
+  let keys = 0;
+  for (const p of pages) {
+    const html = read(p);
+    for (const m of html.matchAll(/<(\w+)\b[^>]*\sdata-i18n="([^"]+)"[^>]*>/g)) {
+      const [open, tag, key] = m;
+      keys++;
+      assert.ok(key in STRINGS.en, p + ': ' + key);
+      const inner = html.slice(m.index + open.length, html.indexOf('</' + tag + '>', m.index + open.length));
+      let i = 0;
+      const text = inner.replace(/<(img|input|br)\b[^>]*>|<(\w+)\b[^>]*>[\s\S]*?<\/\2>/g, () => '{' + i++ + '}').replace(/\s+/g, ' ').trim();
+      assert.equal(STRINGS.en[key], text, p + ': ' + key);
+      // As many child slots in the Czech as the element has children.
+      assert.deepEqual((STRINGS.cs[key].match(/\{\d+\}/g) ?? []).sort(), (STRINGS.en[key].match(/\{\d+\}/g) ?? []).sort(), key);
+    }
+  }
+  assert.ok(keys > 60, 'pages are marked: ' + keys);
+  for (const p of ['extension/popup/popup.js', 'extension/options/options.js', 'extension/welcome/welcome.js']) assert.match(read(p), /applyI18n\(\)/, p);
+  // Every key the scripts ask for exists.
+  for (const f of ['extension/lib.js', ...pages.map((p) => p.replace('.html', '.js'))]) {
+    for (const [, k] of read(f).matchAll(/\bt\('([\w.]+)'/g)) assert.ok(k in STRINGS.en, f + ': ' + k);
+  }
+  for (const target of ['chrome', 'firefox', 'safari']) assert.ok('popup.allow.' + target in STRINGS.en, target);
+  // The settings intro is set from the table (its HTML is pinned to the feature line); the two agree.
+  const intro = read('extension/options/options.html').match(/<\/h1>\s*<p>([\s\S]*?)<\/p>/)[1].replace(/\s+/g, ' ').trim();
+  assert.equal(STRINGS.en['settings.intro'], intro);
+  assert.match(read('extension/options/options.js'), /querySelector\('h1 \+ p'\)\.textContent = t\('settings\.intro'\)/);
+});
+
+test('Czech UI: the status map, report reasons and categories have Czech for every English word (#25)', async () => {
+  const { STATUS_CS, REASONS_CS } = await import('../extension/lib.js');
+  const { CATEGORIES, CATEGORIES_CS } = await import('../extension/features.js');
+  assert.deepEqual(Object.keys(STATUS_CS).sort(), Object.keys(STATUS).sort());
+  for (const [k, s] of Object.entries(STATUS)) {
+    const text = Object.keys(s).filter((f) => f !== 'tone');
+    assert.deepEqual(Object.keys(STATUS_CS[k]).sort(), text.sort(), k);
+    for (const f of text) assert.ok(STATUS_CS[k][f].trim() && STATUS_CS[k][f] !== s[f], k + '.' + f);
+  }
+  assert.deepEqual(Object.keys(REASONS_CS).sort(), Object.keys(REASONS).sort());
+  for (const k of Object.keys(REASONS)) assert.ok(REASONS_CS[k].trim(), k);
+  for (const [k] of CATEGORIES) assert.ok(CATEGORIES_CS[k]?.length === 2 && CATEGORIES_CS[k].every((w) => w.trim()), k);
+  assert.equal(Object.keys(CATEGORIES_CS).length, CATEGORIES.length);
+});
+
+test('Czech UI: chip, badge tooltip and the popup lines speak Czech in a Czech browser, English otherwise (#25)', async () => {
+  const { STATUS_CS, reasonText, statusWords } = await import('../extension/lib.js');
+  const states = [{ consent: 'done', cmp: 'c', host: 'a.cz' }, { consent: 'wall', host: 'www.seznam.cz' }, { consent: 'failed', cmp: 'x' },
+    { consent: 'choice', adapter: 'onetrust' }, { consent: 'working', since: 0 }, { shortsLeak: 3 }, {}];
+  const english = states.map((s) => [chipFor({}, s, {}, 1000), badgeFor(s, 1000)]);
+  const enLines = [shortsSummary({ shortsHidden: 3, shortsRedirects: 1 }), outcomeDetail({ consent: 'done', cmp: 'c', doneAt: 5, clicks: 2 }, (x) => 't' + x)];
+  setLang('cs');
+  try {
+    assert.equal(LANG, 'cs');
+    assert.deepEqual(chipFor({ consent: 'working' }, { consent: 'done', host: 'a.cz' }), { text: 'cookies odmítnuty', tone: 'ok' });
+    assert.deepEqual(chipFor({}, { consent: 'failed' }), { text: 'lišta nezodpovězena', tone: 'bad', sub: STATUS_CS.failed.chip });
+    assert.equal(chipFor({}, { consent: 'wall' }).text, STATUS_CS.wall.label);
+    assert.equal(chipFor({}, { consent: 'wall' }).sub, STATUS_CS.wall.chip);
+    assert.equal(badgeFor({ consent: 'wall', host: 'www.seznam.cz' }).title, 'declutter: ' + STATUS_CS.wall.label + ' — ' + STATUS_CS.wall.next);
+    assert.equal(badgeFor({ consent: 'wall', host: 'www.seznam.cz' }).text, 'Kč');
+    assert.equal(badgeFor({ consent: 'done', cmp: 'Cookiebot' }).title, 'declutter: cookies odmítnuty (Cookiebot)');
+    assert.equal(badgeFor({ consent: 'failed', cmp: 'cz-alza' }).title, 'declutter: lišta nezodpovězena — ' + STATUS_CS.failed.next);
+    assert.equal(badgeFor({ shortsLeak: 3 }).title, 'declutter: 3 shorty zachyceny záložní kontrolou a skryty');
+    assert.equal(badgeFor({}).title, 'declutter');
+    // Tones and colours do not change with the language.
+    for (const [i, s] of states.entries()) {
+      assert.equal(chipFor({}, s, {}, 1000)?.tone, english[i][0]?.tone);
+      assert.equal(badgeFor(s, 1000).color, english[i][1].color);
+      assert.equal(badgeFor(s, 1000).text, english[i][1].text);
+    }
+    assert.equal(statusWords().paused.label, STATUS_CS.paused.label);
+    assert.equal(reasonText('banner'), 'lišta tam pořád je');
+    // Czech counts: 1, 2-4, 5+.
+    assert.equal(shortsSummary({ shortsHidden: 1 }), '1 short skrytý na této stránce');
+    assert.equal(shortsSummary({ shortsHidden: 3, shortsRedirects: 1 }), '3 shorty skryté na této stránce · 1 otevřený v normálním přehrávači');
+    assert.equal(shortsStatsText({ shortsHidden: 12, shortsPages: 1 }), '12 shortů skrytých na 1 stránce youtube');
+    assert.equal(outcomeDetail({ consent: 'done', cmp: 'c', doneAt: 5, clicks: 2, kept: true }, (x) => 't' + x), 'c · t5 · 2 kliky (před znovunačtením stránky)');
+    assert.equal(updateOutcome(['u'], {}, { u: { ok: true, rules: 5 } }), '5 nových pravidel');
+    assert.equal(updateOutcome(['u'], {}, { u: { ok: false, error: 'server error 404' } }), 'nedostupné (chyba serveru 404)');
+    assert.equal(ruleListLine(undefined).text, '(zatím nezkontrolováno)');
+    assert.equal(aboutSummary({ since: Date.UTC(2026, 9, 3, 12), refused: 1, shortsHidden: 2, clicks: 5 }).clicks, '5 ušetřených kliků');
+    assert.equal(t('popup.noBanner'), 'žádná známá cookie lišta');
+  } finally { setLang('en'); }
+  // Back in English: the same words as before the switch.
+  assert.deepEqual(states.map((s) => [chipFor({}, s, {}, 1000), badgeFor(s, 1000)]), english);
+  assert.deepEqual([shortsSummary({ shortsHidden: 3, shortsRedirects: 1 }), outcomeDetail({ consent: 'done', cmp: 'c', doneAt: 5, clicks: 2 }, (x) => 't' + x)], enLines);
+  assert.equal(enLines[0], '3 shorts hidden on this page · 1 opened in the normal player');
+  assert.equal(t('popup.noBanner'), 'no known cookie banner found');
 });

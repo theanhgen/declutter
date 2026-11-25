@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
-<title>declutter is on</title>
+<title data-i18n="welcome.title">declutter is on</title>
 <link rel="stylesheet" href="../tokens.css">
 <style>
   /* Opened once after install (background.js, Chrome and Firefox; Safari's container app explains setup). Same
@@ -38,26 +38,26 @@
 </style>
 </head>
 <body>
-  <h1><img src="../popup/d.svg" alt="" class="logo">declutter is on</h1>
+  <h1 data-i18n="welcome.heading"><img src="../popup/d.svg" alt="" class="logo">declutter is on</h1>
   <div id="access" hidden>
-    <p><strong>one step left:</strong> allow declutter on all sites. Without it, it can't see the cookie banners or
+    <p data-i18n="welcome.access"><strong data-i18n="welcome.oneStep">one step left:</strong> allow declutter on all sites. Without it, it can't see the cookie banners or
       YouTube.</p>
-    <p><button id="grant">allow on all sites</button></p>
+    <p><button id="grant" data-i18n="welcome.grant">allow on all sites</button></p>
   </div>
-  <p id="ready">Nothing to set up. From now on:</p>
-  <p class="bullet">YouTube Shorts are hidden, and a Shorts link opens in the normal player. Posts in feeds and the Playables shelf too; each has its own switch.</p>
-  <p class="bullet">cookie banners are answered with "refuse". A short note in the corner says what was done.</p>
-  <p class="bullet" id="walls">pay walls ("agree to tracking or pay") are never hidden or refused: the toolbar button shows a currency badge.</p>
-  <p class="bullet">per site, choose refuse / accept / leave alone from the toolbar button there, or in settings → your choice.</p>
-  <h2 style="font-size:1em;font-weight:normal;margin-top:2em">try it</h2>
+  <p id="ready" data-i18n="welcome.ready">Nothing to set up. From now on:</p>
+  <p class="bullet" data-i18n="welcome.shorts">YouTube Shorts are hidden, and a Shorts link opens in the normal player. Posts in feeds and the Playables shelf too; each has its own switch.</p>
+  <p class="bullet" data-i18n="welcome.banners">cookie banners are answered with "refuse". A short note in the corner says what was done.</p>
+  <p class="bullet" id="walls" data-i18n="welcome.walls">pay walls ("agree to tracking or pay") are never hidden or refused: the toolbar button shows a currency badge.</p>
+  <p class="bullet" data-i18n="welcome.perSite">per site, choose refuse / accept / leave alone from the toolbar button there, or in settings → your choice.</p>
+  <h2 style="font-size:1em;font-weight:normal;margin-top:2em" data-i18n="welcome.try">try it</h2>
   <div role="status" aria-live="polite">
-    <p class="bullet"><a href="https://www.youtube.com/results?search_query=music" target="_blank" rel="noopener" id="tryShorts">open a YouTube search →</a> <span id="shortsTick" class="tick"></span></p>
-    <p class="bullet"><a href="https://www.bbc.com/" target="_blank" rel="noopener" id="tryBanner">open a site with a cookie banner (bbc.com) →</a> <span id="bannerTick" class="tick"></span></p>
+    <p class="bullet"><a href="https://www.youtube.com/results?search_query=music" target="_blank" rel="noopener" id="tryShorts" data-i18n="welcome.tryShorts">open a YouTube search →</a> <span id="shortsTick" class="tick"></span></p>
+    <p class="bullet"><a href="https://www.bbc.com/" target="_blank" rel="noopener" id="tryBanner" data-i18n="welcome.tryBanner">open a site with a cookie banner (bbc.com) →</a> <span id="bannerTick" class="tick"></span></p>
   </div>
-  <p>Pin the button so it stays in reach: <span class="muted">Chrome, Edge:</span> the puzzle-piece icon → pin next to
+  <p data-i18n="welcome.pin">Pin the button so it stays in reach: <span class="muted">Chrome, Edge:</span> the puzzle-piece icon → pin next to
     declutter. <span class="muted">Firefox:</span> the extensions button → declutter's gear → pin to toolbar.</p>
-  <p class="muted">To allow some kinds of cookies everywhere instead of refusing all, see
-    <a href="../options/options.html#choice">settings → your choice</a>. Nothing leaves your browser unless you send a report.</p>
+  <p class="muted" data-i18n="welcome.more">To allow some kinds of cookies everywhere instead of refusing all, see
+    <a href="../options/options.html#choice" data-i18n="welcome.moreLink">settings → your choice</a>. Nothing leaves your browser unless you send a report.</p>
   <script src="welcome.js"></script>
 </body>
 </html>
