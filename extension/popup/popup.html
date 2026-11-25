@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../tokens.css">
 <style>
   /* A plain-text menu, the settings page's grammar: one mono at its natural width, lowercase, state written as words
      ([on] / off) in one right-hand column, the current row marked by one ink band. Only this page's status is at full
@@ -20,13 +21,13 @@
   :root {
     color-scheme: light dark;
     --bg: hsl(0, 0%, 97%); --fg: hsl(0, 0%, 10%); --muted: hsl(0, 0%, 42%); --faint: hsl(0, 0%, 62%); --line: hsl(0, 0%, 78%);
-    /* handled: the app icon's rose (#c96575) as a pale field under ink */
-    --done: #f1d3d9; --done-fg: hsl(0, 0%, 10%);
+    /* handled: the app icon's rose as a pale field under ink */
+    --done: var(--accent-pale); --done-fg: hsl(0, 0%, 10%);
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: hsl(0, 0%, 9%); --fg: hsl(0, 0%, 90%); --muted: hsl(0, 0%, 58%); --faint: hsl(0, 0%, 38%); --line: hsl(0, 0%, 30%);
-      --done: #5e2c37; --done-fg: hsl(0, 0%, 95%);
+      --done: var(--accent-deep); --done-fg: hsl(0, 0%, 95%);
     }
   }
   * { box-sizing: border-box; }

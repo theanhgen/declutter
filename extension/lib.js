@@ -1,5 +1,6 @@
 // Pure helpers shared by the background and content scripts; unit-tested in test/unit.test.mjs.
 
+import { PALETTE } from './palette.js';
 export const STUCK_AFTER_MS = 15000;
 
 export const hostMatches = (host, domains) =>
@@ -87,9 +88,9 @@ export function ruleListStatus(prev, result, now = Date.now()) {
 export const RULES_STALE_MS = 7 * 24 * 60 * 60 * 1000;
 const shortDate = (t) => new Date(t).toLocaleDateString('en', { month: 'short', day: 'numeric' });
 export function ruleListLine(st, now = Date.now()) {
-  if (!st) return { text: '(not checked yet)', dot: '#8d8d8d' };
+  if (!st) return { text: '(not checked yet)', dot: PALETTE.neutral };
   const lastOkAt = st.lastOkAt ?? (st.ok ? st.at : undefined);
-  const dot = !lastOkAt ? '#e5484d' : now - lastOkAt > RULES_STALE_MS ? '#f76b15' : '#30a46c';
+  const dot = !lastOkAt ? PALETTE.bad : now - lastOkAt > RULES_STALE_MS ? PALETTE.wall : PALETTE.ok;
   if (st.ok) return { text: `(${st.rules} rules, checked ${new Date(st.at).toLocaleString()})`, dot };
   return { text: `(couldn't reach it (${st.error}); ${lastOkAt ? `still using ${st.rules} rules from ${shortDate(lastOkAt)}` : 'no rules from it yet'})`, dot };
 }
@@ -132,7 +133,8 @@ export function wallModePatch(host, mode, s = {}) {
 // One status per tab state, shared by the popup, the chip and the toolbar badge (#21): the same label and the same
 // tone (colour) on every surface. chip: what the chip adds after the label to say where to act; next: the same for
 // the badge tooltip.
-export const TONE_COLOR = { ok: '#1e8e3e', wall: '#e37400', bad: '#d93025', neutral: '#777' };
+// The badge's colours. Wall and bad carry white text there, so they use the palette's darker badge shades.
+export const TONE_COLOR = { ok: PALETTE.ok, wall: PALETTE.wallBadge, bad: PALETTE.badBadge, neutral: PALETTE.neutral };
 export const STATUS = {
   done: { label: 'cookies refused', tone: 'ok' },
   hidden: { label: 'banner hidden', tone: 'ok' },

@@ -1,0 +1,9 @@
+/* The one palette (#24), same values as palette.js. Status colours (ok / wall / bad) only mean status. */
+:root {
+  --accent-pale: #f1d3d9;
+  --accent-deep: #5e2c37;
+  --ok: #30a46c;
+  --wall: #f76b15;
+  --bad: #e5484d;
+  --neutral: #8d8d8d;
+}

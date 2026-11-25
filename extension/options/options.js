@@ -61,7 +61,7 @@ const undoNotes = (where) => undos.filter((u) => u.where === where).flatMap((u) 
   el('span', { className: 'muted', textContent: ` ${u.text}. ` }),
   link('undo', () => { if (!undos.includes(u)) return; clearTimeout(u.timer); undos = undos.filter((x) => x !== u); u.undo(); }),
 ]);
-const undoLine = (where) => (undos.some((u) => u.where === where) ? [el('p', { className: 'bullet', style: '--dot:#8d8d8d' }, ...undoNotes(where))] : []);
+const undoLine = (where) => (undos.some((u) => u.where === where) ? [el('p', { className: 'bullet' }, ...undoNotes(where))] : []);
 const storedSettings = async () => (await api.storage.local.get('settings')).settings ?? {};
 
 async function render() {
@@ -88,7 +88,7 @@ async function render() {
   }
 
   $('categories').replaceChildren(...CATEGORIES.flatMap(([k, name, desc]) => [
-    el('p', { className: 'bullet', style: '--dot:#3e63dd' }, `${name}: `,
+    el('p', { className: 'bullet' }, `${name}: `,
       el('span', { className: 'choice' }, ...choiceLine([[false, 'off'], [true, 'on']], s.categories[k], (v) => save({ categories: { ...s.categories, [k]: v } })))),
     el('p', { className: 'desc', textContent: desc }),
   ]));
@@ -104,7 +104,7 @@ async function render() {
   // there. A subdomain listed under a listed parent keeps its own line.
   const hosts = [...new Set([...s.acceptSites, ...s.exceptions, ...s.refuseSites])].sort();
   $('sites').replaceChildren(...(hosts.length
-    ? hosts.map((host) => el('p', { className: 'bullet', style: '--dot:#8d8d8d' }, `${host}: `,
+    ? hosts.map((host) => el('p', { className: 'bullet' }, `${host}: `,
       el('span', { className: 'choice' }, ...choiceLine(SITE_MODES, siteMode(host, s), (m) => setSite(host, m)))))
     : [el('p', { className: 'desc', textContent: 'no sites yet.' })]), ...undoLine('sites'));
   const addSite = (mode) => (e) => {
@@ -203,13 +203,13 @@ async function render() {
   $('byCmp').replaceChildren(...(rows.length ? [
     el('table', {}, el('tr', {}, el('th', { textContent: 'banner (cmp)' }), el('th', { textContent: 'filled' }), el('th', { textContent: 'clicks' })),
       ...rows.map(([cmp, r]) => el('tr', {}, el('td', { textContent: cmp }), el('td', { className: 'n', textContent: r.filled }), el('td', { className: 'n', textContent: r.clicks })))),
-    el('p', { className: 'bullet', style: '--dot:#8d8d8d' }, link('clear counters', clearStats)),
+    el('p', { className: 'bullet' }, link('clear counters', clearStats)),
   ] : []), ...undoLine('byCmp'));
 
   // reported sites; fixedAt: a later rule list added a rule or wall entry for the site (markFixed in lib.js)
   const lines = reports.map((r) => `${new Date(r.at).toISOString().slice(0, 16).replace('T', ' ')}  ${r.url}  [${r.consent}${r.cmp ? ' ' + r.cmp : ''}]${r.reason ? ` ${reasonLabel(r.reason)}` : ''}` +
     (r.fixedAt ? `  fixed in rule list ${new Date(r.fixedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` : ''));
-  const actions = el('p', { className: 'bullet', style: '--dot:#8d8d8d' });
+  const actions = el('p', { className: 'bullet' });
   actions.append(link('copy list', async () => { await navigator.clipboard.writeText(lines.join('\n')); actions.firstChild.textContent = 'copied'; }), ' / ',
     link('clear', async () => {
       const { reports: old = [] } = await api.storage.local.get('reports');
@@ -230,7 +230,7 @@ async function render() {
   const sendState = (r) => r.sendPending ? ['  ', el('span', { className: 'muted', textContent: 'waiting to send (' }), link('cancel', () => cancelSend(r.host)), el('span', { className: 'muted', textContent: ')' })]
     : r.sentAt ? ['  ', el('span', { className: 'muted', textContent: 'sent' })] : [];
   $('reports').replaceChildren(...(reports.length
-    ? [...lines.map((t, i) => el('p', { className: 'bullet', style: `--dot:${reports[i].fixedAt ? '#30a46c' : '#e5484d'}` }, t, ...sendState(reports[i]))), actions]
+    ? [...lines.map((t, i) => el('p', { className: 'bullet', style: `--dot:var(${reports[i].fixedAt ? '--ok' : '--bad'})` }, t, ...sendState(reports[i]))), actions]
     : [el('p', { className: 'muted', textContent: 'none.' })]), ...undoLine('reports'));
 }
 render();

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
 <title>declutter is on</title>
+<link rel="stylesheet" href="../tokens.css">
 <style>
   /* Opened once after install (background.js, Chrome and Firefox; Safari's container app explains setup). Same
      plain-text look as the settings page. */
@@ -28,11 +29,11 @@
   a:link, a:visited { color: var(--link); }
   .bullet { position: relative; margin-left: 23px; }
   .bullet::before { content: " "; position: absolute; left: -20px; top: 8px; width: 5px; height: 5px;
-    border-radius: 100%; background: var(--dot, currentColor); }
+    border-radius: 100%; background: var(--dot, var(--neutral)); }
   .muted { color: var(--muted); }
   button { font: inherit; font-size: 14px; color: var(--bg); background: var(--fg); border: 0; border-radius: 999px; padding: 4px 14px; cursor: pointer; }
   button:focus-visible, a:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
-  .tick { color: #30a46c; }
+  .tick { color: var(--ok); }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -44,14 +45,14 @@
     <p><button id="grant">allow on all sites</button></p>
   </div>
   <p id="ready">Nothing to set up. From now on:</p>
-  <p class="bullet" style="--dot:#e5484d">YouTube Shorts are hidden, and a Shorts link opens in the normal player.</p>
-  <p class="bullet" style="--dot:#3e63dd">cookie banners are answered with "refuse". A short note in the corner says what was done.</p>
-  <p class="bullet" style="--dot:#f76b15" id="walls">pay walls ("agree to tracking or pay") are never hidden or refused: the toolbar button shows a currency badge.</p>
-  <p class="bullet" style="--dot:#30a46c">per site, choose refuse / accept / leave alone from the toolbar button there, or in settings → your choice.</p>
+  <p class="bullet">YouTube Shorts are hidden, and a Shorts link opens in the normal player.</p>
+  <p class="bullet">cookie banners are answered with "refuse". A short note in the corner says what was done.</p>
+  <p class="bullet" id="walls">pay walls ("agree to tracking or pay") are never hidden or refused: the toolbar button shows a currency badge.</p>
+  <p class="bullet">per site, choose refuse / accept / leave alone from the toolbar button there, or in settings → your choice.</p>
   <h2 style="font-size:1em;font-weight:normal;margin-top:2em">try it</h2>
   <div role="status" aria-live="polite">
-    <p class="bullet" style="--dot:#e5484d"><a href="https://www.youtube.com/results?search_query=music" target="_blank" rel="noopener" id="tryShorts">open a YouTube search →</a> <span id="shortsTick" class="tick"></span></p>
-    <p class="bullet" style="--dot:#3e63dd"><a href="https://www.bbc.com/" target="_blank" rel="noopener" id="tryBanner">open a site with a cookie banner (bbc.com) →</a> <span id="bannerTick" class="tick"></span></p>
+    <p class="bullet"><a href="https://www.youtube.com/results?search_query=music" target="_blank" rel="noopener" id="tryShorts">open a YouTube search →</a> <span id="shortsTick" class="tick"></span></p>
+    <p class="bullet"><a href="https://www.bbc.com/" target="_blank" rel="noopener" id="tryBanner">open a site with a cookie banner (bbc.com) →</a> <span id="bannerTick" class="tick"></span></p>
   </div>
   <p>Pin the button so it stays in reach: <span class="muted">Chrome, Edge:</span> the puzzle-piece icon → pin next to
     declutter. <span class="muted">Firefox:</span> the extensions button → declutter's gear → pin to toolbar.</p>

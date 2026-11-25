@@ -242,6 +242,7 @@ async function buildTarget(name, data) {
     fs.copyFileSync(path.join(root, from), path.join(out, to));
   };
   copy('extension/popup/popup.html', 'popup/popup.html');
+  copy('extension/tokens.css', 'tokens.css');
   copy('extension/popup/d.svg', 'popup/d.svg');
   // Martian Mono (OFL-1.1, @fontsource-variable/martian-mono 5.3.0): the same mono on every OS.
   for (const f of ['martian-mono-latin.woff2', 'martian-mono-latin-ext.woff2', 'OFL.txt']) copy(`extension/fonts/${f}`, `fonts/${f}`);

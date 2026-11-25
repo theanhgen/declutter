@@ -154,6 +154,23 @@ test('one status map: chip, popup and badge share the label and tone for every s
   for (const w of ["'cookies refused'", "'pay wall accepted'", "'accepted (your choice)'", "'accepting the wall…'", "'banners left alone here'"]) assert.ok(!popup.includes(w), w);
 });
 
+test('one palette: tokens.css matches palette.js, no other hex in the extension (#24)', async () => {
+  const { PALETTE } = await import('../extension/palette.js');
+  const css = read('extension/tokens.css');
+  for (const [k, v] of Object.entries({ 'accent-pale': 'accentPale', 'accent-deep': 'accentDeep', ok: 'ok', wall: 'wall', bad: 'bad', neutral: 'neutral' })) {
+    assert.ok(css.includes(`--${k}: ${PALETTE[v]};`), k);
+  }
+  const files = ['extension/lib.js', 'extension/background.js', 'extension/consent/chip.js', 'extension/popup/popup.html', 'extension/popup/popup.js',
+    'extension/options/options.html', 'extension/options/options.js', 'extension/welcome/welcome.html', 'extension/welcome/welcome.js'];
+  // Comments are left out: "(#100)" there is an issue number, not a colour.
+  const code = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').replace(/(^|[^:'"`])\/\/.*$/gm, '$1');
+  for (const f of files) assert.doesNotMatch(code(read(f)), /#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b(?![\w-])/, f);
+  // White badge text ("!", the currency) needs 4.5:1 on its background.
+  const lum = (h) => { const c = h.match(/\w\w/g).map((x) => parseInt(x, 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  for (const c of [badgeFor({ consent: 'wall', host: 'x.cz' }).color, badgeFor({ consent: 'failed' }).color]) assert.ok(1.05 / (lum(c) + 0.05) >= 4.5, c);
+  for (const f of ['extension/popup/popup.html', 'extension/options/options.html', 'extension/welcome/welcome.html']) assert.match(read(f), /href="\.\.\/tokens\.css"/, f);
+});
+
 test('hostMatches: exact host and subdomains only', () => {
   assert.ok(hostMatches('www.seznam.cz', ['seznam.cz']));
   assert.ok(hostMatches('seznam.cz', ['seznam.cz']));
