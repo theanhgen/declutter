@@ -129,17 +129,44 @@ export function wallModePatch(host, mode, s = {}) {
   return { ...lists, wallAskSites };
 }
 
+// One status per tab state, shared by the popup, the chip and the toolbar badge (#21): the same label and the same
+// tone (colour) on every surface. chip: what the chip adds after the label to say where to act; next: the same for
+// the badge tooltip.
+export const TONE_COLOR = { ok: '#1e8e3e', wall: '#e37400', bad: '#d93025', neutral: '#777' };
+export const STATUS = {
+  done: { label: 'cookies refused', tone: 'ok' },
+  hidden: { label: 'banner hidden', tone: 'ok' },
+  fallback: { label: "refused all: your mix isn't supported here", tone: 'ok' },
+  choice: { label: 'your choice applied', tone: 'ok' },
+  acceptedSite: { label: 'cookies accepted', tone: 'neutral' },
+  accepted: { label: 'pay wall accepted', tone: 'wall' },
+  wall: { label: 'pay wall: agree to tracking or pay', tone: 'wall', next: 'decide from this menu' },
+  accepting: { label: 'accepting the pay wall…', tone: 'wall' },
+  failed: { label: 'banner not answered', tone: 'bad', chip: 'see the declutter button', next: 'answer it on the page' },
+  working: { label: 'answering the banner…', tone: 'neutral' },
+  paused: { label: 'banners left alone here', tone: 'neutral' },
+};
+// The STATUS key for a tab state, or null (nothing to say): a stuck answer is a failure, a cosmetic rule only hid.
+export function statusKey(state = {}, now = Date.now()) {
+  const c = state.consent;
+  if (c === 'failed' || (c === 'working' && now - (state.since ?? now) > STUCK_AFTER_MS)) return 'failed';
+  if (c === 'done') return state.cosmetic ? 'hidden' : state.choiceFallback ? 'fallback' : 'done';
+  if (c === 'acceptedSite' && state.cosmetic) return 'hidden';
+  return STATUS[c] ? c : null;
+}
+
 export function badgeFor(state, now = Date.now()) {
-  const stuck = state.consent === 'working' && now - (state.since ?? now) > STUCK_AFTER_MS;
-  if (state.consent === 'failed' || stuck) return { text: '!', color: '#d93025', title: 'declutter: cookie banner not answered — answer it on the page' };
-  if (state.consent === 'wall') return { text: currencyFor(state.host), color: '#e37400', title: 'declutter: pay wall — agree or pay, from this menu' };
-  if (state.consent === 'choice') return { text: '', color: '#1e8e3e', title: `declutter: applied your choice (${state.adapter})` };
-  if (state.consent === 'acceptedSite') return { text: '', color: '#1e8e3e', title: `declutter: cookies accepted on this site (${state.cmp})` };
-  if (state.consent === 'accepted') return { text: '', color: '#777', title: `declutter: accepted the pay wall (${state.cmp})` };
-  if (state.consent === 'done') return { text: '', color: '#1e8e3e', title: `declutter: ${state.cosmetic ? 'hid' : 'refused'} ${state.cmp}` };
+  const key = statusKey(state, now);
+  // Shorts the backup check caught say more than "answering…" or "left alone": those two give way to the leak line.
+  if (key && !(state.shortsLeak > 0 && (key === 'working' || key === 'paused'))) {
+    const { label, tone, next } = STATUS[key];
+    const text = key === 'failed' ? '!' : key === 'wall' ? currencyFor(state.host) : '';
+    const via = key === 'choice' ? state.adapter : state.cmp;
+    return { text, color: TONE_COLOR[tone], title: `declutter: ${label}${via ? ` (${via})` : ''}${next ? ` — ${next}` : ''}` };
+  }
   // Shorts the backup check caught are already hidden: worth a line, not an alarm.
-  if (state.shortsLeak > 0) return { text: '', color: '#777', title: `declutter: ${state.shortsLeak} shorts caught by the backup check and hidden` };
-  return { text: '', color: '#777', title: 'declutter' };
+  if (state.shortsLeak > 0) return { text: '', color: TONE_COLOR.neutral, title: `declutter: ${state.shortsLeak} shorts caught by the backup check and hidden` };
+  return { text: '', color: TONE_COLOR.neutral, title: 'declutter' };
 }
 
 // A banner declutter doesn't know yet: autoconsent's heuristic detection (top frame only, never on wall sites) found
@@ -208,17 +235,14 @@ export function markFixed(reports, data, now = Date.now()) {
 // A page that reloads while the chip is still up (reloaded: the new page's init) gets it once more.
 export const CHIP_REPEAT_MS = 60000;
 export const CHIP_VISIBLE_MS = 2500;
-const CHIPS = {
-  done: ['cookies refused', 'ok'], acceptedSite: ['cookies accepted', 'ok'], choice: ['your choice applied', 'ok'],
-  accepted: ['pay wall accepted', 'ok'], wall: ['pay wall: accept from the declutter button', 'wait'],
-  failed: ['banner not answered: see the declutter button', 'bad'],
-};
-// A mix with no adapter for the banner (choiceFallback) was refused outright: the chip says so, not just "refused".
-const FALLBACK_CHIP = ["refused all: your mix isn't supported here", 'ok'];
+// The chip speaks only for outcomes (not for answering in progress or left alone), in the STATUS words and tone.
+const CHIP_KEYS = ['done', 'hidden', 'fallback', 'choice', 'acceptedSite', 'accepted', 'wall', 'failed'];
 export function chipFor(prev, next, last = {}, now = Date.now(), reloaded = false) {
-  const chip = next.cosmetic && CHIPS[next.consent]?.[1] === 'ok' ? ['banner hidden', 'ok']
-    : next.consent === 'done' && next.choiceFallback ? FALLBACK_CHIP : CHIPS[next.consent];
-  if (!chip) return null;
+  // Only a recorded failure: an answer still running (even a slow one) gets no chip.
+  const key = next.consent === 'working' ? null : statusKey(next, now);
+  if (!CHIP_KEYS.includes(key)) return null;
+  const s = STATUS[key];
+  const chip = [s.chip ? `${s.label}: ${s.chip}` : s.label, s.tone];
   const same = last.host === next.host && last.consent === next.consent;
   if (reloaded && same && now - last.at < CHIP_VISIBLE_MS) return { text: chip[0], tone: chip[1] };
   if (prev.consent === next.consent) return null;
