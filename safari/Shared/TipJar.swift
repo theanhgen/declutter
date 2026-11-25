@@ -15,6 +15,8 @@ final class TipJar: ObservableObject {
     @Published var loaded = false
     @Published var loadFailed = false
     @Published var busy = false
+    // The tip being bought, so its button shows a spinner rather than every button just going grey.
+    @Published var buying: String?
     // The last tip, kept across launches: "thank you for the $2.99 tip on Oct 26."
     @Published private(set) var lastTip: Tip? = Tip.saved
     var thanks: Bool { lastTip != nil }
@@ -76,8 +78,9 @@ final class TipJar: ObservableObject {
     func buy(_ product: Product) async {
         guard !busy else { return }
         busy = true
+        buying = product.id
         note = nil
-        defer { busy = false }
+        defer { busy = false; buying = nil }
         do {
             switch try await product.purchase() {
             case .success(let result):
@@ -142,14 +145,24 @@ struct TipJarView: View {
     @ViewBuilder private var buttons: some View {
         // Until the store answers, the row would be empty; show that it's loading.
         if !jar.loaded {
-            ProgressView().controlSize(.small)
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.small)
+                Text("loading prices…").font(Martian.font(.caption, weight: 300)).foregroundStyle(.secondary)
+            }
         }
         ForEach(jar.products, id: \.id) { p in
-            Button(p.displayPrice) { Task { await jar.buy(p) } }
+            Button { Task { await jar.buy(p) } } label: {
+                // The price stays in the layout (hidden) so the button keeps its width under the spinner.
+                ZStack {
+                    Text(p.displayPrice).opacity(jar.buying == p.id ? 0 : 1)
+                    if jar.buying == p.id { ProgressView().controlSize(.small) }
+                }
+            }
                 .buttonStyle(.bordered)
                 .font(Martian.font(.body))
                 .disabled(jar.busy)
                 .accessibilityLabel("tip \(p.displayPrice)")  // the price alone doesn't say what the button does
+                .accessibilityValue(jar.buying == p.id ? "buying…" : "")
         }
         if jar.loadFailed {
             Button("retry") { Task { await jar.load() } }
