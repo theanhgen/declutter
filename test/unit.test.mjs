@@ -208,7 +208,11 @@ test('chipFor: once per outcome, not on a reload of the same site', () => {
   // a cosmetic rule answers nothing: say hidden, never refused or accepted
   assert.equal(chipFor({}, { consent: 'done', cosmetic: true }).text, 'banner hidden');
   assert.equal(chipFor({}, { consent: 'acceptedSite', cosmetic: true }).text, 'banner hidden');
-  assert.equal(chipFor({}, { consent: 'failed', cosmetic: true }).text, 'banner not answered: see the declutter button');
+  assert.deepEqual(chipFor({}, { consent: 'failed', cosmetic: true }), { text: 'banner not answered', tone: 'bad', sub: 'see the declutter button' });
+  // where to act, as the chip's second line (#11)
+  assert.equal(chipFor({}, { consent: 'wall' }).sub, 'agree from the declutter button');
+  // a failure names no rule, on the badge either
+  assert.doesNotMatch(badgeFor({ consent: 'failed', cmp: 'cz-alza' }).title, /cz-alza/);
   assert.equal(chipFor({}, { consent: 'failed' }).tone, 'bad');
   for (const consent of ['working', 'paused', 'accepting', undefined]) assert.equal(chipFor({}, { consent }), null);
   assert.equal(chipFor({ consent: 'done' }, { consent: 'done', host: 'a.cz' }), null);

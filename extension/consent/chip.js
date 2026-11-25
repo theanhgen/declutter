@@ -29,10 +29,10 @@ function logo() {
   return svg;
 }
 
-export function showChip({ text, tone, host: site }) {
+export function showChip({ text, sub, tone, host: site }) {
   if (window !== window.top || site !== location.hostname) return;
   // At document_start there is no body and nothing to measure: wait for the page.
-  if (!document.body) { document.addEventListener('DOMContentLoaded', () => showChip({ text, tone, host: site }), { once: true }); return; }
+  if (!document.body) { document.addEventListener('DOMContentLoaded', () => showChip({ text, sub, tone, host: site }), { once: true }); return; }
   shown?.remove();
   clearTimeout(timer);
   const narrow = window.innerWidth <= 600;
@@ -41,8 +41,9 @@ export function showChip({ text, tone, host: site }) {
     ...(narrow ? { left: '0', right: '0', display: 'flex', justifyContent: 'center' } : { right: '16px' }),
   });
   const pill = el('div', {
-    display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '7px', boxSizing: 'border-box', height: '32px',
-    padding: '0 12px', borderRadius: '16px', overflow: 'hidden', whiteSpace: 'nowrap', background: PALETTE.pill, color: PALETTE.pillText,
+    // At most the viewport less a margin (a 320 px phone): a long label wraps instead of running off the screen (#11).
+    display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '7px', boxSizing: 'border-box', minHeight: '32px',
+    maxWidth: 'calc(100vw - 32px)', padding: '7px 12px', borderRadius: '16px', overflow: 'hidden', background: PALETTE.pill, color: PALETTE.pillText,
     font: '12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace', boxShadow: '0 2px 10px rgba(0,0,0,.28)',
   });
   // Nothing on the host names declutter or the outcome: the page can't read either from the closed root.
@@ -54,13 +55,15 @@ export function showChip({ text, tone, host: site }) {
   const [mark, color] = MARK[tone] ?? MARK.wall;
   const visible = el('span', { display: 'flex', alignItems: 'center', gap: '7px' });
   visible.setAttribute('aria-hidden', 'true');
-  visible.append(logo(), el('span', {}, text), ...(mark ? [el('span', { color, fontWeight: '700' }, mark)] : []));
+  const words = el('span', { display: 'flex', flexDirection: 'column', gap: '3px', lineHeight: '1.25' }, '');
+  words.append(el('span', {}, text), ...(sub ? [el('span', { opacity: '.7', fontSize: '11px' }, sub)] : []));
+  visible.append(logo(), words, ...(mark ? [el('span', { color, fontWeight: '700' }, mark)] : []));
   const spoken = el('span', { position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clipPath: 'inset(50%)', whiteSpace: 'nowrap' });
   pill.append(visible, spoken);
   host.attachShadow({ mode: 'closed' }).append(pill);
   document.body.append(host);
   shown = host;
-  setTimeout(() => { spoken.textContent = `declutter: ${text}`; }, 100);
+  setTimeout(() => { spoken.textContent = `declutter: ${text}${sub ? `. ${sub}` : ''}`; }, 100);
 
   const width = pill.getBoundingClientRect().width;
   // No width (not laid out yet, a hidden tab): fade only, or the pill would pop from nothing.

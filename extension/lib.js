@@ -142,7 +142,7 @@ export const STATUS = {
   choice: { label: 'your choice applied', tone: 'ok' },
   acceptedSite: { label: 'cookies accepted', tone: 'neutral' },
   accepted: { label: 'pay wall accepted', tone: 'wall' },
-  wall: { label: 'pay wall: agree to tracking or pay', tone: 'wall', next: 'decide from this menu' },
+  wall: { label: 'pay wall: agree to tracking or pay', tone: 'wall', chip: 'agree from the declutter button', next: 'decide from this menu' },
   accepting: { label: 'accepting the pay wall…', tone: 'wall' },
   failed: { label: 'banner not answered', tone: 'bad', chip: 'see the declutter button', next: 'answer it on the page' },
   working: { label: 'answering the banner…', tone: 'neutral' },
@@ -163,7 +163,8 @@ export function badgeFor(state, now = Date.now()) {
   if (key && !(state.shortsLeak > 0 && (key === 'working' || key === 'paused'))) {
     const { label, tone, next } = STATUS[key];
     const text = key === 'failed' ? '!' : key === 'wall' ? currencyFor(state.host) : '';
-    const via = key === 'choice' ? state.adapter : state.cmp;
+    // A failure names no rule: "cz-alza" means nothing to the user (#11).
+    const via = key === 'failed' ? '' : key === 'choice' ? state.adapter : state.cmp;
     return { text, color: TONE_COLOR[tone], title: `declutter: ${label}${via ? ` (${via})` : ''}${next ? ` — ${next}` : ''}` };
   }
   // Shorts the backup check caught are already hidden: worth a line, not an alarm.
@@ -244,12 +245,13 @@ export function chipFor(prev, next, last = {}, now = Date.now(), reloaded = fals
   const key = next.consent === 'working' ? null : statusKey(next, now);
   if (!CHIP_KEYS.includes(key)) return null;
   const s = STATUS[key];
-  const chip = [s.chip ? `${s.label}: ${s.chip}` : s.label, s.tone];
+  // The label, and where to act on a second line (sub) when there is something to do (#11).
+  const chip = { text: s.label, tone: s.tone, ...(s.chip && { sub: s.chip }) };
   const same = last.host === next.host && last.consent === next.consent;
-  if (reloaded && same && now - last.at < CHIP_VISIBLE_MS) return { text: chip[0], tone: chip[1] };
+  if (reloaded && same && now - last.at < CHIP_VISIBLE_MS) return chip;
   if (prev.consent === next.consent) return null;
   if (last.host === next.host && last.consent === next.consent && now - last.at < CHIP_REPEAT_MS) return null;
-  return { text: chip[0], tone: chip[1] };
+  return chip;
 }
 
 // What a newly found banner resets in the tab state (setTab merges, so the previous answer would otherwise show).
