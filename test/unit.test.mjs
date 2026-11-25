@@ -171,6 +171,30 @@ test('one palette: tokens.css matches palette.js, no other hex in the extension 
   for (const f of ['extension/popup/popup.html', 'extension/options/options.html', 'extension/welcome/welcome.html']) assert.match(read(f), /href="\.\.\/tokens\.css"/, f);
 });
 
+test('the privacy page names exactly the fields a report sends (#18)', () => {
+  // The top-level keys of the report bodies in background.js: the first send (sendReport) and the reason (sendReason).
+  const keysOf = (src, at) => {
+    let i = src.indexOf('{', at), depth = 0, part = '';
+    const parts = [];
+    for (i += 1; ; i++) {
+      const ch = src[i];
+      if ('({['.includes(ch)) depth++;
+      if (')}]'.includes(ch)) { if (depth === 0) break; depth--; }
+      if (ch === ',' && depth === 0) { parts.push(part); part = ''; } else part += ch;
+    }
+    return [...parts, part].map((p) => p.trim().match(/^(\w+)/)?.[1]).filter(Boolean).sort();
+  };
+  const bg = read('extension/background.js');
+  const first = keysOf(bg, bg.indexOf('body: {', bg.indexOf('async function sendReport')));
+  const second = keysOf(bg, bg.indexOf('JSON.stringify({', bg.indexOf('async function sendReason')));
+  assert.deepEqual(first, ['browser', 'cmp', 'consent', 'url', 'version']);
+  assert.deepEqual(second, [...first, 'reason'].sort());
+  // Each sent field has its line on the privacy page, and the page lists no other.
+  const FIELD = { url: 'site', consent: 'consent state', cmp: 'CMP', version: 'version', browser: 'browser', reason: 'reason' };
+  const listed = [...read('site/privacy.html').matchAll(/<li><strong>([^<]+)<\/strong>/g)].map((m) => m[1]).sort();
+  assert.deepEqual(listed, second.map((k) => FIELD[k]).sort());
+});
+
 test('one feature list and one set of category names on every surface (#27)', async () => {
   const { FEATURE_LINE, FEATURE_LINE_LOWER, CATEGORIES } = await import('../extension/features.js');
   // The line, word for word: the Chrome summary (manifest), settings, the site's pitch, the listing; the apps in

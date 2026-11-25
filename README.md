@@ -1,8 +1,8 @@
 # declutter
 
-Free, open-source browser extension that hides YouTube Shorts and answers cookie-consent banners the way you
-choose: refuse by default, or allow only the categories you pick; per site: refuse, accept, or leave alone.
-Consent-or-pay walls are never hidden. No account, no analytics, no tracking: the only requests are rule-list downloads (store builds fetch ours from GitHub Pages at install, at browser start, every 12 hours and when you change the lists) and reports you choose to send. Store builds for Chrome and Firefox also open a goodbye page when the extension is removed.
+Free, open-source browser extension. Hides YouTube Shorts, posts in feeds and Playables, and answers cookie banners
+the way you choose: refuse by default, or allow only the categories you pick; per site: refuse, accept, or leave alone.
+Consent-or-pay walls are never hidden. No account, no analytics, no tracking: the only requests are rule-list downloads (store builds fetch ours from GitHub Pages at install, at browser start, every 12 hours and when you change the lists) and reports you choose to send (the site's address, what declutter did there, version, browser, and an optional reason from fixed words). Store builds for Chrome and Firefox also open a goodbye page when the extension is removed.
 
 Chrome, Edge, Opera, Brave, Vivaldi, Firefox (desktop and Android), Safari (Mac, iPhone, iPad). Works
 worldwide through DuckDuckGo's [autoconsent](https://github.com/duckduckgo/autoconsent), plus its own rule pack for sites it misses.
