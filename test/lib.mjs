@@ -22,11 +22,13 @@ export async function launch({ extension = true, mobile = false, walls = 'manual
     channel: 'chromium',
     headless: !process.env.HEADED,
     userAgent: mobile ? IPHONE_UA : UA,
-    locale: 'cs-CZ',
     viewport: mobile ? { width: 393, height: 852 } : { width: 1400, height: 900 },
     ...(mobile && { isMobile: true, hasTouch: true, deviceScaleFactor: 3 }),
     // Without this navigator.webdriver is true, and some banners (orestbida cookieconsent) never show.
-    args: ['--disable-blink-features=AutomationControlled',
+    // A Czech visitor in an English browser: sites get cs-CZ (navigator.language, Accept-Language), so banners behave
+    // as for a Czech visitor, while the browser's UI language, which the extension's own words follow (#25), stays
+    // English. Not Playwright's locale option: it overrides the UI language the extension sees as well.
+    args: ['--disable-blink-features=AutomationControlled', '--lang=en-US', '--accept-lang=cs-CZ,cs',
       ...(extension ? [`--disable-extensions-except=${ext}`, `--load-extension=${ext}`] : [])],
   });
   const sw = extension ? (ctx.serviceWorkers()[0] ?? await ctx.waitForEvent('serviceworker')) : null;

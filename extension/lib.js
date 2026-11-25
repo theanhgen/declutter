@@ -1,6 +1,7 @@
 // Pure helpers shared by the background and content scripts; unit-tested in test/unit.test.mjs.
 
 import { PALETTE } from './palette.js';
+import { LANG, t } from './i18n.js';
 export const STUCK_AFTER_MS = 15000;
 
 export const hostMatches = (host, domains) =>
@@ -86,23 +87,30 @@ export function ruleListStatus(prev, result, now = Date.now()) {
 
 // Settings' line for one rule list: its text and dot. Amber once the rules in use are more than a week old.
 export const RULES_STALE_MS = 7 * 24 * 60 * 60 * 1000;
-const shortDate = (t) => new Date(t).toLocaleDateString('en', { month: 'short', day: 'numeric' });
+const shortDate = (at) => new Date(at).toLocaleDateString(LANG, { month: 'short', day: 'numeric' });
+// A fetch error (fetchRuleList's words, kept in storage in English) in the UI language.
+const errorText = (e = '') => {
+  const server = /^server error (\d+)$/.exec(e);
+  if (server) return t('error.server', { status: server[1] });
+  return { offline: t('error.offline'), 'timed out': t('error.timeout'), 'not a rule list': t('error.notList') }[e] ?? e;
+};
 export function ruleListLine(st, now = Date.now()) {
-  if (!st) return { text: '(not checked yet)', dot: PALETTE.neutral };
+  if (!st) return { text: t('lists.notChecked'), dot: PALETTE.neutral };
   const lastOkAt = st.lastOkAt ?? (st.ok ? st.at : undefined);
   const dot = !lastOkAt ? PALETTE.bad : now - lastOkAt > RULES_STALE_MS ? PALETTE.wall : PALETTE.ok;
-  if (st.ok) return { text: `(${st.rules} rules, checked ${new Date(st.at).toLocaleString()})`, dot };
-  return { text: `(couldn't reach it (${st.error}); ${lastOkAt ? `still using ${st.rules} rules from ${shortDate(lastOkAt)}` : 'no rules from it yet'})`, dot };
+  if (st.ok) return { text: t('lists.ok', { n: st.rules, at: new Date(st.at).toLocaleString() }), dot };
+  const rest = lastOkAt ? t('lists.stillUsing', { n: st.rules, date: shortDate(lastOkAt) }) : t('lists.noneYet');
+  return { text: t('lists.unreachable', { error: errorText(st.error), rest }), dot };
 }
 
 // What "update rules now" ended in, from the statuses before and after: the error, the new rules, or up to date.
 export function updateOutcome(urls, before = {}, after = {}) {
   const errors = [...new Set(urls.filter((u) => after[u] && !after[u].ok).map((u) => after[u].error))];
-  if (errors.length) return `couldn't reach it (${errors.join(' / ')})`;
+  if (errors.length) return t('update.unreachable', { error: errors.map(errorText).join(' / ') });
   const added = urls.reduce((n, u) => n + Math.max(0, (after[u]?.rules ?? 0) - (before[u]?.rules ?? 0)), 0);
-  if (added) return `${added} new rule${added === 1 ? '' : 's'}`;
+  if (added) return t('update.newRules', { n: added });
   const latest = urls.map((u) => after[u]?.generated).filter(Boolean).sort().pop();
-  return latest ? `up to date (${shortDate(latest)})` : 'up to date';
+  return latest ? t('update.upToDateOn', { date: shortDate(latest) }) : t('update.upToDate');
 }
 
 // The pay-wall badge shows the site's own currency, read from its country domain. Consent-or-pay walls are a
@@ -148,6 +156,23 @@ export const STATUS = {
   working: { label: 'answering the banner…', tone: 'neutral' },
   paused: { label: 'banners left alone here', tone: 'neutral' },
 };
+// The same words in Czech (#25), field for field.
+export const STATUS_CS = {
+  done: { label: 'cookies odmítnuty' },
+  hidden: { label: 'lišta skryta' },
+  fallback: { label: 'vše odmítnuto: vaše volba tu nejde nastavit' },
+  choice: { label: 'vaše volba použita' },
+  acceptedSite: { label: 'cookies přijaty' },
+  accepted: { label: 'placená zeď přijata' },
+  wall: { label: 'placená zeď: souhlas se sledováním, nebo platba', chip: 'souhlaste přes tlačítko declutter', next: 'rozhodněte v této nabídce' },
+  accepting: { label: 'přijímá se placená zeď…' },
+  failed: { label: 'lišta nezodpovězena', chip: 'viz tlačítko declutter', next: 'odpovězte na ni na stránce' },
+  working: { label: 'odpovídá se na lištu…' },
+  paused: { label: 'lišty se tu nechávají být' },
+};
+// One status in the UI language; statusWords: the whole map.
+export const statusOf = (key) => (LANG === 'cs' ? { ...STATUS[key], ...STATUS_CS[key] } : STATUS[key]);
+export const statusWords = () => Object.fromEntries(Object.keys(STATUS).map((k) => [k, statusOf(k)]));
 // The STATUS key for a tab state, or null (nothing to say): a stuck answer is a failure, a cosmetic rule only hid.
 export function statusKey(state = {}, now = Date.now()) {
   const c = state.consent;
@@ -161,14 +186,14 @@ export function badgeFor(state, now = Date.now()) {
   const key = statusKey(state, now);
   // Shorts the backup check caught say more than "answering…" or "left alone": those two give way to the leak line.
   if (key && !(state.shortsLeak > 0 && (key === 'working' || key === 'paused'))) {
-    const { label, tone, next } = STATUS[key];
+    const { label, tone, next } = statusOf(key);
     const text = key === 'failed' ? '!' : key === 'wall' ? currencyFor(state.host) : '';
     // A failure names no rule: "cz-alza" means nothing to the user (#11).
     const via = key === 'failed' ? '' : key === 'choice' ? state.adapter : state.cmp;
     return { text, color: TONE_COLOR[tone], title: `declutter: ${label}${via ? ` (${via})` : ''}${next ? ` — ${next}` : ''}` };
   }
   // Shorts the backup check caught are already hidden: worth a line, not an alarm.
-  if (state.shortsLeak > 0) return { text: '', color: TONE_COLOR.neutral, title: `declutter: ${state.shortsLeak} shorts caught by the backup check and hidden` };
+  if (state.shortsLeak > 0) return { text: '', color: TONE_COLOR.neutral, title: t('badge.leak', { n: state.shortsLeak }) };
   return { text: '', color: TONE_COLOR.neutral, title: 'declutter' };
 }
 
@@ -244,7 +269,7 @@ export function chipFor(prev, next, last = {}, now = Date.now(), reloaded = fals
   // Only a recorded failure: an answer still running (even a slow one) gets no chip.
   const key = next.consent === 'working' ? null : statusKey(next, now);
   if (!CHIP_KEYS.includes(key)) return null;
-  const s = STATUS[key];
+  const s = statusOf(key);
   // The label, and where to act on a second line (sub) when there is something to do (#11).
   const chip = { text: s.label, tone: s.tone, ...(s.chip && { sub: s.chip }) };
   const same = last.host === next.host && last.consent === next.consent;
@@ -264,6 +289,14 @@ export const REASONS = {
   shorts: 'shorts got through',
   other: 'something else',
 };
+export const REASONS_CS = {
+  banner: 'lišta tam pořád je',
+  broken: 'web se po odpovědi declutteru rozbil',
+  shorts: 'shorty prošly',
+  other: 'něco jiného',
+};
+// A reason in the UI language (the word sent is always the key).
+export const reasonText = (k) => (LANG === 'cs' ? REASONS_CS : REASONS)[k];
 export const REASON_WORD = /^(banner|broken|other|shorts:(home|search|channel|watch|other))$/;
 // The reasons that fit what declutter saw on the page, most likely first.
 export function reasonsFor(state = {}) {
@@ -289,10 +322,10 @@ export const FRESH_OUTCOME = { kept: false, choiceFallback: false, clicks: 0, do
 // site did itself (background init), so the line says it happened before that. time formats a timestamp.
 const localTime = (t) => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 export function outcomeDetail(state, time = localTime) {
-  const parts = [state.consent === 'choice' && state.adapter ? `${state.cmp} via ${state.adapter}` : state.cmp];
+  const parts = [state.consent === 'choice' && state.adapter ? t('detail.via', { cmp: state.cmp, adapter: state.adapter }) : state.cmp];
   if (state.doneAt) parts.push(time(state.doneAt));
-  if (state.clicks > 0) parts.push(`${state.clicks} ${state.clicks === 1 ? 'click' : 'clicks'}`);
-  return parts.filter(Boolean).join(' · ') + (state.kept ? ' (before the page reloaded)' : '');
+  if (state.clicks > 0) parts.push(t('detail.clicks', { n: state.clicks }));
+  return parts.filter(Boolean).join(' · ') + (state.kept ? t('detail.kept') : '');
 }
 
 // Global Privacy Control (opt-in): the Sec-GPC request header as one dynamic declarativeNetRequest rule. skip = sites
@@ -344,25 +377,24 @@ export function countNewlyHidden(root, selectors, seen) {
   return added;
 }
 
-const counted = (n, word) => `${n.toLocaleString('en')} ${word}${n === 1 ? '' : 's'}`;
 // Popup row on YouTube: shorts hidden on this page, and shorts opened in the normal player in this tab.
 export function shortsSummary({ shortsHidden = 0, shortsRedirects = 0 } = {}) {
-  return [shortsHidden ? `${counted(shortsHidden, 'short')} hidden on this page` : 'no shorts on this page',
-    ...(shortsRedirects ? [`${shortsRedirects.toLocaleString('en')} opened in the normal player`] : [])].join(' · ');
+  return [shortsHidden ? t('shorts.hiddenOnPage', { n: shortsHidden }) : t('shorts.noneOnPage'),
+    ...(shortsRedirects ? [t('shorts.opened', { n: shortsRedirects })] : [])].join(' · ');
 }
 // Settings → youtube.
 export const shortsStatsText = ({ shortsHidden = 0, shortsPages = 0 } = {}) =>
-  shortsHidden ? `${counted(shortsHidden, 'short')} hidden on ${counted(shortsPages, 'youtube page')}` : 'no shorts hidden yet.';
+  shortsHidden ? t('shorts.stats', { n: shortsHidden, pages: shortsPages }) : t('shorts.noStats');
 
 // Settings → about: banners answered (a banner a cosmetic rule only hid is in `refused` too) and shorts hidden first,
 // clicks saved beneath. Only what declutter did, never a "trackers blocked" figure. A fresh install says what to try.
 // shortsHidden is the YouTube counter (shorts.js counts each hidden short once per page; background.js bumps it).
 export function aboutSummary(stats = {}, locale = undefined) {
-  if (!stats.since) return { headline: 'nothing yet. open a site with a cookie banner (bbc.com) or a YouTube search, and it shows up here.', clicks: '' };
+  if (!stats.since) return { headline: t('about.empty'), clicks: '' };
   const n = (k) => stats[k] ?? 0;
   const banners = n('refused') + n('choice') + n('accepted') + n('walls');
-  const since = new Date(stats.since).toLocaleDateString(locale, { month: 'short', day: 'numeric' });
-  return { headline: `since ${since}: ${banners} banners answered, ${n('shortsHidden')} shorts hidden`, clicks: `${n('clicks')} clicks saved` };
+  const since = new Date(stats.since).toLocaleDateString(locale ?? (LANG === 'cs' ? 'cs' : undefined), { month: 'short', day: 'numeric' });
+  return { headline: t('about.headline', { since, banners, shorts: n('shortsHidden') }), clicks: t('about.clicks', { n: n('clicks') }) };
 }
 
 // Consent-O-Matic's categories -> how to answer: all off = refuse, all on = accept, anything else = mix.

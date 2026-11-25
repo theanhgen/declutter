@@ -1,8 +1,10 @@
-import { choiceMode, reportUrl, siteModePatch, siteMode, wallMode, wallModePatch, outcomeDetail, REASONS, reasonsFor, shortsSummary, STATUS, statusKey } from '../lib.js';
+import { choiceMode, reportUrl, siteModePatch, siteMode, wallMode, wallModePatch, outcomeDetail, reasonText, reasonsFor, shortsSummary, statusWords, statusKey } from '../lib.js';
 import { declutterSnippets } from '../consent/snippets.js';
+import { applyI18n, t } from '../i18n.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = (id) => document.getElementById(id);
+applyI18n();
 
 // iPhone/iPad: full-width sheet with larger touch targets.
 if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent) && matchMedia('(pointer: coarse)').matches)) {
@@ -18,7 +20,8 @@ function statusRow(kind, text, sub) {
   if (sub) row.append(Object.assign(document.createElement('span'), { className: 'sub', textContent: sub }));
   return row;
 }
-// The shared status words (lib.js STATUS), the same as the chip's and the badge tooltip's.
+// The shared status words (lib.js STATUS), the same as the chip's and the badge tooltip's, in the UI language.
+const STATUS = statusWords();
 const label = (state) => STATUS[statusKey(state)]?.label ?? '';
 const handled = (thing, ...sub) => statusRow('done', thing, sub.filter(Boolean).join(' · '));
 
@@ -47,7 +50,7 @@ async function main() {
   const forced = Number(new URLSearchParams(location.search).get('tab'));
   const [tab] = forced ? [await api.tabs.get(forced)] : await api.tabs.query({ active: true, currentWindow: true });
   if (!/^https?:/.test(tab?.url ?? '')) {
-    $('status').replaceChildren(statusRow('', "declutter doesn't run on browser pages"));
+    $('status').replaceChildren(statusRow('', t('popup.browserPage')));
     $('pageSection').hidden = false;
     return;
   }
@@ -65,48 +68,43 @@ async function main() {
   // restrict site access too. Say so instead of "no cookie banner here".
   const allowed = await api.permissions.contains({ origins: [`${new URL(tab.url).origin}/*`] }).catch(() => true);
   if (!allowed && !state.consent) {
-    rows.push(statusRow('bad', 'not allowed on this site', {
-      safari: 'allow it on every website: Safari → Settings → Extensions (iPhone: Settings → Apps → Safari → Extensions) → declutter',
-      firefox: 'the extensions button → declutter → always allow on all sites',
-      chrome: 'right-click the declutter button → "This can read and change site data" → on all sites',
-    }[__TARGET__]));
-  } else if (!s.consent) rows.push(statusRow('', 'cookie banners: off', 'switch "answer cookie banners" on above'));
+    rows.push(statusRow('bad', t('popup.notAllowed'), t(`popup.allow.${__TARGET__}`)));
+  } else if (!s.consent) rows.push(statusRow('', t('popup.consentOff'), t('popup.consentOffSub')));
   else if (!running) {
-    rows.push(statusRow('bad', "declutter isn't running on this page yet", 'it was open before declutter was installed or updated'));
+    rows.push(statusRow('bad', t('popup.notRunning'), t('popup.notRunningSub')));
     $('reload').hidden = false;
     $('reload').onclick = () => { api.tabs.reload(tab.id); window.close(); };
-  } else if (state.consent === 'done' || state.consent === 'choice') rows.push(handled('cookie banner', label(state), outcomeDetail(state)));
-  else if (failed) rows.push(statusRow('bad', STATUS.failed.label, 'answer it yourself on the page. reporting it helps get it fixed.'));
+  } else if (state.consent === 'done' || state.consent === 'choice') rows.push(handled(t('popup.cookieBanner'), label(state), outcomeDetail(state)));
+  else if (failed) rows.push(statusRow('bad', STATUS.failed.label, t('popup.failedSub')));
   else if (state.consent === 'wall') {
     rows.push(statusRow('wall', STATUS.wall.label, state.looping
-      ? 'it came back twice within a minute after accepting, so auto-accept is paused in this tab'
-      : 'there is no free refuse on this site'));
+      ? t('popup.wallLooping')
+      : t('popup.wallNoRefuse')));
     $('acceptWall').hidden = false;
-    $('acceptWall').querySelector('.label').replaceChildren(`agree to tracking on ${host.replace(/^www\./, '')}`,
-      Object.assign(document.createElement('span'), { className: 'sub', textContent: "can't be undone here: clear this site's cookies to take it back" }));
+    $('acceptWall').querySelector('.label').replaceChildren(t('popup.agreeOn', { host: host.replace(/^www\./, '') }),
+      Object.assign(document.createElement('span'), { className: 'sub', textContent: t('popup.agreeUndo') }));
     $('acceptWall').onclick = async () => {
       await api.runtime.sendMessage({ type: 'acceptWall', tabId: tab.id });
       window.close();
     };
   } else if (state.consent === 'accepting') rows.push(statusRow('wall', STATUS.accepting.label, state.cmp));
-  else if (state.consent === 'accepted') rows.push(handled('pay wall', label(state), outcomeDetail(state)));
+  else if (state.consent === 'accepted') rows.push(handled(t('popup.payWall'), label(state), outcomeDetail(state)));
   else if (state.consent === 'paused') rows.push(statusRow('', STATUS.paused.label));
-  else if (state.consent === 'acceptedSite') rows.push(handled('cookie banner', label(state), outcomeDetail(state)));
+  else if (state.consent === 'acceptedSite') rows.push(handled(t('popup.cookieBanner'), label(state), outcomeDetail(state)));
   else if (state.consent === 'working') rows.push(statusRow('', STATUS.working.label, state.cmp));
   else if (state.banner === 'suspected') {
     // Cookie-banner wording no rule matched (bannerSuspected in lib.js). The report row goes right under it.
-    rows.push(statusRow('wall', "looks like a cookie banner declutter doesn't know yet", 'answer it on the page, then report it so a rule gets written'), $('report'));
-  } else rows.push(statusRow('', 'no known cookie banner found'));
+    rows.push(statusRow('wall', t('popup.suspected'), t('popup.suspectedSub')), $('report'));
+  } else rows.push(statusRow('', t('popup.noBanner')));
   if (s.shorts && /^(www|m)\.youtube\.com$/.test(host)) {
     rows.push(statusRow(state.shortsHidden || state.shortsRedirects ? 'ok' : '', shortsSummary(state)));
   }
   if (state.shortsLeak > 0) {
-    rows.push(statusRow('', `${state.shortsLeak} shorts caught by the backup check, hidden`,
-      `on ${state.leakPath}: report it so the main list learns them`));
+    rows.push(statusRow('', t('popup.leak', { n: state.shortsLeak }), t('popup.leakSub', { path: state.leakPath })));
   }
   // A site the user reported that a later rule list now covers (markFixed in lib.js).
   const reported = reports.find((r) => r.host === host);
-  if (reported?.fixedAt) rows.push(statusRow('', `fixed since you reported it on ${new Date(reported.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`));
+  if (reported?.fixedAt) rows.push(statusRow('', t('popup.fixedSince', { date: new Date(reported.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) })));
   $('status').replaceChildren(...rows);
   // On a failure reporting is the next step (#11): the report button goes right under the status, with its note on
   // what it sends and the reasons that follow a send (outside the live region, which only speaks the status).
@@ -114,7 +112,7 @@ async function main() {
   $('pageSection').hidden = false;
 
   // Per-site choice: the global answer (refuse / your mix / accept, from Settings → your choice) / accept / leave alone.
-  $('siteMode').querySelector('[data-mode=refuse]').textContent = { refuse: 'refuse', mix: 'your mix', accept: 'accept all' }[choiceMode(s.categories)];
+  $('siteMode').querySelector('[data-mode=refuse]').textContent = t({ refuse: 'site.refuse', mix: 'site.mix', accept: 'site.acceptAll' }[choiceMode(s.categories)]);
   // Matched the way the background matches (lib.js): a choice made for a parent domain shows here. Changing it here
   // sets this host only; the parent's other subdomains keep theirs. A pay wall can't be refused (D5), so a wall site
   // gets its own control: agree for me / ask me / leave alone, defaulting to the global walls mode (wallMode).
@@ -143,7 +141,7 @@ async function main() {
   // One press saves the site on this device (settings → reported sites, with the page's full address) and sends it.
   // The note says exactly what goes out before the press.
   const sendUrl = reportUrl(tab.url);
-  $('sendNote').textContent = `sends ${sendUrl} (the site, not the page), what declutter saw here, and its version. nothing else. after sending, you can add what went wrong.`;
+  $('sendNote').textContent = t('popup.sendNote', { url: sendUrl });
   $('sendNote').hidden = false;
   $('report').onclick = async () => {
     // Firefox: sending a page address is optional data collection, granted in its own prompt (from this click, so
@@ -155,23 +153,22 @@ async function main() {
     // The background sends this exact address, and nothing if the tab has moved to another site since.
     // true: sent. 'pending': kept on the report, and the background tries again (alarm, next popup open). false: nothing sent.
     const sent = mayCollect && await api.runtime.sendMessage({ type: 'sendReport', tabId: tab.id, url: sendUrl });
-    const outcome = sent === 'pending' ? "couldn't send (offline?). saved; declutter will try again."
-      : sent ? 'sent, thanks' : mayCollect ? 'saved here, could not send: try again later' : 'saved here, not sent';
+    const outcome = t(sent === 'pending' ? 'popup.sendPending' : sent ? 'popup.sent' : mayCollect ? 'popup.sendFailed' : 'popup.notSent');
     $('report').querySelector('.label').textContent = outcome;
     // The button label changes under the focus; say it too, for screen readers.
     $('announce').textContent = outcome;
     if (mayCollect && !sent) $('report').disabled = false;
-    // Optional, after the send: what went wrong, from fixed words that fit this page (lib.js REASONS).
+    // Optional, after the send: what went wrong, from fixed words that fit this page (lib.js REASONS, reasonText).
     if (sent) {
       const choose = async (r) => {
         const noted = await api.runtime.sendMessage({ type: 'sendReason', tabId: tab.id, url: sendUrl, reason: r });
-        const text = noted ? `noted: ${REASONS[r]}. thanks` : "couldn't add that";
+        const text = noted ? t('popup.noted', { reason: reasonText(r) }) : t('popup.notNoted');
         $('reasons').replaceChildren(Object.assign(document.createElement('p'), { className: 'note', textContent: text }));
         $('announce').textContent = text;
       };
       $('reasons').replaceChildren(...reasonsFor(state).map((r) => {
         const b = Object.assign(document.createElement('button'), { className: 'row', type: 'button', onclick: () => choose(r) });
-        b.append(Object.assign(document.createElement('span'), { className: 'label', textContent: REASONS[r] }));
+        b.append(Object.assign(document.createElement('span'), { className: 'label', textContent: reasonText(r) }));
         return b;
       }));
       $('reasonSection').hidden = false;
