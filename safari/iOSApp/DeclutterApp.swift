@@ -27,7 +27,7 @@ struct ContentView: View {
                     HStack(spacing: 12) { logo; title }
                     VStack(alignment: .leading, spacing: 8) { logo; title }
                 }
-                Text("hides YouTube Shorts and answers cookie banners in Safari.")
+                Text("hides YouTube Shorts, posts in feeds and Playables, and answers cookie banners the way you choose.")
                     .font(Martian.font(.body))
                 VStack(alignment: .leading, spacing: 8) {
                     Text("to turn it on:")

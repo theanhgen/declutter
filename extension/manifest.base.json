@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "declutter",
-  "description": "Hides YouTube Shorts and answers cookie banners the way you choose. No tracking, no account.",
+  "description": "Hides YouTube Shorts, posts in feeds and Playables, and answers cookie banners the way you choose.",
   "permissions": [
     "storage",
     "scripting",

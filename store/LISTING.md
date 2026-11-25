@@ -34,7 +34,7 @@ before submitting. The manifest `name` stays `declutter`.)
 
 ## Short description (≤132 chars, Chrome "summary")
 
-Hides YouTube Shorts and answers cookie banners the way you choose. No tracking, no account.
+Hides YouTube Shorts, posts in feeds and Playables, and answers cookie banners the way you choose.
 
 ## Long description
 
@@ -43,8 +43,8 @@ declutter does two things, both entirely inside your browser.
 YOUTUBE SHORTS
 Removes the Shorts shelf, the Shorts tab and Shorts in search and subscriptions, on desktop and mobile
 YouTube. A Shorts link opens in the normal video player instead.
-Community posts (pictures, polls, text) between the videos in your feeds can be hidden too; a channel's own
-Posts tab stays.
+Community posts (pictures, polls, text) between the videos in your feeds are hidden too; a channel's own
+Posts tab stays. So is the YouTube Playables (games) shelf. Each has its own switch.
 
 COOKIE BANNERS
 Answers cookie-consent banners for you. By default it refuses everything that is not strictly necessary.
