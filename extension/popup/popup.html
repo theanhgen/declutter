@@ -76,6 +76,8 @@
     position: absolute; top: 0; right: 0; bottom: 0; width: calc(10ch + 48px); height: 100%; margin: 0; padding: 0;
     font: inherit; opacity: 0; cursor: pointer;
   }
+  /* Czech: "[zapnuto] / vypnuto" is nineteen characters; the label column wraps to make room, never the switch. */
+  html[lang="cs"] .row.switch .hit { width: calc(19ch + 48px); }
 
   /* The current row (pointer or keyboard): one ink band across the row, text reversed. */
   .row.switch:has(.hit:hover), .row.switch:has(:focus-visible), button.row:not(:disabled):hover, button.row:focus-visible {

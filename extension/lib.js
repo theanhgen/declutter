@@ -160,15 +160,15 @@ export const STATUS = {
 export const STATUS_CS = {
   done: { label: 'cookies odmítnuty' },
   hidden: { label: 'lišta skryta' },
-  fallback: { label: 'vše odmítnuto: váš výběr tu nejde nastavit' },
+  fallback: { label: 'vše odmítnuto: vaše volba tu nejde nastavit' },
   choice: { label: 'vaše volba použita' },
   acceptedSite: { label: 'cookies přijaty' },
-  accepted: { label: 'zeď přijata' },
-  wall: { label: 'zeď: souhlas, nebo platba', chip: 'souhlaste přes tlačítko declutter', next: 'rozhodněte v této nabídce' },
-  accepting: { label: 'přijímám zeď…' },
+  accepted: { label: 'placená zeď přijata' },
+  wall: { label: 'placená zeď: souhlas se sledováním, nebo platba', chip: 'souhlaste přes tlačítko declutter', next: 'rozhodněte v této nabídce' },
+  accepting: { label: 'přijímá se placená zeď…' },
   failed: { label: 'lišta nezodpovězena', chip: 'viz tlačítko declutter', next: 'odpovězte na ni na stránce' },
-  working: { label: 'odpovídám na lištu…' },
-  paused: { label: 'lišty tu nechávám být' },
+  working: { label: 'odpovídá se na lištu…' },
+  paused: { label: 'lišty se tu nechávají být' },
 };
 // One status in the UI language; statusWords: the whole map.
 export const statusOf = (key) => (LANG === 'cs' ? { ...STATUS[key], ...STATUS_CS[key] } : STATUS[key]);

@@ -1193,10 +1193,10 @@ test('Czech UI: chip, badge tooltip and the popup lines speak Czech in a Czech b
     assert.equal(shortsStatsText({ shortsHidden: 12, shortsPages: 1 }), '12 shortů skrytých na 1 stránce youtube');
     assert.equal(outcomeDetail({ consent: 'done', cmp: 'c', doneAt: 5, clicks: 2, kept: true }, (x) => 't' + x), 'c · t5 · 2 kliky (před znovunačtením stránky)');
     assert.equal(updateOutcome(['u'], {}, { u: { ok: true, rules: 5 } }), '5 nových pravidel');
-    assert.equal(updateOutcome(['u'], {}, { u: { ok: false, error: 'server error 404' } }), 'nedostupné (chyba serveru 404)');
+    assert.equal(updateOutcome(['u'], {}, { u: { ok: false, error: 'server error 404' } }), 'nelze načíst (chyba serveru 404)');
     assert.equal(ruleListLine(undefined).text, '(zatím nezkontrolováno)');
     assert.equal(aboutSummary({ since: Date.UTC(2026, 9, 3, 12), refused: 1, shortsHidden: 2, clicks: 5 }).clicks, '5 ušetřených kliků');
-    assert.equal(t('popup.noBanner'), 'žádná známá cookie lišta');
+    assert.equal(t('popup.noBanner'), 'žádná známá cookie lišta nenalezena');
   } finally { setLang('en'); }
   // Back in English: the same words as before the switch.
   assert.deepEqual(states.map((s) => [chipFor({}, s, {}, 1000), badgeFor(s, 1000)]), english);
